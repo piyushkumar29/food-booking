@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h3>Listing details :</h3>
+    <ul>
+        <li><b>Title:</b><%= listing.title %></li>
+        <li><b>Description</b><%= listing.description %> </li>
+        <li><b>Price:</b> &#8377; <%= listing.price.toLocaleString("en-IN") %></li>
+        <li><b>Category:</b> <%= listing.category %></li>
+        <li><b>Food Type:</b> <%= listing.isVeg ? "🟢 Veg" : "🔴 Non-Veg" %></li>
+        <li><b>PreparationTime:</b> <%= listing.PreparationTime %> mins</li>
+        <li><b>Spiciness:</b> <%= listing.Spiciness %></li>
+    </ul>
+    <br>
+    <a href="/listings/<%= listing._id %>/edit">Edit this Listing</a>
+    <br><br>
+    <form method="POST" action="/listings/<%=listing._id%>?_method=DELETE">
+        <button>Delete this listing</button>
+    </form>
+</body>
+</html>

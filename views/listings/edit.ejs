@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WanderLust</title>
+</head>
+<body>
+    <h3>Edit your listings</h3>
+    <form method="POST" action="/listings/<%= listing._id %>?_method=PUT">
+        <label>Dish Name:</label><br>
+        <input name="listing[title]" value="<%= listing.title %>" type="text" />
+        <br> <br>
+        <label>Description:</label><br>
+        <textarea name="listing[description]"><%= listing.description %></textarea>
+        <br> <br>
+        <label>Image URL:</label><br>
+        <input name="listing[image]" value="<%= listing.image %>" type="text" />
+        <br> <br>
+        <label>Price (₹):</label><br>
+        <input name="listing[price]" value="<%= listing.price %>" type="number" />
+        <br> <br>
+        <label>Category:</label><br>
+        <select name="listing[category]">
+            <option value="Starters" <%= listing.category === 'Starters' ? 'selected' : '' %>>Starters</option>
+            <option value="Main Course" <%= listing.category === 'Main Course' ? 'selected' : '' %>>Main Course></option>
+            <option value="Dessert" <%= listing.category === 'Dessert' ? 'selected' : '' %>>Dessert></option>
+            <option value="Beverages" <%= listing.category === 'Beverages' ? 'selected' : '' %>>Beverages></option>
+            <option value="Breakfast / Snacks" <%= listing.category === 'Breakfast' ? 'selected' : '' %>>Breakfast / Snacks></option>
+            <option value="Italian / Fast Food" <%= listing.category === 'Italian / Fast Food' ? 'selected' : '' %>>Italian / Fast Food></option>
+        </select>
+        <br><br>
+
+        <label>Food Type:</label><br>
+        <select name="listing[isVeg]">
+            <option value="true" <%= listing.isVeg ? 'selected' : '' %>>🟢 Veg</option>
+            <option value="false" <%= !listing.isVeg ? 'selected' : '' %>>🔴 Non-Veg</option>
+        </select>
+        <br><br>
+        <label>Preparation Time (mins):</label><br>
+        <input name="listing[PreparationTime]" value="<%= listing.PreparationTime || 20 %>" type="number" placeholder="e.g. 20" />
+        <br><br>
+        <label>Spiciness Level:</label><br>
+        <select name="listing[Spiciness]">
+            <option value="Mild" <%= listing.Spiciness === 'Mild' ? 'selected' : '' %>>🌶️ Mild</option>
+            <option value="Medium" <%= listing.Spiciness === 'Medium' ? 'selected' : '' %>>🌶️🌶️ Medium</option>
+            <option value="Spicy" <%= listing.Spiciness === 'Spicy' ? 'selected' : '' %>>🌶️🌶️🌶️ Spicy</option>
+        </select>
+        <br><br>
+        <button type="submit">Edit</button>
+    </form>
+</body>
+</html>
