@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WanderLust</title>
+    <title>Hungryfood</title>
 </head>
 <body>
     <h3>Edit your listings</h3>
@@ -38,13 +38,13 @@
         </select>
         <br><br>
         <label>Preparation Time (mins):</label><br>
-        <input name="listing[PreparationTime]" value="<%= listing.PreparationTime || 20 %>" type="number" placeholder="e.g. 20" />
+        <input name="listing[preparationTime]" value="<%= listing.preparationTime || 20 %>" type="number" placeholder="e.g. 20" />
         <br><br>
         <label>Spiciness Level:</label><br>
-        <select name="listing[Spiciness]">
-            <option value="Mild" <%= listing.Spiciness === 'Mild' ? 'selected' : '' %>>🌶️ Mild</option>
-            <option value="Medium" <%= listing.Spiciness === 'Medium' ? 'selected' : '' %>>🌶️🌶️ Medium</option>
-            <option value="Spicy" <%= listing.Spiciness === 'Spicy' ? 'selected' : '' %>>🌶️🌶️🌶️ Spicy</option>
+        <select name="listing[spiciness]">
+            <option value="Mild" <%= listing.spiciness === 'Mild' ? 'selected' : '' %>>🌶️ Mild</option>
+            <option value="Medium" <%= listing.spiciness === 'Medium' ? 'selected' : '' %>>🌶️🌶️ Medium</option>
+            <option value="Spicy" <%= listing.spiciness === 'Spicy' ? 'selected' : '' %>>🌶️🌶️🌶️ Spicy</option>
         </select>
         <br><br>
         <button type="submit">Edit</button>
