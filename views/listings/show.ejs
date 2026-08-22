@@ -1,10 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
+<% layout("/layouts/boilerplate") %>
 <body>
     <h3>Listing details :</h3>
     <ul>
@@ -13,8 +7,8 @@
         <li><b>Price:</b> &#8377; <%= listing.price.toLocaleString("en-IN") %></li>
         <li><b>Category:</b> <%= listing.category %></li>
         <li><b>Food Type:</b> <%= listing.isVeg ? "🟢 Veg" : "🔴 Non-Veg" %></li>
-        <li><b>PreparationTime:</b> <%= listing.PreparationTime %> mins</li>
-        <li><b>Spiciness:</b> <%= listing.Spiciness %></li>
+        <li><b>PreparationTime:</b> <%= listing.preparationTime %> mins</li>
+        <li><b>Spiciness:</b> <%= listing.spiciness %></li>
     </ul>
     <br>
     <a href="/listings/<%= listing._id %>/edit">Edit this Listing</a>
@@ -23,4 +17,3 @@
         <button>Delete this listing</button>
     </form>
 </body>
-</html>
