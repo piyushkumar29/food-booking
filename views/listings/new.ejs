@@ -3,47 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hungryfood</title>
+    <title>Hungrymate</title>
 </head>
 <body>
-    <h1>Create a new listings</h1>
-    <form method="POST" action="/listings">
-        <input name="listing[title]" placeholder="Enter title" type="text" />
-        <br> <br>
-        <textarea name="listing[description]" placeholder="Enter Description"></textarea>
-        <br> <br>
-        <input name="listing[image]" placeholder="Enter image URL/Link" type="text" />
-        <br> <br>
-        <input name="listing[price]" placeholder="Enter price" type="number" />
-        <br> <br>
-        <label>Category:</label><br>
-        <select name="listing[category]">
-            <option value="Starters">Starters</option>
-            <option value="Main Course">Main Course</option>
-            <option value="Dessert">Dessert</option>
-            <option value="Beverages">Beverages</option>
-            <option value="Breakfast / Snacks">Breakfast / Snacks</option>
-            <option value="Italian / Fast Food">Italian / Fast Food</option>
-        </select>
-        <br><br>
-        <label>Food Type:</label><br>
-        <select name="listing[isVeg]">
-            <option value="true">🟢 Veg</option>
-            <option value="false">🔴 Non-Veg</option>
-        </select>
-        <br><br>
-        <label>Preparation Time (mins):</label><br>
-        <input name="listing[PreparationTime]" placeholder="e.g. 20" />
-        <br><br>
-        <label>Spiciness Level:</label><br>
-        <select name="listing[Spiciness]">
-            <option value="Mild">🌶️ Mild</option>
-            <option value="Medium">🌶️🌶️ Medium</option>
-            <option value="Spicy">🌶️🌶️🌶️ Spicy</option>
-        </select>
-        <br><br>
-        <button>Add</button>
+    <% layout("/layouts/boilerplate") %>
 
-    </form>
+    <div class="row mt-3">
+        <div class="col-8 offset-2">
+           <br>
+           <h3>Create a new food list</h3>
+           <form method="POST" action="/listings" novalidate class="needs-validation">
+
+              <div class="mb-3">
+                <label for="title" class="form-label">Title</label>
+                <input name="listing[title]" placeholder="Enter a food name" type="text" class="form-control" required/>
+                <div class="valid-feedback">Title looks good!</div>
+              </div>
+
+              <div class="mb-3">
+               <label for="description" class="form-label">Description</label>
+               <textarea name="listing[description]" placeholder="Write about the food description" class="form-control" required></textarea>
+               <div class="invalid-feedback">Please enter a description</div>
+              </div>
+
+              <div class="mb-3">
+                <label for="image" class="form-label">Image link</label>
+                <input name="listing[image]" placeholder="Enter image URL/Link" type="text" class="form-control" required />
+              </div>
+
+              <div class="mb-3">
+               <label for="price" class="form-label">Price</label>
+               <input name="listing[price]" placeholder="Enter price" type="number" class="form-control" required/>
+               <div class="invalid-feedback">Please enter a valid Price</div>
+              </div>
+
+              <div class="mb-3">
+                <label for="category" class="form-label">Category</label>
+                <select name="listing[category]" class="form-select" required>
+                   <option value="Starters">Starters</option>
+                   <option value="Main Course">Main Course</option>
+                   <option value="Dessert">Dessert</option>
+                   <option value="Beverages">Beverages</option>
+                   <option value="Breakfast / Snacks">Breakfast / Snacks</option>
+                   <option value="Italian / Fast Food">Italian / Fast Food</option>
+               </select>
+              </div>
+
+              <div class="mt-3">
+                <label for="food-type" class="form-label">Food type</label>
+                <select name="listing[isVeg]" class="form-select" required>
+                  <option value="true">🟢 Veg</option>
+                  <option value="false">🔴 Non-Veg</option>
+                </select>
+              </div>   
+
+              <div class="mt-3">
+                <label for="preparationTime" class="form-label">Preparation time</label>
+                <input name="listing[preparationTime]" placeholder="e.g. 20" class="form-control" required/>
+              </div>  
+
+              <div class="mt-3">
+                 <label for="spiciness" class="form-label">Spiciness</label>
+                
+                 <select name="listing[spiciness]" class="form-select" required>
+                    <option value="Mild">Mild</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Spicy">Spicy</option>
+                    <option value="Sweet">Sweet</option>
+                    <option value="None">None</option>
+                 </select>
+             </div>  
+             <br><br>
+        
+             <button class="btn btn-dark">Add</button>
+             <br><br>
+
+           </form>
+        </div>
+    </div>       
+
 </body>
 </html>

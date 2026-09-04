@@ -3,51 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hungryfood</title>
+    <title>Hungrymate</title>
 </head>
 <body>
-    <h3>Edit your listings</h3>
-    <form method="POST" action="/listings/<%= listing._id %>?_method=PUT">
-        <label>Dish Name:</label><br>
-        <input name="listing[title]" value="<%= listing.title %>" type="text" />
-        <br> <br>
-        <label>Description:</label><br>
-        <textarea name="listing[description]"><%= listing.description %></textarea>
-        <br> <br>
-        <label>Image URL:</label><br>
-        <input name="listing[image]" value="<%= listing.image %>" type="text" />
-        <br> <br>
-        <label>Price (₹):</label><br>
-        <input name="listing[price]" value="<%= listing.price %>" type="number" />
-        <br> <br>
-        <label>Category:</label><br>
-        <select name="listing[category]">
-            <option value="Starters" <%= listing.category === 'Starters' ? 'selected' : '' %>>Starters</option>
-            <option value="Main Course" <%= listing.category === 'Main Course' ? 'selected' : '' %>>Main Course></option>
-            <option value="Dessert" <%= listing.category === 'Dessert' ? 'selected' : '' %>>Dessert></option>
-            <option value="Beverages" <%= listing.category === 'Beverages' ? 'selected' : '' %>>Beverages></option>
-            <option value="Breakfast / Snacks" <%= listing.category === 'Breakfast' ? 'selected' : '' %>>Breakfast / Snacks></option>
-            <option value="Italian / Fast Food" <%= listing.category === 'Italian / Fast Food' ? 'selected' : '' %>>Italian / Fast Food></option>
-        </select>
-        <br><br>
+    <% layout("/layouts/boilerplate") %>
+    <div class="row mt-3">
+        <div class="col-8 offset-2">
+           <br>
+           <h3>Edit your listings</h3>
+           <form method="POST" action="/listings/<%= listing._id %>?_method=PUT" novalidate class="needs-validation">
+              <div class="mb-3">    
+                <label for="title" class="form-label">Dish Name:</label>
+                <input name="listing[title]" value="<%= listing.title %>" type="text" class="form-control" required/>
+                <div class="invalid-feedback">Please enter a dish name</div>
+              </div>
 
-        <label>Food Type:</label><br>
-        <select name="listing[isVeg]">
-            <option value="true" <%= listing.isVeg ? 'selected' : '' %>>🟢 Veg</option>
-            <option value="false" <%= !listing.isVeg ? 'selected' : '' %>>🔴 Non-Veg</option>
-        </select>
-        <br><br>
-        <label>Preparation Time (mins):</label><br>
-        <input name="listing[preparationTime]" value="<%= listing.preparationTime || 20 %>" type="number" placeholder="e.g. 20" />
-        <br><br>
-        <label>Spiciness Level:</label><br>
-        <select name="listing[spiciness]">
-            <option value="Mild" <%= listing.spiciness === 'Mild' ? 'selected' : '' %>>🌶️ Mild</option>
-            <option value="Medium" <%= listing.spiciness === 'Medium' ? 'selected' : '' %>>🌶️🌶️ Medium</option>
-            <option value="Spicy" <%= listing.spiciness === 'Spicy' ? 'selected' : '' %>>🌶️🌶️🌶️ Spicy</option>
-        </select>
-        <br><br>
-        <button type="submit">Edit</button>
-    </form>
+              <div class="mb-3">
+                <label for="description" class="form-label">Description:</label><br>
+                <textarea name="listing[description]" class="form-control" rows="3" required><%= listing.description %></textarea>
+                <div class="invalid-feedback">Please enter a description</div>
+              </div>
+
+              <div class="mb-3">
+                <label for="image" class="form-label">Image URL:</label><br>
+                <input name="listing[image]" value="<%= listing.image %>" type="text" class="form-control" required/>
+                <div class="invalid-feedback">Please paste a image link</div>
+              </div>
+
+              <div class="mb-3">
+                <label for="price" class="form-label">Price (₹):</label><br>
+                <input name="listing[price]"  value="<%= listing.price %>" type="number" class="form-control" required/>
+                <div class="invalid-feedback">Please enter a price</div>
+              </div>
+
+              <div class="mb-3">
+                <label for="category" class="form-label">Category:</label><br>
+                <select name="listing[category]" class="form-select" required>
+                   <option value="Starters" <%= listing.category === 'Starters' ? 'selected' : '' %>>Starters</option>
+                   <option value="Main Course" <%= listing.category === 'Main Course' ? 'selected' : '' %>>Main Course</option>
+                   <option value="Dessert" <%= listing.category === 'Dessert' ? 'selected' : '' %>>Dessert</option>
+                   <option value="Beverages" <%= listing.category === 'Beverages' ? 'selected' : '' %>>Beverages</option>
+                   <option value="Breakfast / Snacks" <%= listing.category === 'Breakfast' ? 'selected' : '' %>>Breakfast / Snacks</option>
+                   <option value="Italian / Fast Food" <%= listing.category === 'Italian / Fast Food' ? 'selected' : '' %>>Italian / Fast Food</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                 <label for="food-type" class="form-label">Food Type:</label><br>
+                 <select name="listing[isVeg]" class="form-select" required>
+                    <option value="true" <%= listing.isVeg ? 'selected' : '' %>>🟢 Veg</option>
+                    <option value="false" <%= !listing.isVeg ? 'selected' : '' %>>🔴 Non-Veg</option>
+                 </select>
+              </div>
+
+              <div class="mb-3">
+                 <label for="preparationTime" class="form-label">Preparation Time (mins):</label><br>
+                 <input name="listing[preparationTime]" value="<%= listing.preparationTime || 20 %>" type="number" placeholder="e.g. 20" class="form-control" required />
+                 <div class="invalid-feedback">Please enter a preparationTime</div>
+               
+              </div>
+
+              <div class="mb-3">
+                  <label for="spiciness" class="form-label">Spiciness Level:</label><br>
+                  <select name="listing[spiciness]" class="form-select" required>
+                     <option value="Mild" <%= listing.spiciness === 'Mild' ? 'selected' : '' %>>Mild</option>
+                     <option value="Medium" <%= listing.spiciness === 'Medium' ? 'selected' : '' %>>Medium</option>
+                     <option value="Spicy" <%= listing.spiciness === 'Spicy' ? 'selected' : '' %>>Spicy</option>
+                     <option value="Sweet" <%= listing.spiciness === 'Sweet' ? 'selected' : '' %>>Sweet</option>
+                     <option value="None" <%= listing.spiciness === 'None' ? 'selected' : '' %>>None</option>
+                  </select>
+              </div>
+              <br><br>
+              <button class="btn btn-dark edit-btn">Edit</button>
+              <br><br>
+            </form>
+        </div>
+    </div>
+   
+   
 </body>
 </html>
