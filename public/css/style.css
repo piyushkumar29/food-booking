@@ -15,9 +15,20 @@
     min-height: 100vh;
   
  }
- .container{
-    flex: 1;
+ html, body{
+   height: 100;
  }
+
+
+ 
+ .container{
+    flex: 1 0 auto;
+ }
+ footer{
+   flex-shrink: 0;
+ }
+
+ 
  .navbar{
     height: 5rem;
     background-color: white;
