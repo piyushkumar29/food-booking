@@ -121,3 +121,115 @@
     padding-left: 0;
     padding-right: 0;
  }
+
+.custom-nav-link {
+   color: #374151 !important;
+   font-weight: 500;
+   font-size: 0.92rem;
+   padding: 6px 12px !important;
+   border-radius: 8px;
+   white-space: nowrap;
+   transition: all 0.2s ease;
+} 
+
+.custom-nav-link:hover{
+   background-color: #f5f5f5;
+   color: #111827 !important;
+
+}
+
+.nav-search-input {
+   border-radius: 50px !important;
+   padding: 8px 45px 8px 18px !important;
+   border: 1px solid #e5e7eb !important;
+   background-color: #f9fafb !important;
+   font-size: 0.88rem;
+   box-shadow: none !important;
+}
+
+.nav-search-input:focus{
+   background-color: #ffffff !important;
+   border-color: #d1d5db !important;
+}
+
+.nav-search-btn {
+   position: absolute;
+   right: 6px; 
+   top:50%;
+   transform: translateY(-50%);
+   border: none;
+   background: transparent;
+   color: #6b7280;
+   padding: 4px 10px;
+   
+}
+
+.btn-capsule {
+   background-color: #111827 !important;
+   color: #ffffff !important;
+   border-radius: 9999px !important;
+   padding: 7px 18px !important;
+   font-size: 0.85rem;
+   line-height: 1.2;
+   font-weight: 500 !important;
+   border: none !important;
+   white-space: nowrap;
+   float: right;
+   transition: opacity 0.2s ease;
+
+}
+
+.btn-capsule:hover{
+   opacity: 0.88;
+   
+   color: #ffffff !important;
+}
+
+.search-box-wrapper {
+   width: 380px;
+}
+
+.search-bar-container {
+   position: relative;
+   width: 100%;
+}
+
+.search-inp {
+   border-radius: 25px !important;
+   padding: 8px 45px 8px 20px !important;
+   font-size: 0.9rem !important;
+   border: 1px solid #e0e0e0 !important;
+   background-color: #f8f9fa !important;
+   box-shadow: none !important;
+   width: 100% !important;
+}
+
+.search-inp:focus{
+   background-color: #ffffff !important;
+   border-color: #bcbcbc !important;
+}
+
+.search-btn{
+   position: absolute;
+   right: 5px;
+   top: 50%;
+   transform: translateY(-50%);
+   border: none !important;
+   background: transparent !important;
+   color: #666666 !important;
+   border-radius: 50%;
+   width: 35px;
+   height: 35px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+}
+
+.search-btn:hover{
+   color: #000000 !important;
+}
+.navbar .container-fluid {
+   display: flex !important;
+   justify-content: space-between !important;
+   width: 100% !important;
+}

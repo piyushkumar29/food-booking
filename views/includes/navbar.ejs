@@ -1,20 +1,35 @@
-<nav class="navbar navbar-expand-md bg-body-light border-bottom sticky-top">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="/"><img src="/mypic.png" alt="logo" ></a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" >
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
-        <a class="nav-link"  href="/">Home</a>
-        <a class="nav-link" href="/listings">All food items</a>
-        <a class="nav-link" href="/listings/new">Add new items</a>
+<nav class="navbar navbar-expand-md bg-body-light border-bottom sticky-top py-2 px-3">
+  <div class="container-fluid px-4 d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center">
+      <a class="navbar-brand me-3" href="/"><img src="/mypic.png" alt="logo" ></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav d-none d-md-flex flex-row gap-1">
+          <a class="nav-link custom-nav-link"  href="/">Home</a>
+          <a class="nav-link custom-nav-link"  href="/listings">All food items</a>
+          <a class="nav-link custom-nav-link" href="/listings/new">Add new items</a>
+        </div>
       </div>
+        
+      <div class="search-box-wrapper d-none d-md-block mx-auto">
+        <form class="d-flex align-items-center search-bar-container" role="search" action="/listings" method="GET">
+          <input class="form-control nav-search-input" type="search" placeholder="Search delicious food..." aria-label="Search">
+          <button class="btn nav-search-btn" type="submit">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+        </form>
+      </div>  
 
-       <div class="navbar-nav ms-auto">
-        <a class="nav-link"  href="/signup">Sign up</a>
-        <a class="nav-link" href="/login">Log in</a>
-        <a class="nav-link" href="/logout">Log out</a>
+      <div style="position: absolute; right: 25px; top: 50%; transform: translateY(-50%); display: flex; gap: 10px;">
+        <% if(!currUser) { %>
+          <a class="btn btn-capsule"  href="/signup">Sign up</a>
+          <a class="btn btn-capsule" href="/login">Log in</a>
+        <% } %>
+        <% if(currUser) { %>
+          <a class="btn btn-capsule" href="/logout">Log out</a>
+        <% } %>
       </div>
     </div>
   </div>
