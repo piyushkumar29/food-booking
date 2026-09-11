@@ -18,7 +18,7 @@ router.get("/new", isLoggedIn ,listingController.renderNewForm);
 
 router
   .route("/:id")
-  .get( isLoggedIn ,listingController.renderNewForm)
+  .get(wrapAsync(listingController.showListing))
   .put( isLoggedIn ,isOwner ,validateListing, wrapAsync(listingController.updateListing))
   .delete( isLoggedIn , isOwner , wrapAsync(listingController.destroyListing)
 );
