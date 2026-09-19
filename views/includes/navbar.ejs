@@ -1,36 +1,114 @@
-<nav class="navbar navbar-expand-md bg-body-light border-bottom sticky-top py-2 px-3">
-  <div class="container-fluid px-4 d-flex align-items-center justify-content-between">
-    <div class="d-flex align-items-center">
-      <a class="navbar-brand me-3" href="/"><img src="/mypic.png" alt="logo" ></a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" >
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-        <div class="navbar-nav d-none d-md-flex flex-row gap-1">
-          <a class="nav-link custom-nav-link"  href="/">Home</a>
-          <a class="nav-link custom-nav-link"  href="/listings">All food items</a>
-          <a class="nav-link custom-nav-link" href="/listings/new">Add new items</a>
-        </div>
-      </div>
-        
-      <div class="search-box-wrapper d-none d-md-block mx-auto">
-        <form class="d-flex align-items-center search-bar-container" role="search" action="/listings" method="GET">
-          <input class="form-control nav-search-input" type="search" placeholder="Search delicious food..." aria-label="Search">
-          <button class="btn nav-search-btn" type="submit">
-            <i class="fa-solid fa-magnifying-glass"></i>
-          </button>
-        </form>
-      </div>  
-
-      <div style="position: absolute; right: 25px; top: 50%; transform: translateY(-50%); display: flex; gap: 10px;">
-        <% if(!currUser) { %>
-          <a class="btn btn-capsule"  href="/signup">Sign up</a>
-          <a class="btn btn-capsule" href="/login">Log in</a>
-        <% } %>
-        <% if(currUser) { %>
-          <a class="btn btn-capsule" href="/logout">Log out</a>
-        <% } %>
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top py-2 px-3">
+  <div class="container-fluid d-flex align-items-center justify-content-between p-0">
+    
+    <!-- Left Logo & Nav Links -->
+    <div class="d-flex align-items-center flex-shrink-0">
+      <a class="navbar-brand me-3 p-0" href="/listings">
+        <img src="/mypic.png" alt="logo" style="height: 38px;" />
+      </a>
+      <div class="d-none d-lg-flex align-items-center gap-3">
+        <a class="nav-link fw-semibold text-dark p-0" href="/listings"><i class="fa-solid fa-utensils me-1 text-danger"></i> All food items</a>
+        <a class="nav-link fw-semibold text-dark p-0" href="/listings/new"><i class="fa-solid fa-plus me-1 text-danger"></i> Add new items</a>
       </div>
     </div>
+
+    <!-- Center Search Bar -->
+    <div class="position-relative mx-auto" style="width: 100%; max-width: 440px;">
+      <form class="d-flex align-items-center m-0" id="foodSearchForm" onsubmit="return false;">
+        <div class="input-group w-100 position-relative">
+          <input 
+            class="form-control rounded-pill pe-5 py-2 shadow-none" 
+            type="search" 
+            id="foodSearchInput" 
+            placeholder="Search delicious food..." 
+            autocomplete="off"
+            style="border: 1.5px solid #ddd; font-size: 0.9rem;"
+          />
+          <button class="btn position-absolute end-0 top-50 translate-middle-y me-2 border-0 bg-transparent text-secondary p-0" type="submit" id="searchSubmitBtn">
+            <i class="fa-solid fa-magnifying-glass fs-6"></i>
+          </button>
+        </div>
+      </form>
+
+      <!-- Search History Dropdown -->
+      <div id="searchHistoryBox" class="position-absolute bg-white border rounded-3 shadow-lg w-100 mt-1 d-none" style="z-index: 1060; max-height: 220px; overflow-y: auto; left: 0;">
+        <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom text-muted" style="font-size: 0.78rem; background-color: #f8f9fa;">
+          <span class="fw-bold"><i class="fa-solid fa-clock-rotate-left me-1"></i> RECENT SEARCHES</span>
+          <span role="button" id="clearHistoryBtn" class="text-danger fw-semibold" style="cursor: pointer;">Clear</span>
+        </div>
+        <ul id="historyList" class="list-unstyled m-0 p-0"></ul>
+      </div>
+    </div>
+
+    <!-- Right Auth Buttons -->
+    <div class="d-flex align-items-center gap-2 flex-shrink-0">
+      <% if(!currUser) { %>
+        <a class="btn btn-outline-dark rounded-pill px-3 py-1 fw-semibold btn-sm" href="/signup">Sign up</a>
+        <a class="btn btn-dark rounded-pill px-3 py-1 fw-semibold btn-sm" href="/login">Log in</a>
+      <% } %>
+      <% if(currUser) { %>
+        <a class="btn btn-dark rounded-pill px-3 py-1 fw-semibold btn-sm" href="/logout">Log out</a>
+      <% } %>
+    </div>
+
   </div>
 </nav>
+
+<style>
+    .history-entry-item {
+        padding: 8px 14px;
+        cursor: pointer;
+        font-size: 0.84rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid #f1f1f1;
+        color: #212529;
+    }
+    .history-entry-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    body.dark-mode nav,
+    body.dark-mode .navbar {
+        background-color: #181818 !important;
+        border-color: #282828 !important;
+    }
+    body.dark-mode .navbar-brand,
+    body.dark-mode .nav-link {
+        color: #ffffff !important;
+    }
+    body.dark-mode #foodSearchInput {
+        background-color: #242424 !important;
+        border-color: #383838 !important;
+        color: #ffffff !important;
+    }
+    body.dark-mode #foodSearchInput::placeholder {
+        color: #888 !important;
+    }
+    body.dark-mode #searchHistoryBox {
+        background-color: #1e1e1e !important;
+        border-color: #333 !important;
+    }
+    body.dark-mode #searchHistoryBox div {
+        background-color: #262626 !important;
+        border-color: #333 !important;
+        color: #bbb !important;
+    }
+    body.dark-mode .history-entry-item {
+        color: #eee !important;
+        border-bottom-color: #2c2c2c !important;
+    }
+    body.dark-mode .history-entry-item:hover {
+        background-color: #2c2c2c !important;
+    }
+    body.dark-mode .btn-outline-dark {
+        border-color: #ffffff !important;
+        color: #ffffff !important;
+    }
+    body.dark-mode .btn-dark {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        border-color: #ffffff !important;
+    }
+</style>
