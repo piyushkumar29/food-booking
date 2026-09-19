@@ -1,18 +1,36 @@
 <nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top py-2 px-3">
   <div class="container-fluid d-flex align-items-center justify-content-between p-0">
     
-    <!-- Left Logo & Nav Links -->
+    <!-- Left Logo & Navigation Links -->
     <div class="d-flex align-items-center flex-shrink-0">
-      <a class="navbar-brand me-3 p-0" href="/listings">
+      <a class="navbar-brand me-3 p-0 d-flex align-items-center" href="/listings">
         <img src="/mypic.png" alt="logo" style="height: 38px;" />
       </a>
-      <div class="d-none d-lg-flex align-items-center gap-3">
-        <a class="nav-link fw-semibold text-dark p-0" href="/listings"><i class="fa-solid fa-utensils me-1 text-danger"></i> All food items</a>
-        <a class="nav-link fw-semibold text-dark p-0" href="/listings/new"><i class="fa-solid fa-plus me-1 text-danger"></i> Add new items</a>
+
+      <div class="d-none d-lg-flex align-items-center gap-2">
+        <!-- All Food Items (Sabko dikhega) -->
+        <a class="nav-pill-btn" href="/listings">
+          <i class="fa-solid fa-utensils icon-item icon-red"></i> All food items
+        </a>
+
+        <!-- Sirf Owner login hone par Add new items aayega -->
+        <% if (currUser && currUser.isOwner) { %>
+          <a class="nav-pill-btn owner-highlight-btn" href="/listings/new">
+            <i class="fa-solid fa-plus icon-item icon-red"></i> Add new items
+          </a>
+        <% } else { %>
+          <!-- Normal user ya logged-out guest ke liye -->
+          <a class="nav-pill-btn" href="/orders/track">
+            <i class="fa-solid fa-motorcycle icon-item icon-green"></i> Track Order
+          </a>
+          <a class="nav-pill-btn" href="/offers">
+            <i class="fa-solid fa-tags icon-item icon-gold"></i> Offers & Discounts
+          </a>
+        <% } %>
       </div>
     </div>
 
-    <!-- Center Search Bar -->
+    <!-- Center Search Bar with History -->
     <div class="position-relative mx-auto" style="width: 100%; max-width: 440px;">
       <form class="d-flex align-items-center m-0" id="foodSearchForm" onsubmit="return false;">
         <div class="input-group w-100 position-relative">
@@ -30,7 +48,7 @@
         </div>
       </form>
 
-      <!-- Search History Dropdown -->
+      <!-- History Dropdown -->
       <div id="searchHistoryBox" class="position-absolute bg-white border rounded-3 shadow-lg w-100 mt-1 d-none" style="z-index: 1060; max-height: 220px; overflow-y: auto; left: 0;">
         <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom text-muted" style="font-size: 0.78rem; background-color: #f8f9fa;">
           <span class="fw-bold"><i class="fa-solid fa-clock-rotate-left me-1"></i> RECENT SEARCHES</span>
@@ -40,7 +58,7 @@
       </div>
     </div>
 
-    <!-- Right Auth Buttons -->
+    <!-- Right Side Auth Buttons (Foodie badge removed) -->
     <div class="d-flex align-items-center gap-2 flex-shrink-0">
       <% if(!currUser) { %>
         <a class="btn btn-outline-dark rounded-pill px-3 py-1 fw-semibold btn-sm" href="/signup">Sign up</a>
@@ -55,6 +73,51 @@
 </nav>
 
 <style>
+    .nav-pill-btn {
+        display: inline-flex !important;
+        align-items: center !important;
+        padding: 0.45rem 1rem !important;
+        border-radius: 50px !important;
+        font-weight: 600 !important;
+        font-size: 0.91rem !important;
+        color: #2c2c2c !important;
+        text-decoration: none !important;
+        background-color: transparent !important;
+        border: 1.5px solid transparent !important;
+        transition: all 0.28s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+        position: relative;
+    }
+
+    .icon-item {
+        margin-right: 0.45rem;
+        font-size: 1rem;
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .icon-red { color: #fe424d; }
+    .icon-green { color: #198754; }
+    .icon-gold { color: #ff9800; }
+
+    /* Light Mode Pill Hover (Lift + Glow Pop) */
+    .nav-pill-btn:hover {
+        background-color: #ffffff !important;
+        border-color: #ffdada !important;
+        color: #fe424d !important;
+        transform: translateY(-2.5px);
+        box-shadow: 0 5px 15px rgba(254, 66, 77, 0.18) !important;
+    }
+    .nav-pill-btn:hover .icon-item {
+        transform: scale(1.25) rotate(-5deg);
+    }
+
+    /* Special Owner Add-Item Glow */
+    .owner-highlight-btn:hover {
+        background-color: #fff4f4 !important;
+        border-color: #fe424d !important;
+        box-shadow: 0 6px 18px rgba(254, 66, 77, 0.25) !important;
+    }
+
+    /* History Entries */
     .history-entry-item {
         padding: 8px 14px;
         cursor: pointer;
@@ -69,15 +132,29 @@
         background-color: #f8f9fa;
     }
 
+    /* Dark Mode Hover Effects */
     body.dark-mode nav,
     body.dark-mode .navbar {
         background-color: #181818 !important;
         border-color: #282828 !important;
     }
-    body.dark-mode .navbar-brand,
-    body.dark-mode .nav-link {
+    body.dark-mode .navbar-brand {
         color: #ffffff !important;
     }
+    body.dark-mode .nav-pill-btn {
+        color: #eaeaea !important;
+    }
+    body.dark-mode .nav-pill-btn:hover {
+        background-color: #222222 !important;
+        border-color: #444444 !important;
+        color: #ffc107 !important;
+        transform: translateY(-2.5px);
+        box-shadow: 0 5px 15px rgba(255, 193, 7, 0.22) !important;
+    }
+    body.dark-mode .nav-pill-btn:hover .icon-item {
+        color: #ffc107 !important;
+    }
+
     body.dark-mode #foodSearchInput {
         background-color: #242424 !important;
         border-color: #383838 !important;
