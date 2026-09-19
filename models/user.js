@@ -4,14 +4,23 @@ const passportLocalMongoose = require("passport-local-mongoose").default || requ
 
 const userSchema = new Schema({
     email: {
-
         type: String,
         required: true,
         unique: true
     },
+    googleId: {
+        type: String
+    },
+    githubId: {
+        type: String
+    },
+    avatar: {
+        type: String,
+        default: ""
+    },
     isOwner: {
         type: Boolean,
-        default: false // By default har naya user customer/normal user hoga
+        default: false
     }
 });
 
