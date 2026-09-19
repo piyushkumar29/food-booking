@@ -1,27 +1,472 @@
-<% layout("/layouts/boilerplate") %> 
-<body>
-    
-    <h1>Food items</h1>
-    <!-- <form method="GET" action="/listings/new">
-        <button>Create New Listing</button>
-    </form> -->
-    <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1">
-        <% for(let listing of allListings) { %>
-          <a href="/listings/<%= listing._id %>" class="listing-link">  
-             <div class="card col listing-card" >
-               <img src="<%= listing.image %>" class="card-img-top" alt="listing_image" style="height: 20rem">
-               <div class="card-img-overlay">abcd</div>
-               <div class="card-body">
-                 <p class="card-text">
-                  <b><%= listing.title %></b> <br>
-                  &#8377;   <%= listing.price?.toLocaleString("en-IN") %>
-                 </p>
-               </div>
-             </div>
-           </a>  
-        <% } %>
+<% layout("/layouts/boilerplate") %>
+
+<style>
+    /* Top Action Bar */
+    .top-action-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        padding: 0.6rem 0.5rem;
+        gap: 1rem;
+        box-sizing: border-box;
+    }
+
+    .filter-wrapper {
+        display: flex;
+        align-items: center;
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    #filters {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        gap: 1.8rem;
+        padding: 0.4rem 0.2rem;
+        width: 100%;
+        min-width: 0;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    #filters::-webkit-scrollbar {
+        display: none;
+    }
+
+    .filter {
+        text-align: center;
+        opacity: 0.65;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .filter:hover, .filter.active-filter {
+        opacity: 1;
+        transform: translateY(-2px) scale(1.05);
+    }
+    .filter div i {
+        font-size: 1.45rem;
+        margin-bottom: 0.25rem;
+        display: inline-block;
+    }
+    .filter p {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+        margin: 0;
+        color: #222;
+        white-space: nowrap;
+        user-select: none;
+    }
+
+    body.dark-mode .filter div i {
+        color: #ffc107 !important;
+    }
+    body.dark-mode .filter p {
+        color: #ffffff !important;
+    }
+
+    .scroll-btn {
+        background-color: #ffffff;
+        border: 1px solid #ced4da;
+        border-radius: 50%;
+        width: 34px;
+        height: 34px;
+        min-width: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+        z-index: 5;
+        flex-shrink: 0;
+    }
+    body.dark-mode .scroll-btn {
+        background-color: #222222 !important;
+        border-color: #444444 !important;
+        color: #ffffff !important;
+    }
+    body.dark-mode .scroll-btn i {
+        color: #ffffff !important;
+    }
+
+    /* Toggles */
+    .toggle-group-container {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-shrink: 0;
+    }
+    .clickable-toggle-box {
+        background-color: #ffffff;
+        border: 1.5px solid #d0d5dd;
+        border-radius: 30px;
+        padding: 0.35rem 0.75rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        cursor: pointer;
+        user-select: none;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    body.dark-mode .clickable-toggle-box {
+        background-color: #222222 !important;
+        border-color: #444444 !important;
+        color: #ffffff !important;
+    }
+    .clickable-toggle-box .toggle-label {
+        font-size: 0.78rem;
+        font-weight: 700;
+        margin: 0;
+        white-space: nowrap;
+    }
+    .clickable-toggle-box .form-check-input {
+        cursor: pointer;
+        width: 2rem;
+        height: 1.05rem;
+        margin: 0;
+        pointer-events: none;
+    }
+
+    /* PURE 3-COLUMN RESPONSIVE CSS GRID (NO MORE 1-COLUMN OVERFLOW) */
+    .pure-food-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 1.8rem !important;
+        width: 100% !important;
+        margin-top: 1rem !important;
+    }
+    @media (max-width: 991px) {
+        .pure-food-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        }
+    }
+    @media (max-width: 575px) {
+        .pure-food-grid {
+            grid-template-columns: 1fr !important;
+        }
+    }
+
+    .listing-link {
+        text-decoration: none !important;
+        color: inherit !important;
+        display: block;
+    }
+    .listing-card {
+        border: none !important;
+        border-radius: 1rem !important;
+        overflow: hidden !important;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.07) !important;
+        transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+        background: #ffffff;
+    }
+    .listing-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.14) !important;
+    }
+    .listing-card img {
+        height: 18.5rem !important;
+        width: 100% !important;
+        object-fit: cover !important;
+    }
+    body.dark-mode .listing-card {
+        background-color: #1e1e1e !important;
+        color: #ffffff !important;
+    }
+    body.dark-mode .listing-card b,
+    body.dark-mode .listing-card p {
+        color: #ffffff !important;
+    }
+    body.dark-mode .listing-card small {
+        color: #aaaaaa !important;
+    }
+</style>
+
+<div class="top-action-bar">
+    <!-- Filters Carousel -->
+    <div class="filter-wrapper">
+        <button class="scroll-btn me-2" id="slideLeft" type="button">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+
+        <div id="filters">
+            <div class="filter active-filter" data-category="all">
+                <div><i class="fa-solid fa-utensils"></i></div>
+                <p>All</p>
+            </div>
+            <div class="filter" data-category="trending">
+                <div><i class="fa-solid fa-fire text-warning"></i></div>
+                <p>Trending</p>
+            </div>
+            <div class="filter" data-category="biryani">
+                <div><i class="fa-solid fa-bowl-rice"></i></div>
+                <p>Biryani/Rice</p>
+            </div>
+            <div class="filter" data-category="pizza">
+                <div><i class="fa-solid fa-pizza-slice"></i></div>
+                <p>Pizza/Fast Food</p>
+            </div>
+            <div class="filter" data-category="burger">
+                <div><i class="fa-solid fa-burger"></i></div>
+                <p>Burger</p>
+            </div>
+            <div class="filter" data-category="veg">
+                <div><i class="fa-solid fa-seedling text-success"></i></div>
+                <p>Pure Veg</p>
+            </div>
+            <div class="filter" data-category="non-veg">
+                <div><i class="fa-solid fa-drumstick-bite text-danger"></i></div>
+                <p>Non Veg</p>
+            </div>
+            <div class="filter" data-category="thali">
+                <div><i class="fa-solid fa-plate-wheat"></i></div>
+                <p>Indian Thali</p>
+            </div>
+            <div class="filter" data-category="dessert">
+                <div><i class="fa-solid fa-ice-cream"></i></div>
+                <p>Ice-cream</p>
+            </div>
+            <div class="filter" data-category="bakery">
+                <div><i class="fa-solid fa-cake-candles"></i></div>
+                <p>Cake/Bakery</p>
+            </div>
+            <div class="filter" data-category="beverages">
+                <div><i class="fa-solid fa-mug-hot"></i></div>
+                <p>Chai/Coffee</p>
+            </div>
+            <div class="filter" data-category="drinks">
+                <div><i class="fa-solid fa-wine-glass"></i></div>
+                <p>Cold Drinks</p>
+            </div>
+        </div>
+
+        <button class="scroll-btn ms-2" id="slideRight" type="button">
+            <i class="fa-solid fa-chevron-right"></i>
+        </button>
     </div>
 
-   
-    
-</body>
+    <!-- Toggles -->
+    <div class="toggle-group-container">
+        <div class="clickable-toggle-box" id="vegPill">
+            <span class="toggle-label">🟢 Veg</span>
+            <input class="form-check-input" type="checkbox" id="onlyVegToggle" role="switch">
+        </div>
+
+        <div class="clickable-toggle-box" id="darkPill">
+            <span class="toggle-label" id="darkLabel"><i class="fa-solid fa-moon"></i> Dark</span>
+            <input class="form-check-input" type="checkbox" id="darkModeToggle" role="switch">
+        </div>
+    </div>
+</div>
+
+<!-- 3-Column Solid CSS Grid -->
+<div class="pure-food-grid" id="listingsContainer">
+    <% for(let listing of allListings) { %>
+        <div class="food-card-box" 
+             data-title="<%= (listing.title || '').toLowerCase() %>"
+             data-restaurant="<%= (listing.restaurant || '').toLowerCase() %>"
+             data-location="<%= (listing.location || '').toLowerCase() %>"
+             data-category="<%= (listing.category || '').toLowerCase() %>"
+             data-isveg="<%= String(listing.isVeg) %>">
+            <a href="/listings/<%= listing._id %>" class="listing-link">
+                <div class="card listing-card shadow-sm h-100">
+                    <img src="<%= listing.image.url %>" class="card-img-top" alt="listing_image">
+                    <div class="card-body py-3 px-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <h6 class="card-title fw-bold mb-0 text-truncate fs-5" style="max-width: 85%;"><%= listing.title %></h6>
+                            <span><%= (listing.isVeg === true || String(listing.isVeg) === 'true') ? "🟢" : "🔴" %></span>
+                        </div>
+                        <small class="text-muted d-block mb-1 text-truncate" style="font-size: 0.88rem;">
+                            <%= listing.restaurant ? listing.restaurant + ' • ' : '' %><%= listing.location || '' %>
+                        </small>
+                        <p class="card-text fw-bold mb-0 fs-5">&#8377; <%= listing.price ? listing.price.toLocaleString("en-IN") : 0 %></p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    <% } %>
+</div>
+
+<div id="noMatchMessage" class="text-center py-5 d-none">
+    <i class="fa-solid fa-bowl-food fs-1 text-muted mb-3"></i>
+    <h4 class="text-secondary">No food items found!</h4>
+    <p class="text-muted">Try searching for another dish or turn off 'Only Veg'.</p>
+</div>
+
+<script>
+    // 1. Carousel Scroll
+    const filterBox = document.getElementById("filters");
+    document.getElementById("slideLeft").addEventListener("click", () => filterBox.scrollBy({ left: -260, behavior: "smooth" }));
+    document.getElementById("slideRight").addEventListener("click", () => filterBox.scrollBy({ left: 260, behavior: "smooth" }));
+
+    // 2. Veg Toggle Pill
+    const vegPill = document.getElementById("vegPill");
+    const onlyVegToggle = document.getElementById("onlyVegToggle");
+    vegPill.addEventListener("click", () => {
+        onlyVegToggle.checked = !onlyVegToggle.checked;
+        applyAllFilters();
+    });
+
+    // 3. Dark Mode Persistence
+    const darkPill = document.getElementById("darkPill");
+    const darkModeToggle = document.getElementById("darkModeToggle");
+    const darkLabel = document.getElementById("darkLabel");
+
+    function updateDarkMode(isDark) {
+        if (isDark) {
+            document.body.classList.add("dark-mode");
+            darkModeToggle.checked = true;
+            darkLabel.innerHTML = `<i class="fa-solid fa-sun text-warning"></i> Light`;
+            localStorage.setItem("hungrymate_dark_theme", "active");
+        } else {
+            document.body.classList.remove("dark-mode");
+            darkModeToggle.checked = false;
+            darkLabel.innerHTML = `<i class="fa-solid fa-moon"></i> Dark`;
+            localStorage.setItem("hungrymate_dark_theme", "inactive");
+        }
+    }
+
+    if (localStorage.getItem("hungrymate_dark_theme") === "active") {
+        updateDarkMode(true);
+    }
+
+    darkPill.addEventListener("click", () => {
+        updateDarkMode(!darkModeToggle.checked);
+    });
+
+    // 4. Combined Filter Engine (Search + Categories + Veg)
+    const foodCards = document.querySelectorAll(".food-card-box");
+    const searchInput = document.getElementById("foodSearchInput");
+    const categoryFilters = document.querySelectorAll(".filter");
+    const noMatchMsg = document.getElementById("noMatchMessage");
+    let activeCat = "all";
+
+    function applyAllFilters() {
+        const query = (searchInput ? searchInput.value : "").trim().toLowerCase();
+        const vegOnly = onlyVegToggle.checked;
+        let visibleCount = 0;
+
+        foodCards.forEach(card => {
+            const title = card.getAttribute("data-title") || "";
+            const restaurant = card.getAttribute("data-restaurant") || "";
+            const location = card.getAttribute("data-location") || "";
+            const category = card.getAttribute("data-category") || "";
+            const isVeg = (card.getAttribute("data-isveg") === "true");
+
+            const matchSearch = !query || title.includes(query) || restaurant.includes(query) || location.includes(query) || category.includes(query);
+            const matchVeg = !vegOnly || isVeg === true;
+
+            let matchCategory = true;
+            if (activeCat !== "all" && activeCat !== "trending") {
+                if (activeCat === "veg") {
+                    matchCategory = (isVeg === true);
+                } else if (activeCat === "non-veg") {
+                    matchCategory = (isVeg === false);
+                } else {
+                    matchCategory = category.includes(activeCat) || title.includes(activeCat);
+                }
+            }
+
+            if (matchSearch && matchVeg && matchCategory) {
+                card.style.display = "block";
+                visibleCount++;
+            } else {
+                card.style.display = "none";
+            }
+        });
+
+        if (visibleCount === 0) {
+            noMatchMsg.classList.remove("d-none");
+        } else {
+            noMatchMsg.classList.add("d-none");
+        }
+    }
+
+    categoryFilters.forEach(f => {
+        f.addEventListener("click", () => {
+            categoryFilters.forEach(item => item.classList.remove("active-filter"));
+            f.classList.add("active-filter");
+            activeCat = f.getAttribute("data-category");
+            applyAllFilters();
+        });
+    });
+
+    // 5. Search History Management
+    const searchHistoryBox = document.getElementById("searchHistoryBox");
+    const historyList = document.getElementById("historyList");
+    const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+
+    function fetchHistory() {
+        return JSON.parse(localStorage.getItem("hungrymate_search_history") || "[]");
+    }
+
+    function addHistory(term) {
+        if (!term) return;
+        let history = fetchHistory().filter(i => i.toLowerCase() !== term.toLowerCase());
+        history.unshift(term);
+        if (history.length > 5) history.pop();
+        localStorage.setItem("hungrymate_search_history", JSON.stringify(history));
+        renderHistory();
+    }
+
+    function renderHistory() {
+        if (!historyList) return;
+        const history = fetchHistory();
+        historyList.innerHTML = "";
+        if (history.length === 0) {
+            historyList.innerHTML = `<li class="px-3 py-2 text-muted" style="font-size: 0.8rem;">No recent searches</li>`;
+            return;
+        }
+        history.forEach(item => {
+            const li = document.createElement("li");
+            li.className = "history-entry-item";
+            li.innerHTML = `<span><i class="fa-solid fa-clock-rotate-left text-muted me-2"></i>${item}</span><i class="fa-solid fa-arrow-turn-down text-muted" style="font-size:0.75rem; transform: rotate(90deg);"></i>`;
+            li.addEventListener("click", () => {
+                searchInput.value = item;
+                searchHistoryBox.classList.add("d-none");
+                applyAllFilters();
+            });
+            historyList.appendChild(li);
+        });
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener("focus", () => {
+            renderHistory();
+            searchHistoryBox.classList.remove("d-none");
+        });
+
+        searchInput.addEventListener("input", () => {
+            applyAllFilters();
+        });
+
+        document.getElementById("foodSearchForm").addEventListener("submit", (e) => {
+            e.preventDefault();
+            const val = searchInput.value.trim();
+            if (val) {
+                addHistory(val);
+                searchHistoryBox.classList.add("d-none");
+            }
+            applyAllFilters();
+        });
+
+        document.addEventListener("click", (e) => {
+            if (!e.target.closest("#foodSearchForm") && !e.target.closest("#searchHistoryBox")) {
+                searchHistoryBox.classList.add("d-none");
+            }
+        });
+    }
+
+    if (clearHistoryBtn) {
+        clearHistoryBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            localStorage.removeItem("hungrymate_search_history");
+            renderHistory();
+        });
+    }
+</script>
