@@ -1,18 +1,215 @@
 <% layout("/layouts/boilerplate") %>
 
-<div class="row mt-3">
-    <h1 class="col-6 offset-3">Login</h1>
-    <div class="col-6 offset-3">
+<style>
+    /* Main Layout with Side Animations */
+    .auth-stage {
+        min-height: calc(85vh - 70px);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 2rem 0.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Left Cookie: 360 Spin Animation */
+    .side-food-left {
+        flex: 0 0 220px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        user-select: none;
+    }
+    .spin-cookie-img {
+        width: 170px;
+        filter: drop-shadow(0 12px 25px rgba(0,0,0,0.35));
+        animation: spinInfinite 16s linear infinite;
+    }
+    @keyframes spinInfinite {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    /* Right Icecream: Floating / Bobbing Animation */
+    .side-food-right {
+        flex: 0 0 220px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        user-select: none;
+    }
+    .float-icecream-img {
+        width: 155px;
+        filter: drop-shadow(0 12px 25px rgba(0,0,0,0.35));
+        animation: floatBounce 3.2s ease-in-out infinite;
+    }
+    @keyframes floatBounce {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-16px) rotate(3deg); }
+    }
+
+    @media (max-width: 992px) {
+        .side-food-left, .side-food-right { display: none !important; }
+    }
+
+    /* Centered Main Form Card */
+    .center-auth-card {
+        flex: 1;
+        max-width: 460px;
+        margin: 0 auto;
+        background: #ffffff;
+        border-radius: 24px;
+        padding: 2.5rem 2.2rem;
+        box-shadow: 0 16px 36px rgba(0,0,0,0.08);
+        border: 1px solid #ededed;
+        transition: all 0.3s ease;
+    }
+
+    /* Input Field Styling (Light mode soft grey) */
+    .auth-input-box {
+        background-color: #f6f7f9 !important;
+        border: 1.5px solid #e5e7eb !important;
+        color: #1f2937 !important;
+        border-radius: 12px;
+        padding: 0.68rem 1rem;
+        font-size: 0.92rem;
+        transition: all 0.2s ease;
+    }
+    .auth-input-box:focus {
+        background-color: #ffffff !important;
+        border-color: #fe424d !important;
+        box-shadow: 0 0 0 3px rgba(254, 66, 77, 0.15) !important;
+    }
+    .auth-input-box::placeholder {
+        color: #8c939f !important;
+    }
+
+    /* Submit Button */
+    .btn-auth-action {
+        background: linear-gradient(135deg, #fe424d 0%, #ff5e3a 100%);
+        border: none;
+        border-radius: 12px;
+        color: #ffffff;
+        font-weight: 700;
+        padding: 0.72rem;
+        font-size: 0.98rem;
+        transition: all 0.25s ease;
+    }
+    .btn-auth-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(254, 66, 77, 0.35);
+        color: #ffffff;
+    }
+
+    /* Social Buttons Grid */
+    .social-auth-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.55rem;
+    }
+    .social-auth-item {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.55rem;
+        border-radius: 10px;
+        background: #f6f7f9;
+        border: 1px solid #e5e7eb;
+        color: #333333;
+        text-decoration: none;
+        font-size: 1.15rem;
+        transition: all 0.2s ease;
+    }
+    .social-auth-item:hover {
+        transform: translateY(-2px);
+        background: #ffffff;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .social-auth-item.google:hover { color: #ea4335; }
+    .social-auth-item.microsoft:hover { color: #00a4ef; }
+    .social-auth-item.github:hover { color: #24292e; }
+    .social-auth-item.linkedin:hover { color: #0a66c2; }
+
+    /* DARK MODE STYLING */
+    body.dark-mode .center-auth-card {
+        background: #18181b !important;
+        border-color: #2a2a2e !important;
+        box-shadow: 0 16px 36px rgba(0,0,0,0.55) !important;
+    }
+    body.dark-mode .auth-input-box {
+        background-color: #27272a !important; /* Light grey dark mode */
+        border-color: #39393e !important;
+        color: #f4f4f5 !important;
+    }
+    body.dark-mode .auth-input-box::placeholder {
+        color: #909099 !important;
+    }
+    body.dark-mode .auth-input-box:focus {
+        background-color: #2e2e33 !important;
+        border-color: #fe424d !important;
+    }
+    body.dark-mode .social-auth-item {
+        background: #27272a !important;
+        border-color: #38383e !important;
+        color: #f4f4f5 !important;
+    }
+    body.dark-mode .social-auth-item:hover {
+        background: #323238 !important;
+    }
+    body.dark-mode .text-auth-title {
+        color: #ffffff !important;
+    }
+</style>
+
+<div class="auth-stage">
+    <!-- Left Animation: Spinning Cookie -->
+    <div class="side-food-left">
+        <img src="https://pngimg.com/d/cookie_PNG13656.png" class="spin-cookie-img" alt="Spinning Cookie">
+    </div>
+
+    <!-- Center Form Card -->
+    <div class="center-auth-card">
+        <div class="text-center mb-4">
+            <h3 class="fw-bold mb-1 text-auth-title">Welcome Back!</h3>
+            <p class="text-muted small">Login to order your favorite dishes</p>
+        </div>
+
         <form action="/login" method="POST" class="needs-validation" novalidate>
             <div class="mb-3">
-                <label for="username" class="form-label">Username</label>
-                <input name="username" id="username" type="text" class="form-control" placeholder="Enter your username" required />
+                <label for="username" class="form-label fw-semibold small">Username</label>
+                <input name="username" id="username" type="text" class="form-control auth-input-box" placeholder="Enter your username" required autocomplete="username" />
+                <div class="invalid-feedback">Please enter your username.</div>
             </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input name="password" id="password" type="password" class="form-control" placeholder="Enter your password" required />
+
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <label for="password" class="form-label fw-semibold small mb-0">Password</label>
+                    <a href="#" class="text-muted text-decoration-none small">Forgot?</a>
+                </div>
+                <input name="password" id="password" type="password" class="form-control auth-input-box" placeholder="Enter your password" required autocomplete="current-password" />
+                <div class="invalid-feedback">Please enter your password.</div>
             </div>
-            <button class="btn btn-success">Login</button>
+
+            <button class="btn btn-auth-action w-100 mb-3" type="submit">Log in</button>
+
+            <!-- Social Logins Section -->
+            <div class="text-center text-muted small mb-3">or continue with</div>
+            <div class="social-auth-grid mb-4">
+                <a href="/auth/google" class="social-auth-item google" title="Log in with Google"><i class="fa-brands fa-google"></i></a>
+                <a href="/auth/microsoft" class="social-auth-item microsoft" title="Log in with Microsoft"><i class="fa-brands fa-microsoft"></i></a>
+                <a href="/auth/github" class="social-auth-item github" title="Log in with GitHub"><i class="fa-brands fa-github"></i></a>
+                <a href="/auth/linkedin" class="social-auth-item linkedin" title="Log in with LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+            </div>
+
+            <div class="text-center">
+                <span class="text-muted small">Don't have an account? </span>
+                <a href="/signup" class="text-danger fw-bold text-decoration-none small">Sign up</a>
+            </div>
         </form>
+    </div>
+
+    <!-- Right Animation: Floating Ice Cream -->
+    <div class="side-food-right">
+        <img src="https://pngimg.com/d/ice_cream_PNG5117.png" class="float-icecream-img" alt="Floating Ice Cream">
     </div>
 </div>

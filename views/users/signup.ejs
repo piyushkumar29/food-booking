@@ -1,45 +1,252 @@
 <% layout("/layouts/boilerplate") %>
 
-<div class="row mt-3">
-    <h1 class="col-6 offset-3">Signup on Hungrymate</h1>
-    <div class="col-6 offset-3">
+<style>
+    /* Main Layout with Side Animations */
+    .auth-stage {
+        min-height: calc(85vh - 70px);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.5rem 0.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Left Cookie: 360 Spin Animation */
+    .side-food-left {
+        flex: 0 0 220px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        user-select: none;
+    }
+    .spin-cookie-img {
+        width: 170px;
+        filter: drop-shadow(0 12px 25px rgba(0,0,0,0.35));
+        animation: spinInfinite 16s linear infinite;
+    }
+    @keyframes spinInfinite {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    /* Right Icecream: Floating / Bobbing Animation */
+    .side-food-right {
+        flex: 0 0 220px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        user-select: none;
+    }
+    .float-icecream-img {
+        width: 155px;
+        filter: drop-shadow(0 12px 25px rgba(0,0,0,0.35));
+        animation: floatBounce 3.2s ease-in-out infinite;
+    }
+    @keyframes floatBounce {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-16px) rotate(3deg); }
+    }
+
+    @media (max-width: 992px) {
+        .side-food-left, .side-food-right { display: none !important; }
+    }
+
+    /* Centered Main Form Card */
+    .center-auth-card {
+        flex: 1;
+        max-width: 480px;
+        margin: 0 auto;
+        background: #ffffff;
+        border-radius: 24px;
+        padding: 2.2rem 2.2rem;
+        box-shadow: 0 16px 36px rgba(0,0,0,0.08);
+        border: 1px solid #ededed;
+        transition: all 0.3s ease;
+    }
+
+    /* Input Field Styling (Light mode soft grey) */
+    .auth-input-box {
+        background-color: #f6f7f9 !important;
+        border: 1.5px solid #e5e7eb !important;
+        color: #1f2937 !important;
+        border-radius: 12px;
+        padding: 0.65rem 1rem;
+        font-size: 0.92rem;
+        transition: all 0.2s ease;
+    }
+    .auth-input-box:focus {
+        background-color: #ffffff !important;
+        border-color: #fe424d !important;
+        box-shadow: 0 0 0 3px rgba(254, 66, 77, 0.15) !important;
+    }
+    .auth-input-box::placeholder {
+        color: #8c939f !important;
+    }
+
+    /* Submit Button */
+    .btn-auth-action {
+        background: linear-gradient(135deg, #fe424d 0%, #ff5e3a 100%);
+        border: none;
+        border-radius: 12px;
+        color: #ffffff;
+        font-weight: 700;
+        padding: 0.72rem;
+        font-size: 0.98rem;
+        transition: all 0.25s ease;
+    }
+    .btn-auth-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(254, 66, 77, 0.35);
+        color: #ffffff;
+    }
+
+    /* Social Buttons Grid */
+    .social-auth-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.55rem;
+    }
+    .social-auth-item {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.55rem;
+        border-radius: 10px;
+        background: #f6f7f9;
+        border: 1px solid #e5e7eb;
+        color: #333333;
+        text-decoration: none;
+        font-size: 1.15rem;
+        transition: all 0.2s ease;
+    }
+    .social-auth-item:hover {
+        transform: translateY(-2px);
+        background: #ffffff;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .social-auth-item.google:hover { color: #ea4335; }
+    .social-auth-item.microsoft:hover { color: #00a4ef; }
+    .social-auth-item.github:hover { color: #24292e; }
+    .social-auth-item.linkedin:hover { color: #0a66c2; }
+
+    /* DARK MODE STYLING: Inputs Light-Grey */
+    body.dark-mode .center-auth-card {
+        background: #18181b !important;
+        border-color: #2a2a2e !important;
+        box-shadow: 0 16px 36px rgba(0,0,0,0.55) !important;
+    }
+    body.dark-mode .auth-input-box {
+        background-color: #27272a !important; /* Light grey dark mode */
+        border-color: #39393e !important;
+        color: #f4f4f5 !important;
+    }
+    body.dark-mode .auth-input-box::placeholder {
+        color: #909099 !important;
+    }
+    body.dark-mode .auth-input-box:focus {
+        background-color: #2e2e33 !important;
+        border-color: #fe424d !important;
+    }
+    body.dark-mode .social-auth-item {
+        background: #27272a !important;
+        border-color: #38383e !important;
+        color: #f4f4f5 !important;
+    }
+    body.dark-mode .social-auth-item:hover {
+        background: #323238 !important;
+    }
+    body.dark-mode .text-auth-title {
+        color: #ffffff !important;
+    }
+</style>
+
+<div class="auth-stage">
+    <!-- Left Animation: Spinning Cookie -->
+    <div class="side-food-left">
+        <img src="https://pngimg.com/d/cookie_PNG13656.png" class="spin-cookie-img" alt="Spinning Cookie">
+    </div>
+
+    <!-- Center Form Card -->
+    <div class="center-auth-card">
+        <div class="text-center mb-4">
+            <h3 class="fw-bold mb-1 text-auth-title">Create Account</h3>
+            <p class="text-muted small">Join Hungrymate for delicious orders</p>
+        </div>
+
         <form action="/signup" method="POST" class="needs-validation" id="signupForm" novalidate>
             <div class="mb-3">
-                <label for="username" class="form-label">Username</label>
-                <input name="username" id="username" type="text" class="form-control" placeholder="Enter your username" required />
-                <div class="valid-feedback">Looks good!</div>
+                <label for="username" class="form-label fw-semibold small">Username</label>
+                <input name="username" id="username" type="text" class="form-control auth-input-box" placeholder="Enter your username" required autocomplete="username" />
                 <div class="invalid-feedback">Please enter a username.</div>
             </div>
 
             <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input name="email" id="email" type="email" class="form-control" placeholder="Enter your email ID" required />
-                <div class="invalid-feedback">Please enter a valid email.</div>
+                <label for="email" class="form-label fw-semibold small">Email Address (Real Gmail/ID)</label>
+                <input name="email" id="email" type="email" class="form-control auth-input-box" placeholder="name@example.com" required autocomplete="email" />
+                <div class="invalid-feedback" id="emailFeedback">Please enter a valid real email ID.</div>
             </div>
 
             <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input name="password" id="password" type="password" class="form-control" placeholder="Create password" required />
+                <label for="password" class="form-label fw-semibold small">Password</label>
+                <input name="password" id="password" type="password" class="form-control auth-input-box" placeholder="Create password" required autocomplete="new-password" />
                 <div class="invalid-feedback">Please create a password.</div>
             </div>
 
-            <div class="mb-3">
-                <label for="confirmPassword" class="form-label">Confirm Password</label>
-                <input name="confirmPassword" id="confirmPassword" type="password" class="form-control" placeholder="Confirm your password" required />
-                <div class="invalid-feedback" id="confirmFeedback">Passwords do not match!</div>
+            <div class="mb-4">
+                <label for="confirmPassword" class="form-label fw-semibold small">Confirm Password</label>
+                <input name="confirmPassword" id="confirmPassword" type="password" class="form-control auth-input-box" placeholder="Re-enter password" required autocomplete="new-password" />
+                <div class="invalid-feedback" id="confirmFeedback">Passwords must match!</div>
             </div>
 
-            <button class="btn btn-success" type="submit">SignUp</button>
+            <button class="btn btn-auth-action w-100 mb-3" type="submit">Sign up</button>
+
+            <!-- Social Logins Section -->
+            <div class="text-center text-muted small mb-3">or continue with</div>
+            <div class="social-auth-grid mb-4">
+                <a href="/auth/google" class="social-auth-item google" title="Sign up with Google"><i class="fa-brands fa-google"></i></a>
+                <a href="/auth/microsoft" class="social-auth-item microsoft" title="Sign up with Microsoft"><i class="fa-brands fa-microsoft"></i></a>
+                <a href="/auth/github" class="social-auth-item github" title="Sign up with GitHub"><i class="fa-brands fa-github"></i></a>
+                <a href="/auth/linkedin" class="social-auth-item linkedin" title="Sign up with LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+            </div>
+
+            <div class="text-center">
+                <span class="text-muted small">Already have an account? </span>
+                <a href="/login" class="text-danger fw-bold text-decoration-none small">Log in</a>
+            </div>
         </form>
+    </div>
+
+    <!-- Right Animation: Floating Ice Cream -->
+    <div class="side-food-right">
+        <img src="https://pngimg.com/d/ice_cream_PNG5117.png" class="float-icecream-img" alt="Floating Ice Cream">
     </div>
 </div>
 
 <script>
     const form = document.getElementById("signupForm");
+    const email = document.getElementById("email");
     const password = document.getElementById("password");
     const confirmPassword = document.getElementById("confirmPassword");
 
+    // Real Email Domain Verification Checker
+    function validateRealEmail(val) {
+        const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!regex.test(val)) return false;
+        const fakeDomains = ["test.com", "fake.com", "dummy.com", "example.com", "mailinator.com", "trashmail.com"];
+        const domain = val.split("@")[1].toLowerCase();
+        return !fakeDomains.includes(domain);
+    }
+
     form.addEventListener("submit", function(event) {
+        // Email check
+        if (!validateRealEmail(email.value)) {
+            email.setCustomValidity("Real email required");
+        } else {
+            email.setCustomValidity("");
+        }
+
+        // Passwords check
         if (password.value !== confirmPassword.value) {
             confirmPassword.setCustomValidity("Passwords must match");
         } else {
@@ -59,6 +266,14 @@
             confirmPassword.setCustomValidity("");
         } else {
             confirmPassword.setCustomValidity("Passwords must match");
+        }
+    });
+
+    email.addEventListener("input", function() {
+        if (validateRealEmail(email.value)) {
+            email.setCustomValidity("");
+        } else {
+            email.setCustomValidity("Invalid");
         }
     });
 </script>
