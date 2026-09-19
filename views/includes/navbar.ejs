@@ -63,11 +63,11 @@
       <% } %>
 
       <% if(currUser) { %>
-        <!-- Interactive Profile Trigger -->
+        <!-- Interactive Profile Dropdown -->
         <div class="dropdown text-center">
           <div role="button" class="d-flex flex-column align-items-center dropdown-toggle user-avatar-wrap" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
             
-            <div id="navAvatarBox" class="profile-avatar-circle shadow-sm" data-userid="<%= currUser._id %>" data-hasavatar="<%= (currUser.avatar && currUser.avatar.trim() !== '') ? 'true' : 'false' %>">
+            <div id="navAvatarBox" class="profile-avatar-circle shadow-sm">
               <% if(currUser.avatar && currUser.avatar.trim() !== '') { %>
                 <img src="<%= currUser.avatar %>" alt="avatar" class="w-100 h-100 rounded-circle object-fit-cover" />
               <% } else { %>
@@ -78,24 +78,38 @@
             <span class="profile-username-label mt-1">
               <%= currUser.username %>
               <% if(currUser.isOwner) { %>
-                <i class="fa-solid fa-crown text-warning small ms-1" title="Owner"></i>
+                <i class="fa-solid fa-crown text-warning small ms-1" title="Restaurant Owner"></i>
               <% } %>
             </span>
           </div>
 
-          <!-- Profile Options Dropdown -->
-          <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2 p-3 rounded-4" style="min-width: 240px;">
+          <!-- Profile Options Dropdown Menu -->
+          <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2 p-3 rounded-4" style="min-width: 250px;">
             <li class="text-center pb-2 border-bottom mb-2">
-              <div class="fw-bold text-dark user-card-name"><%= currUser.username %></div>
+              <div class="fw-bold text-dark user-card-name d-flex align-items-center justify-content-center gap-1">
+                <span><%= currUser.username %></span>
+                <% if(currUser.isOwner) { %>
+                  <span class="badge bg-warning text-dark px-2 py-0" style="font-size: 0.65rem;">OWNER</span>
+                <% } %>
+              </div>
               <div class="text-muted small text-truncate"><%= currUser.email %></div>
             </li>
 
+            <!-- Edit Name Action -->
             <li>
-              <label for="avatarFileInput" class="dropdown-item py-2 rounded-2 d-flex align-items-center gap-2" style="cursor: pointer;">
+              <button type="button" class="dropdown-item py-2 rounded-2 d-flex align-items-center gap-2" onclick="promptEditName('<%= currUser.username %>')">
+                <i class="fa-solid fa-pen-to-square text-primary"></i>
+                <span>Edit Name</span>
+              </button>
+            </li>
+
+            <!-- Change Photo Action (Permanent DB Upload) -->
+            <li>
+              <label for="avatarFileInput" class="dropdown-item py-2 rounded-2 d-flex align-items-center gap-2 mb-0" style="cursor: pointer;">
                 <i class="fa-solid fa-camera text-danger"></i>
                 <span>Change Photo</span>
               </label>
-              <input type="file" id="avatarFileInput" accept="image/*" class="d-none" onchange="previewAndSaveAvatar(event)" />
+              <input type="file" id="avatarFileInput" accept="image/*" class="d-none" onchange="uploadPermanentAvatar(event)" />
             </li>
 
             <li><hr class="dropdown-divider"></li>
@@ -114,8 +128,17 @@
   </div>
 </nav>
 
+<!-- Hidden Form to submit edited username -->
+<form id="editNameForm" action="/user/update-name" method="POST" class="d-none">
+  <input type="hidden" name="newName" id="newNameInput" />
+</form>
+
+<!-- Hidden Form to submit permanent avatar to MongoDB -->
+<form id="editAvatarForm" action="/user/update-avatar" method="POST" class="d-none">
+  <input type="hidden" name="avatarData" id="avatarDataInput" />
+</form>
+
 <style>
-    /* Navigation Pills */
     .nav-pill-btn {
         display: inline-flex !important;
         align-items: center !important;
@@ -138,7 +161,6 @@
     .icon-green { color: #198754; }
     .icon-gold { color: #ff9800; }
 
-    /* Light Mode Pill Hover */
     .nav-pill-btn:hover {
         background-color: #ffffff !important;
         border-color: #ffdada !important;
@@ -150,13 +172,11 @@
         transform: scale(1.22);
     }
 
-    /* Owner Highlight */
     .owner-highlight-btn:hover {
         background-color: #fff4f4 !important;
         border-color: #fe424d !important;
     }
 
-    /* Signup Button: Crisp Visible in Light & Dark Mode */
     .nav-auth-signup-btn {
         background-color: transparent !important;
         border: 1.5px solid #212529 !important;
@@ -168,7 +188,6 @@
         color: #ffffff !important;
     }
 
-    /* Profile Avatar Circle */
     .profile-avatar-circle {
         width: 38px;
         height: 38px;
@@ -199,29 +218,19 @@
         line-height: 1;
     }
 
-    /* ========================================================
-       DARK MODE FIXES: HOVER EFFECTS & VISIBILITY
-       ======================================================== */
     body.dark-mode nav, 
     body.dark-mode .navbar {
         background-color: #161618 !important;
         border-color: #26262a !important;
     }
     body.dark-mode .navbar-brand { color: #ffffff !important; }
-
-    /* Dark Mode Links */
-    body.dark-mode .nav-pill-btn {
-        color: #e4e4e7 !important;
-    }
-    /* Fixed Dark Mode Hover: No white blinding wash */
+    body.dark-mode .nav-pill-btn { color: #e4e4e7 !important; }
     body.dark-mode .nav-pill-btn:hover {
         background-color: #232328 !important;
         border-color: #3f3f46 !important;
         color: #fe424d !important;
         box-shadow: 0 5px 16px rgba(254, 66, 77, 0.22) !important;
     }
-
-    /* Fixed Dark Mode Signup Button (Crisp White Border & Text) */
     body.dark-mode .nav-auth-signup-btn {
         border-color: #ffffff !important;
         color: #ffffff !important;
@@ -230,53 +239,39 @@
         background-color: #ffffff !important;
         color: #000000 !important;
     }
-
-    body.dark-mode .profile-username-label {
-        color: #f4f4f5 !important;
-    }
+    body.dark-mode .profile-username-label { color: #f4f4f5 !important; }
     body.dark-mode .dropdown-menu {
         background-color: #1f1f23 !important;
         border: 1px solid #333338 !important;
     }
-    body.dark-mode .user-card-name {
-        color: #ffffff !important;
-    }
-    body.dark-mode .dropdown-item {
-        color: #e4e4e7 !important;
-    }
-    body.dark-mode .dropdown-item:hover {
-        background-color: #2a2a30 !important;
-    }
+    body.dark-mode .user-card-name { color: #ffffff !important; }
+    body.dark-mode .dropdown-item { color: #e4e4e7 !important; }
+    body.dark-mode .dropdown-item:hover { background-color: #2a2a30 !important; }
 </style>
 
 <script>
-function previewAndSaveAvatar(event) {
+function promptEditName(currentName) {
+    const updatedName = prompt("Enter your new profile name:", currentName);
+    if (updatedName !== null && updatedName.trim() !== "" && updatedName.trim() !== currentName) {
+        document.getElementById("newNameInput").value = updatedName.trim();
+        document.getElementById("editNameForm").submit();
+    }
+}
+
+function uploadPermanentAvatar(event) {
     const file = event.target.files[0];
-    const avatarBox = document.getElementById("navAvatarBox");
-    if (file && avatarBox) {
-        const userId = avatarBox.getAttribute("data-userid") || "";
+    if (file) {
+        // File size check (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert("File size too large! Please choose an image under 5MB.");
+            return;
+        }
         const reader = new FileReader();
         reader.onload = function(e) {
-            avatarBox.innerHTML = '<img src="' + e.target.result + '" alt="avatar" class="w-100 h-100 rounded-circle object-fit-cover" />';
-            if (userId) {
-                localStorage.setItem("user_avatar_" + userId, e.target.result);
-            }
+            document.getElementById("avatarDataInput").value = e.target.result;
+            document.getElementById("editAvatarForm").submit();
         };
         reader.readAsDataURL(file);
     }
 }
-
-document.addEventListener("DOMContentLoaded", function() {
-    const avatarBox = document.getElementById("navAvatarBox");
-    if (avatarBox) {
-        const userId = avatarBox.getAttribute("data-userid") || "";
-        const hasAvatar = avatarBox.getAttribute("data-hasavatar") === "true";
-        if (userId && !hasAvatar) {
-            const savedPhoto = localStorage.getItem("user_avatar_" + userId);
-            if (savedPhoto) {
-                avatarBox.innerHTML = '<img src="' + savedPhoto + '" alt="avatar" class="w-100 h-100 rounded-circle object-fit-cover" />';
-            }
-        }
-    }
-});
 </script>
