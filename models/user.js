@@ -6,7 +6,12 @@ const userSchema = new Schema({
     email: {
 
         type: String,
-        required: true
+        required: true,
+        unique: true
+    },
+    isOwner: {
+        type: Boolean,
+        default: false // By default har naya user customer/normal user hoga
     }
 });
 
