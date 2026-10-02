@@ -17,9 +17,7 @@
         padding: 1.5rem;
         transition: transform 0.2s ease;
     }
-    .coupon-card:hover {
-        transform: translateY(-4px);
-    }
+    .coupon-card:hover { transform: translateY(-4px); }
     body.dark-mode .coupon-card {
         background: #0f172a !important;
         border-color: #ec4899 !important;
@@ -33,7 +31,7 @@
         <h1 class="fw-bold display-5" style="color: #f59e0b;">Flat 60% Off on All Orders</h1>
         <p class="fs-5 text-light opacity-75">Valid for the next 10 Days across all predefined and upcoming dishes!</p>
         <div class="d-inline-block bg-white text-dark px-4 py-2 rounded-pill fw-bold fs-6">
-            <i class="fa-regular fa-clock text-danger me-2"></i>Offer Expires in: <span id="offerTimer" class="text-danger fw-bold">9 Days 23h 59m</span>
+            <i class="fa-regular fa-clock text-danger me-2"></i>Offer Expires in: <span id="offerTimer" class="text-danger fw-bold">Calculating...</span>
         </div>
     </div>
 
@@ -74,4 +72,39 @@
         navigator.clipboard.writeText(code);
         alert(`Coupon ${code} copied to clipboard! Paste it on the Cart checkout page.`);
     }
+
+    // Dynamic 10-Day Looping Countdown Timer Engine
+    function start10DayLoopingTimer() {
+        const TEN_DAYS_MS = 10 * 24 * 60 * 60 * 1000;
+        let offerEnd = localStorage.getItem("hungrymate_offer_end_time");
+
+        if (!offerEnd || Date.now() > parseInt(offerEnd)) {
+            offerEnd = Date.now() + TEN_DAYS_MS;
+            localStorage.setItem("hungrymate_offer_end_time", offerEnd);
+        }
+
+        function updateCountdown() {
+            const now = Date.now();
+            let distance = parseInt(offerEnd) - now;
+
+            if (distance <= 0) {
+                // Auto reset to fresh 10 days
+                offerEnd = Date.now() + TEN_DAYS_MS;
+                localStorage.setItem("hungrymate_offer_end_time", offerEnd);
+                distance = TEN_DAYS_MS;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById("offerTimer").innerText = `${days} Days ${hours}h ${minutes}m ${seconds}s`;
+        }
+
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+    }
+
+    document.addEventListener("DOMContentLoaded", start10DayLoopingTimer);
 </script>

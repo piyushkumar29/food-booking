@@ -1,141 +1,148 @@
 <% layout("/layouts/boilerplate") %>
-<body>
-    <div class="row mt-3">
-        <div class="col-8 offset-3">
-            <h3><%= listing.title %></h3>
-        </div>
 
-        <div class="card col-6 offset-3 show-card listing-card">
-            <img src="<%= listing.image.url %>" class="card-img-top show-img" alt="listing_image">
-            <div class="card-body">
-                <p class="card-text">Owned by: <i><%= listing.owner ? listing.owner.username : "Anonymous" %></i></p>
-                <% if(listing.restaurant) { %>
-                    <p class="card-text"><b>Restaurant:</b> <%= listing.restaurant %></p>
-                <% } %>
-                <p class="card-text"><b>Location:</b> <%= listing.location %></p>
-                <p class="card-text"><%= listing.description %></p>
-                <p class="card-text">&#8377; <%= listing.price ? listing.price.toLocaleString("en-IN") : "" %></p>
-                <p class="card-text"><b>Category:</b> <%= listing.category %></p>
-                <p class="card-text"><%= listing.isVeg ? "🟢 Veg" : "🔴 Non-Veg" %></p>
-                <p class="card-text"><b>Preparation Time:</b> <%= listing.preparationTime %> mins</p>
-                <p class="card-text"><b>Spiciness:</b> <%= listing.spiciness %></p>
-            </div>
-        </div>
-    </div>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <% if (currUser && listing.owner && listing.owner._id.equals(currUser._id)) { %>
-        <div class="btns">
-            <a href="/listings/<%= listing._id %>/edit" class="btn btn-dark col-1 offset-3 edit-btn">Edit</a>
-            <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE">
-                <button class="btn btn-dark offset-3">Delete</button>
-            </form>
-        </div>
-    <% } %>
+<style>
+    .show-card-box {
+        background: #ffffff;
+        border-radius: 24px;
+        padding: 2.2rem;
+        border: 1.5px solid #e2e8f0;
+        box-shadow: 0 16px 36px rgba(15,23,42,0.06);
+        margin: 2rem auto;
+    }
+    .food-detail-img {
+        height: 420px;
+        width: 100%;
+        object-fit: cover;
+        border-radius: 18px;
+    }
+    #map {
+        height: 400px;
+        width: 100%;
+        border-radius: 18px;
+        border: 1.5px solid #cbd5e1;
+        margin-top: 1rem;
+        z-index: 1;
+    }
+    body.dark-mode .show-card-box {
+        background: #0f172a !important;
+        border-color: #1e293b !important;
+        color: #f8fafc !important;
+    }
+</style>
 
-    <div class="col-8 offset-3 mb-3">
-        <hr>
-        <% if (currUser) { %>
-            <h4>Leave a Review</h4>
-            <form action="/listings/<%= listing.id %>/reviews" method="POST" novalidate class="needs-validation">
-                <div class="mb-3 mt-3">
-                    <label for="rating" class="form-label">Rating</label>
-                    <fieldset class="starability-slot">
-                        <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="1" checked aria-label="No rating." />
-                        <input type="radio" id="first-rate1" name="review[rating]" value="1" />
-                        <label for="first-rate1" title="Terrible">1 star</label>
-                        <input type="radio" id="first-rate2" name="review[rating]" value="2" />
-                        <label for="first-rate2" title="Not good">2 stars</label>
-                        <input type="radio" id="first-rate3" name="review[rating]" value="3" />
-                        <label for="first-rate3" title="Average">3 stars</label>
-                        <input type="radio" id="first-rate4" name="review[rating]" value="4" />
-                        <label for="first-rate4" title="Very good">4 stars</label>
-                        <input type="radio" id="first-rate5" name="review[rating]" value="5" />
-                        <label for="first-rate5" title="Amazing">5 stars</label>
-                    </fieldset>
+<div class="container show-card-box">
+    <div class="row">
+        <div class="col-md-6">
+            <img src="<%= listing.image.url %>" class="food-detail-img shadow-sm" alt="<%= listing.title %>">
+        </div>
+        <div class="col-md-6 d-flex flex-column justify-content-between pt-3 pt-md-0">
+            <div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h2 class="fw-bold mb-0"><%= listing.title %></h2>
+                    <span class="fs-4"><%= (listing.isVeg === true || String(listing.isVeg) === 'true') ? '🟢' : '🔴' %></span>
                 </div>
+                <h5 class="text-danger fw-semibold"><i class="fa-solid fa-store me-2"></i><%= listing.restaurant || 'Hungrymate Partner Restaurant' %></h5>
+                <p class="text-muted"><i class="fa-solid fa-location-dot me-2"></i><%= listing.location %></p>
+                
+                <p class="lead fs-6"><%= listing.description %></p>
 
-                <div class="mb-3 mt-3">
-                    <label for="comment" class="form-label">Comments</label>
-                    <textarea name="review[comment]" id="comment" cols="30" rows="5" class="form-control" required></textarea>
-                    <div class="invalid-feedback">Please add some comments for review</div>
-                </div>
-                <button class="btn btn-outline-dark">Submit</button>
-            </form>
-            <hr>
-        <% } %>
-
-        <% if (listing.reviews && listing.reviews.length > 0) { %>
-            <div class="row">
-                <p><b>All Reviews</b></p>
-                <% for (review of listing.reviews) { %>
-                    <div class="card col-5 ms-3 mb-3">
-                        <div class="card-body">
-                            <h5 class="card-title">@<%= review.author ? review.author.username : "Anonymous" %></h5>
-                            <p class="starability-result card-text" data-rating="<%= review.rating %>"></p>
-                            <p class="card-text"><%= review.comment %></p>
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <div class="p-2 border rounded-3 bg-light text-dark">
+                            <small class="text-muted d-block">Preparation Time</small>
+                            <strong><i class="fa-regular fa-clock me-1 text-danger"></i><%= listing.preparationTime || 20 %> Mins</strong>
                         </div>
-                        <% if (currUser && review.author && review.author._id.equals(currUser._id)) { %>
-                            <form class="mb-3" method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE">
-                                <button class="btn btn-sm btn-dark">Delete</button>
-                            </form>
-                        <% } %>
                     </div>
-                <% } %>
+                    <div class="col-6">
+                        <div class="p-2 border rounded-3 bg-light text-dark">
+                            <small class="text-muted d-block">Spiciness Level</small>
+                            <strong><i class="fa-solid fa-pepper-hot me-1 text-warning"></i><%= listing.spiciness || 'Medium' %></strong>
+                        </div>
+                    </div>
+                </div>
             </div>
-        <% } %>
-    </div>
 
-    <!-- Map Section -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
-    <div class="col-8 offset-3 mb-4 mt-3">
-        <h3>Where you'll get the food</h3>
-        <div id="map" 
-             data-listing='<%- JSON.stringify(listing) %>' 
-             style="height: 400px; width: 100%; border-radius: 12px; border: 1px solid #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+            <div>
+                <div class="d-flex align-items-center justify-content-between mt-3 pt-3 border-top">
+                    <span class="display-6 fw-bold text-danger">&#8377;<%= listing.price %></span>
+                    <button class="btn btn-danger btn-lg rounded-pill px-4 fw-bold shadow" onclick="addToCart('<%= listing._id %>', '<%= listing.title.replace(/'/g, '') %>', <%= listing.price %>, '<%= listing.image.url %>')">
+                        <i class="fa-solid fa-cart-shopping me-2"></i>Add to Cart
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-    <script>
-        const mapElement = document.getElementById('map');
-        const listingData = JSON.parse(mapElement.getAttribute('data-listing'));
-
-        let coords = [77.2090, 28.6139]; 
-        if (listingData.geometry && listingData.geometry.coordinates && listingData.geometry.coordinates.length === 2) {
-            coords = listingData.geometry.coordinates;
-        }
-
-        const map = L.map('map').setView([coords[1], coords[0]], 16);
-
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; OpenStreetMap'
-        }).addTo(map);
-
-        // Google Maps Exact Search URL
-        const gmapsQuery = encodeURIComponent(`${listingData.restaurant || ''} ${listingData.location || ''}`);
-        const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${gmapsQuery}`;
-
-        let popupContent = `
-            <div style="text-align: center; padding: 2px;">
-                <h6 style="margin: 0; font-weight: 700;">${listingData.title}</h6>
-                ${listingData.restaurant ? `<p style="margin: 2px 0; font-size: 13px;"><b>🏪 ${listingData.restaurant}</b></p>` : ''}
-                <p style="margin: 2px 0 8px 0; font-size: 12px; color: #555;">📍 ${listingData.location || ''}</p>
-                <a href="${googleMapsLink}" target="_blank" style="display: inline-block; background-color: #0d6efd; color: white; padding: 4px 10px; border-radius: 6px; text-decoration: none; font-size: 12px;">
-                    🗺️ Open in Google Maps
-                </a>
+    <!-- Exact Location Pinpoint Section -->
+    <div class="mt-5 pt-3 border-top">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h3 class="fw-bold mb-0">Where you'll get the food</h3>
+                <p class="text-muted small mb-0"><%= listing.restaurant %> &bull; <%= listing.location %></p>
             </div>
-        `;
+            <a id="openGoogleMapsBtn" target="_blank" rel="noopener noreferrer" class="btn btn-primary rounded-pill fw-bold btn-sm px-3 shadow-sm">
+                <i class="fa-solid fa-map-location-dot me-1"></i> Open in Google Maps
+            </a>
+        </div>
 
-        L.marker([coords[1], coords[0]])
-            .addTo(map)
-            .bindPopup(popupContent)
-            .openPopup();
+        <div id="map"></div>
+    </div>
+</div>
 
-        setTimeout(() => {
-            map.invalidateSize();
-        }, 250);
-    </script>
-</body>
+<script>
+    const restName = "<%= listing.restaurant || '' %>";
+    const locName = "<%= listing.location || '' %>";
+    const fullLocString = (restName + " " + locName).trim();
+
+    // Default Exact GPS Anchor: JIS College of Engineering Gate / Kalyani Nadia
+    let exactLat = 22.9682;
+    let exactLng = 88.4552;
+
+    const map = L.map('map').setView([exactLat, exactLng], 17);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    let marker = L.marker([exactLat, exactLng]).addTo(map)
+        .bindPopup(`<b>${restName || 'Restaurant'}</b><br>${locName}<br><span class='badge bg-danger'>Exact Spot</span>`)
+        .openPopup();
+
+    function setGoogleMapsUrl(lat, lng) {
+        document.getElementById("openGoogleMapsBtn").href = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+    }
+    setGoogleMapsUrl(exactLat, exactLng);
+
+    // High Precision Geocoder (OSM Nominatim)
+    if (fullLocString) {
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullLocString + ", Kalyani, West Bengal")}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    exactLat = parseFloat(data[0].lat);
+                    exactLng = parseFloat(data[0].lon);
+                    map.setView([exactLat, exactLng], 18);
+                    marker.setLatLng([exactLat, exactLng]);
+                    setGoogleMapsUrl(exactLat, exactLng);
+                }
+            })
+            .catch(() => {});
+    }
+
+    function addToCart(id, title, price, image) {
+        let cart = JSON.parse(localStorage.getItem("hungrymate_cart") || "[]");
+        const existing = cart.find(item => item.id === id);
+        if (existing) {
+            existing.quantity += 1;
+        } else {
+            cart.push({ id, title, price, image, quantity: 1 });
+        }
+        localStorage.setItem("hungrymate_cart", JSON.stringify(cart));
+        if (typeof refreshNavCartBadge === "function") refreshNavCartBadge();
+        alert(`${title} added to cart!`);
+    }
+</script>

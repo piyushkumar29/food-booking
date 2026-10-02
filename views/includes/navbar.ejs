@@ -1,41 +1,41 @@
 <nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top py-2 px-3 shadow-sm">
   <div class="container-fluid d-flex align-items-center justify-content-between p-0">
     
-    <!-- Left: Bigger Attractive Logo & Links -->
-    <div class="d-flex align-items-center flex-shrink-0">
-      <a class="navbar-brand me-3 p-0 d-flex align-items-center" href="/listings">
+    <!-- Left Logo & Navigation Links -->
+    <div class="d-flex align-items-center flex-shrink-0 gap-3">
+      <a class="navbar-brand me-2 p-0 d-flex align-items-center" href="/listings">
         <img src="/mypic.png" alt="Hungrymate Logo" style="height: 52px; width: auto; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.12));" />
       </a>
 
-      <div class="d-none d-lg-flex align-items-center gap-2">
-        <a class="nav-pill-btn" href="/listings">
-          <i class="fa-solid fa-utensils icon-item text-danger"></i> All food items
+      <div class="d-none d-lg-flex align-items-center gap-3">
+        <a class="nav-pill-btn nav-all-food" href="/listings">
+          <i class="fa-solid fa-utensils icon-item"></i> All food items
         </a>
 
         <% if (currUser && currUser.isOwner) { %>
           <a class="nav-pill-btn owner-highlight-btn" href="/listings/new">
-            <i class="fa-solid fa-plus icon-item text-danger"></i> Add new items
+            <i class="fa-solid fa-plus icon-item"></i> Add new items
           </a>
         <% } %>
 
-        <a class="nav-pill-btn" href="/orders/track">
-          <i class="fa-solid fa-motorcycle icon-item text-success"></i> Track Order
+        <a class="nav-pill-btn nav-track-order" href="/orders/track">
+          <i class="fa-solid fa-motorcycle icon-item"></i> Track Order
         </a>
-        <a class="nav-pill-btn" href="/offers">
-          <i class="fa-solid fa-tags icon-item text-warning"></i> Offers & Discounts
+        <a class="nav-pill-btn nav-offers" href="/offers">
+          <i class="fa-solid fa-tags icon-item"></i> Offers & Discounts
         </a>
       </div>
     </div>
 
-    <!-- Center: Search Bar with History Box -->
-    <div class="position-relative mx-2 mx-md-auto flex-grow-1" style="max-width: 440px;">
+    <!-- Center Search Bar with Worldwide Live Autocomplete -->
+    <div class="position-relative mx-3 flex-grow-1" style="max-width: 440px;">
       <form class="d-flex align-items-center m-0" id="foodSearchForm" onsubmit="return false;">
         <div class="input-group w-100 position-relative">
           <input 
             class="form-control rounded-pill pe-5 py-2 shadow-none" 
             type="search" 
             id="foodSearchInput" 
-            placeholder="Search delicious food..." 
+            placeholder="Search food, restaurants, or dishes..." 
             autocomplete="off"
             style="border: 1.5px solid #cbd5e1; font-size: 0.9rem;"
           />
@@ -45,20 +45,18 @@
         </div>
       </form>
 
-      <!-- History Dropdown -->
-      <div id="searchHistoryBox" class="position-absolute border rounded-3 shadow-lg w-100 mt-1 d-none" style="z-index: 1060; max-height: 220px; overflow-y: auto; left: 0;">
+      <div id="searchHistoryBox" class="position-absolute border rounded-3 shadow-lg w-100 mt-1 d-none" style="z-index: 1060; max-height: 240px; overflow-y: auto; left: 0;">
         <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom" style="font-size: 0.78rem; opacity: 0.85;">
-          <span class="fw-bold"><i class="fa-solid fa-clock-rotate-left me-1"></i> RECENT SEARCHES</span>
+          <span class="fw-bold" id="searchDropdownHeader"><i class="fa-solid fa-clock-rotate-left me-1"></i> RECENT SEARCHES</span>
           <span role="button" id="clearHistoryBtn" class="text-danger fw-semibold" style="cursor: pointer;">Clear</span>
         </div>
         <ul id="historyList" class="list-unstyled m-0 p-0"></ul>
       </div>
     </div>
 
-    <!-- Right: Cart Icon & Auth / Profile Details -->
-    <div class="d-flex align-items-center gap-2 flex-shrink-0">
+    <!-- Right Actions -->
+    <div class="d-flex align-items-center gap-3 flex-shrink-0">
       
-      <!-- Cart Box Trigger -->
       <a href="/cart" class="btn btn-light border position-relative rounded-pill px-3 py-1 d-flex align-items-center gap-2 text-decoration-none" title="View Cart">
         <i class="fa-solid fa-cart-shopping text-danger fs-5"></i>
         <span class="d-none d-sm-inline fw-semibold" style="font-size: 0.88rem;">Cart</span>
@@ -66,12 +64,11 @@
       </a>
 
       <% if(!currUser) { %>
-        <a class="btn nav-auth-signup-btn rounded-pill px-3 py-1 fw-semibold btn-sm" href="/signup">Sign up</a>
-        <a class="btn btn-dark rounded-pill px-3 py-1 fw-semibold btn-sm" href="/login">Log in</a>
+        <a class="btn nav-auth-signup-btn rounded-pill px-3 py-1 fw-bold btn-sm" href="/signup">Sign up</a>
+        <a class="btn btn-dark rounded-pill px-3 py-1 fw-bold btn-sm" href="/login">Log in</a>
       <% } %>
 
       <% if(currUser) { %>
-        <!-- Interactive Profile Dropdown -->
         <div class="dropdown text-center">
           <div role="button" class="d-flex flex-column align-items-center dropdown-toggle user-avatar-wrap" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
             <div id="navAvatarBox" class="profile-avatar-circle shadow-sm">
@@ -89,7 +86,6 @@
             </span>
           </div>
 
-          <!-- Dropdown Menu -->
           <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2 p-3 rounded-4" style="min-width: 250px;">
             <li class="text-center pb-2 border-bottom mb-2">
               <div class="fw-bold text-dark user-card-name d-flex align-items-center justify-content-center gap-1">
@@ -131,12 +127,10 @@
   </div>
 </nav>
 
-<!-- Hidden Form for Name Update -->
 <form id="editNameForm" action="/user/update-name" method="POST" class="d-none">
   <input type="hidden" name="newName" id="newNameInput" />
 </form>
 
-<!-- Hidden Form for Avatar Update -->
 <form id="editAvatarForm" action="/user/update-avatar" method="POST" class="d-none">
   <input type="hidden" name="avatarData" id="avatarDataInput" />
 </form>
@@ -145,58 +139,68 @@
     .nav-pill-btn {
         display: inline-flex !important;
         align-items: center !important;
-        padding: 0.45rem 1rem !important;
+        padding: 0.52rem 1.15rem !important;
         border-radius: 50px !important;
-        font-weight: 600 !important;
-        font-size: 0.91rem !important;
+        font-weight: 700 !important;
+        font-size: 0.9rem !important;
         color: #1e293b !important;
         text-decoration: none !important;
         background-color: transparent !important;
         border: 1.5px solid transparent !important;
-        transition: all 0.25s ease !important;
+        transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
+    .icon-item { margin-right: 0.5rem; font-size: 1rem; }
+    .nav-all-food .icon-item { color: #fe424d; }
+    .nav-track-order .icon-item { color: #10b981; }
+    .nav-offers .icon-item { color: #f59e0b; }
+    .owner-highlight-btn .icon-item { color: #fe424d; }
+
     .nav-pill-btn:hover {
         background-color: #ffffff !important;
-        border-color: #fecdd3 !important;
+        border-color: #ffdada !important;
         color: #fe424d !important;
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(254, 66, 77, 0.15) !important;
+        box-shadow: 0 6px 16px rgba(254, 66, 77, 0.16) !important;
     }
+
+    .nav-auth-signup-btn {
+        border: 1.5px solid #212529 !important;
+        color: #212529 !important;
+    }
+
+    /* Pink Theme Capsule on Dark Mode with Black Text */
+    body.dark-mode .nav-pill-btn {
+        background-color: #ec4899 !important;
+        color: #000000 !important;
+        border-color: #ec4899 !important;
+        box-shadow: 0 4px 14px rgba(236, 72, 153, 0.35) !important;
+    }
+    body.dark-mode .nav-pill-btn .icon-item {
+        color: #000000 !important;
+    }
+    body.dark-mode .nav-pill-btn:hover {
+        background-color: #f472b6 !important;
+        border-color: #f472b6 !important;
+        color: #000000 !important;
+        transform: translateY(-3px) scale(1.03);
+        box-shadow: 0 8px 22px rgba(236, 72, 153, 0.55) !important;
+    }
+    body.dark-mode .nav-auth-signup-btn {
+        border-color: #ffffff !important;
+        color: #ffffff !important;
+    }
+
     .profile-avatar-circle {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
+        width: 40px; height: 40px; border-radius: 50%;
         background: linear-gradient(135deg, #fe424d 0%, #ec4899 100%);
-        color: #ffffff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-        font-size: 1.05rem;
-        border: 2px solid #ffffff;
-        overflow: hidden;
+        color: #ffffff; display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 1.05rem; border: 2px solid #ffffff; overflow: hidden;
     }
     .profile-username-label {
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: #1e293b;
-        max-width: 85px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        line-height: 1;
-    }
-    body.dark-mode .nav-pill-btn { color: #f1f5f9 !important; }
-    body.dark-mode .nav-pill-btn:hover {
-        background-color: #1e293b !important;
-        border-color: #334155 !important;
-        color: #f59e0b !important;
+        font-size: 0.75rem; font-weight: 600; color: #1e293b;
+        max-width: 85px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1;
     }
     body.dark-mode .profile-username-label { color: #f8fafc !important; }
-    body.dark-mode .dropdown-menu { background-color: #0f172a !important; border: 1px solid #334155 !important; }
-    body.dark-mode .user-card-name { color: #ffffff !important; }
-    body.dark-mode .dropdown-item { color: #e2e8f0 !important; }
-    body.dark-mode .dropdown-item:hover { background-color: #1e293b !important; }
 </style>
 
 <script>
@@ -211,10 +215,7 @@ function promptEditName(currentName) {
 function uploadPermanentAvatar(event) {
     const file = event.target.files[0];
     if (file) {
-        if (file.size > 5 * 1024 * 1024) {
-            alert("Image must be smaller than 5MB!");
-            return;
-        }
+        if (file.size > 5 * 1024 * 1024) return alert("Image must be under 5MB!");
         const reader = new FileReader();
         reader.onload = function(e) {
             document.getElementById("avatarDataInput").value = e.target.result;
@@ -224,7 +225,6 @@ function uploadPermanentAvatar(event) {
     }
 }
 
-// Live Cart Count Updater
 function refreshNavCartBadge() {
     const cart = JSON.parse(localStorage.getItem("hungrymate_cart") || "[]");
     const totalCount = cart.reduce((acc, item) => acc + (item.quantity || 1), 0);
@@ -233,4 +233,86 @@ function refreshNavCartBadge() {
 }
 document.addEventListener("DOMContentLoaded", refreshNavCartBadge);
 window.addEventListener("storage", refreshNavCartBadge);
+
+// Smart Live Worldwide Autocomplete & Search Engine
+const sInput = document.getElementById("foodSearchInput");
+const sBox = document.getElementById("searchHistoryBox");
+const sList = document.getElementById("historyList");
+const sHeader = document.getElementById("searchDropdownHeader");
+const sClear = document.getElementById("clearHistoryBtn");
+
+let searchDebounceTimer = null;
+
+function renderSearchDropdown(items, isHint) {
+    sList.innerHTML = "";
+    if (items.length === 0) {
+        sBox.classList.add("d-none");
+        return;
+    }
+    sBox.classList.remove("d-none");
+    sHeader.innerHTML = isHint ? '<i class="fa-solid fa-earth-americas text-primary me-1"></i> WORLDWIDE MATCHES' : '<i class="fa-solid fa-clock-rotate-left me-1"></i> RECENT SEARCHES';
+    sClear.style.display = isHint ? "none" : "inline";
+
+    items.forEach(txt => {
+        const li = document.createElement("li");
+        li.innerHTML = `<span><i class="fa-solid ${isHint ? 'fa-location-dot text-danger' : 'fa-clock text-muted'} me-2"></i>${txt}</span>`;
+        li.onclick = () => {
+            sInput.value = txt;
+            sBox.classList.add("d-none");
+            saveSearchHistory(txt);
+            if (typeof applyAllFilters === "function") applyAllFilters();
+        };
+        sList.appendChild(li);
+    });
+}
+
+function saveSearchHistory(term) {
+    if (!term) return;
+    let hist = JSON.parse(localStorage.getItem("hungrymate_search_hist") || "[]");
+    hist = hist.filter(h => h.toLowerCase() !== term.toLowerCase());
+    hist.unshift(term);
+    if (hist.length > 5) hist.pop();
+    localStorage.setItem("hungrymate_search_hist", JSON.stringify(hist));
+}
+
+if (sInput) {
+    sInput.addEventListener("focus", () => {
+        if (!sInput.value.trim()) {
+            const hist = JSON.parse(localStorage.getItem("hungrymate_search_hist") || "[]");
+            renderSearchDropdown(hist, false);
+        }
+    });
+
+    sInput.addEventListener("input", () => {
+        const q = sInput.value.trim();
+        clearTimeout(searchDebounceTimer);
+        if (!q) {
+            const hist = JSON.parse(localStorage.getItem("hungrymate_search_hist") || "[]");
+            renderSearchDropdown(hist, false);
+        } else {
+            searchDebounceTimer = setTimeout(() => {
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=5`)
+                    .then(res => res.json())
+                    .then(data => {
+                        const recs = data.map(d => d.display_name.split(',').slice(0, 3).join(','));
+                        if (recs.length > 0) renderSearchDropdown(recs, true);
+                    })
+                    .catch(() => {});
+            }, 300);
+        }
+    });
+}
+
+if (sClear) {
+    sClear.addEventListener("click", () => {
+        localStorage.removeItem("hungrymate_search_hist");
+        sBox.classList.add("d-none");
+    });
+}
+
+document.addEventListener("click", (e) => {
+    if (!sBox.contains(e.target) && e.target !== sInput) {
+        sBox.classList.add("d-none");
+    }
+});
 </script>

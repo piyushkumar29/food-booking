@@ -15,7 +15,7 @@ const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const User = require("./models/user.js");
 
-// All 4 Real OAuth Strategies
+// OAuth Strategies
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const GitHubStrategy = require("passport-github2").Strategy;
 const LinkedInStrategy = require("passport-linkedin-oauth2").Strategy;
@@ -59,7 +59,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
 
-// Owner Role Credentials
+// Permanent Owner Authorization
 const OWNER_EMAIL = "piyushkumarg292007@gmail.com";
 const OWNER_USERNAMES = ["piyush", "piyush kumar", "piyushkumar"];
 
@@ -69,7 +69,6 @@ function checkIsOwner(email, username) {
     return false;
 }
 
-// Universal Social Login Handler
 async function handleSocialUser(profile, done) {
     try {
         const email = profile.emails && profile.emails[0] ? profile.emails[0].value.toLowerCase().trim() : "";
@@ -101,7 +100,7 @@ async function handleSocialUser(profile, done) {
     }
 }
 
-// 1. Google OAuth
+// 1. Google
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     passport.use(new GoogleStrategy({
         clientID: process.env.GOOGLE_CLIENT_ID,
@@ -110,7 +109,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     }, (token, refresh, profile, done) => handleSocialUser(profile, done)));
 }
 
-// 2. GitHub OAuth
+// 2. GitHub
 if (process.env.GITHUB_CLIENT_ID && !process.env.GITHUB_CLIENT_ID.includes("your_")) {
     passport.use(new GitHubStrategy({
         clientID: process.env.GITHUB_CLIENT_ID,
@@ -120,7 +119,7 @@ if (process.env.GITHUB_CLIENT_ID && !process.env.GITHUB_CLIENT_ID.includes("your
     }, (token, refresh, profile, done) => handleSocialUser(profile, done)));
 }
 
-// 3. LinkedIn OAuth
+// 3. LinkedIn
 if (process.env.LINKEDIN_CLIENT_ID && !process.env.LINKEDIN_CLIENT_ID.includes("your_")) {
     passport.use(new LinkedInStrategy({
         clientID: process.env.LINKEDIN_CLIENT_ID,
@@ -130,7 +129,7 @@ if (process.env.LINKEDIN_CLIENT_ID && !process.env.LINKEDIN_CLIENT_ID.includes("
     }, (token, refresh, profile, done) => handleSocialUser(profile, done)));
 }
 
-// 4. Microsoft OAuth
+// 4. Microsoft
 if (process.env.MICROSOFT_CLIENT_ID && !process.env.MICROSOFT_CLIENT_ID.includes("your_")) {
     passport.use(new MicrosoftStrategy({
         clientID: process.env.MICROSOFT_CLIENT_ID,
@@ -186,7 +185,7 @@ app.post("/user/update-avatar", async (req, res) => {
     res.redirect("/listings");
 });
 
-// Real OAuth Routes
+// OAuth Routes
 app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"], prompt: "select_account" }));
 app.get("/auth/google/callback", passport.authenticate("google", { failureRedirect: "/login", failureFlash: true }), (req, res) => {
     req.flash("success", `Welcome ${req.user.username}!`);
@@ -211,23 +210,55 @@ app.get("/auth/microsoft/callback", passport.authenticate("microsoft", { failure
     res.redirect("/listings");
 });
 
-// Dedicated Food Cart, Offers & Live Tracking Pages
+// Pages
 app.get("/cart", (req, res) => res.render("listings/cart.ejs"));
 app.get("/offers", (req, res) => res.render("listings/offers.ejs"));
 app.get("/orders/track", (req, res) => res.render("listings/track.ejs"));
 
-// QR Phone Confirmation Route
-app.get("/orders/qr-confirm", (req, res) => {
+// QR Phone Sync Memory Store
+const verifiedQrTokens = new Set();
+
+app.get("/orders/qr-mobile-confirm", (req, res) => {
+    const { token, amount } = req.query;
+    res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Confirm Hungrymate Order</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        </head>
+        <body class="bg-light d-flex align-items-center justify-content-center" style="min-height: 100vh; padding: 1rem;">
+            <div class="card p-4 text-center shadow-lg border-0 rounded-4" style="max-width: 400px; width: 100%;">
+                <h3 class="fw-bold text-danger mb-2">Hungrymate</h3>
+                <p class="text-muted small">Instant Phone Payment Authorization</p>
+                <div class="display-6 fw-bold my-3 text-dark">&#8377;${amount || 0}</div>
+                <form method="POST" action="/orders/api/confirm-qr-token">
+                    <input type="hidden" name="token" value="${token}">
+                    <button class="btn btn-success btn-lg w-100 rounded-pill fw-bold shadow py-2">Confirm & Place Order</button>
+                </form>
+            </div>
+        </body>
+        </html>
+    `);
+});
+
+app.post("/orders/api/confirm-qr-token", (req, res) => {
+    const { token } = req.body;
+    if (token) verifiedQrTokens.add(token);
     res.send(`
         <div style="font-family:sans-serif; text-align:center; padding:3rem;">
             <h2 style="color:#16a34a;">Order Confirmed!</h2>
-            <p>Your payment of <strong>&#8377;${req.query.amount || 0}</strong> was verified.</p>
-            <p>You can return to your computer screen or refresh to live track your order.</p>
+            <p>Your desktop browser will now automatically redirect to the Live Delivery Partner tracking page.</p>
         </div>
     `);
 });
 
-// Main Route Bindings
+app.get("/orders/api/check-qr-status", (req, res) => {
+    const { token } = req.query;
+    res.json({ confirmed: verifiedQrTokens.has(token) });
+});
+
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
 app.use("/", userRouter);

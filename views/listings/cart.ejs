@@ -1,46 +1,53 @@
 <% layout("/layouts/boilerplate") %>
 
+<!-- Confetti & Sound Libraries for Order Celebrations -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
 <style>
-    .cart-container-box {
-        max-width: 980px;
-        margin: 2rem auto 4rem auto;
-    }
+    .cart-container-box { max-width: 980px; margin: 2rem auto 4rem auto; }
     .cart-card-item {
-        background: #ffffff;
-        border: 1.5px solid #e2e8f0;
-        border-radius: 16px;
-        padding: 1rem;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
+        background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px;
+        padding: 1rem; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between;
     }
     .order-summary-card {
-        background: #ffffff;
-        border: 1.5px solid #e2e8f0;
-        border-radius: 20px;
-        padding: 1.5rem;
-        box-shadow: 0 10px 25px rgba(15,23,42,0.06);
+        background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 20px;
+        padding: 1.5rem; box-shadow: 0 10px 25px rgba(15,23,42,0.06);
     }
     .qr-box-wrap {
-        background: #f8fafc;
-        border: 2px dashed #cbd5e1;
-        border-radius: 16px;
-        padding: 1.5rem;
-        text-align: center;
+        background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 16px; padding: 1.5rem; text-align: center;
     }
     body.dark-mode .cart-card-item, body.dark-mode .order-summary-card {
-        background: #0f172a !important;
-        border-color: #1e293b !important;
-        color: #f8fafc !important;
+        background: #0f172a !important; border-color: #1e293b !important; color: #f8fafc !important;
     }
-    body.dark-mode .qr-box-wrap {
-        background: #1e293b !important;
-        border-color: #334155 !important;
+    body.dark-mode .qr-box-wrap { background: #1e293b !important; border-color: #334155 !important; }
+
+    /* Success Tick Overlay Modal */
+    #orderSuccessModal {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.75); display: flex; align-items: center; justify-content: center;
+        z-index: 9999;
     }
+    .success-card-content {
+        background: #ffffff; border-radius: 26px; padding: 2.5rem; text-align: center; max-width: 420px; width: 90%;
+        animation: popUp 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes popUp { 0% { transform: scale(0.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 </style>
 
-<div class="cart-container-box">
+<!-- Order Success Animation Modal -->
+<div id="orderSuccessModal" class="d-none">
+    <div class="success-card-content shadow-lg">
+        <div class="mb-3">
+            <i class="fa-solid fa-circle-check text-success" style="font-size: 4.8rem;"></i>
+        </div>
+        <h3 class="fw-bold text-dark mb-1">Hurray! Order Confirmed</h3>
+        <p class="text-muted small">Payment verified & kitchen has started preparing your hot meal.</p>
+        <div class="spinner-border text-danger spinner-border-sm mt-2" role="status"></div>
+        <div class="small text-muted mt-2">Redirecting to live bike route...</div>
+    </div>
+</div>
+
+<div class="cart-container-box" id="cartContentWrap" data-userlogged="<%= currUser ? 'true' : 'false' %>">
     <h3 class="fw-bold mb-3"><i class="fa-solid fa-bag-shopping text-danger me-2"></i>Your Food Cart</h3>
 
     <div class="row">
@@ -53,20 +60,23 @@
                 <a href="/listings" class="btn btn-outline-danger rounded-pill px-4 mt-2">Explore Menu</a>
             </div>
 
-            <!-- Delivery Address Details Form -->
-            <div class="order-summary-card mt-3">
+            <!-- Delivery Address Form with Worldwide Live Autocomplete -->
+            <div class="order-summary-card mt-3 position-relative">
                 <h5 class="fw-bold mb-3 text-primary"><i class="fa-solid fa-location-dot me-2"></i>Delivery Address & Contact</h5>
                 <div class="mb-2">
                     <label class="form-label small fw-semibold">Recipient Full Name</label>
-                    <input type="text" id="custName" class="form-control" placeholder="Piyush Kumar" required>
+                    <input type="text" id="custName" class="form-control" value="<%= currUser ? currUser.username : '' %>" placeholder="Piyush Kumar" required>
                 </div>
                 <div class="mb-2">
                     <label class="form-label small fw-semibold">Contact Phone (10 digits)</label>
-                    <input type="tel" id="custPhone" class="form-control" placeholder="9876543210" required>
+                    <input type="tel" id="custPhone" class="form-control" placeholder="9876543210" maxlength="10" required>
                 </div>
-                <div class="mb-2">
+                <div class="mb-2 position-relative">
                     <label class="form-label small fw-semibold">Complete Street Address / Landmark</label>
-                    <textarea id="custAddress" class="form-control" rows="2" placeholder="Flat 4B, Sector V, Salt Lake, Kolkata" required></textarea>
+                    <textarea id="custAddress" class="form-control" rows="2" placeholder="Start typing: e.g. Opposite JIS College, Kalyani..." autocomplete="off" required></textarea>
+                    
+                    <!-- Worldwide Auto Suggestions Dropdown -->
+                    <ul id="addressSuggestionsBox" class="list-group position-absolute w-100 shadow-lg d-none" style="z-index: 1050; max-height: 180px; overflow-y: auto;"></ul>
                 </div>
             </div>
         </div>
@@ -76,7 +86,6 @@
             <div class="order-summary-card">
                 <h5 class="fw-bold mb-3 border-bottom pb-2">Bill Summary</h5>
                 
-                <!-- Coupon Apply Section -->
                 <div class="input-group mb-3">
                     <input type="text" id="couponInput" class="form-control text-uppercase" placeholder="Enter Coupon Code">
                     <button class="btn btn-dark fw-bold px-3" onclick="applyCouponCode()">Apply</button>
@@ -113,7 +122,7 @@
                 <h6 class="fw-bold mb-2">Select Payment Method</h6>
                 <div class="accordion mb-3" id="paymentOptions">
                     
-                    <!-- Dynamic Phone QR Scan -->
+                    <!-- Dynamic Phone QR Scan with Real Auto Sync -->
                     <div class="accordion-item">
                         <h2 class="accordion-header">
                             <button class="accordion-button fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#payQR" onclick="generateDynamicOrderQR()">
@@ -122,18 +131,18 @@
                         </h2>
                         <div id="payQR" class="accordion-collapse collapse show" data-bs-parent="#paymentOptions">
                             <div class="accordion-body qr-box-wrap">
-                                <p class="small text-muted mb-2">Scan with Phone Camera / Any UPI App to open the confirmation order link:</p>
+                                <p class="small text-muted mb-2">Scan from Phone Camera to authorize payment:</p>
                                 <div id="qrCodeContainer" class="d-flex justify-content-center my-2"></div>
-                                <span class="badge bg-success mt-2">Scan & Confirm to Book</span>
+                                <span class="badge bg-warning text-dark mt-2" id="qrWaitingBadge"><i class="fa-solid fa-spinner fa-spin me-1"></i> Waiting for phone scan & confirm...</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- UPI ID (GPay, PhonePe, Paytm) -->
+                    <!-- UPI ID (GPay / PhonePe / Paytm) -->
                     <div class="accordion-item">
                         <h2 class="accordion-header">
                             <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#payUPI">
-                                <i class="fa-brands fa-google-pay text-danger fs-4 me-2"></i> UPI ID (GPay / PhonePe / Paytm)
+                                <i class="fa-brands fa-google-pay text-danger fs-4 me-2"></i> UPI (GPay / PhonePe / Paytm)
                             </button>
                         </h2>
                         <div id="payUPI" class="accordion-collapse collapse" data-bs-parent="#paymentOptions">
@@ -153,17 +162,18 @@
                         </h2>
                         <div id="payCard" class="accordion-collapse collapse" data-bs-parent="#paymentOptions">
                             <div class="accordion-body">
-                                <input type="text" id="cardNumber" class="form-control mb-2" placeholder="16 Digit Card Number" maxlength="19">
-                                <div class="row g-2">
-                                    <div class="col-6"><input type="text" id="cardExpiry" class="form-control" placeholder="MM/YY"></div>
+                                <input type="text" id="cardNumber" class="form-control mb-2" placeholder="16 Digit Card Number" maxlength="16">
+                                <div class="row g-2 mb-2">
+                                    <div class="col-6"><input type="text" id="cardExpiry" class="form-control" placeholder="MM/YY" maxlength="5"></div>
                                     <div class="col-6"><input type="password" id="cardCvv" class="form-control" placeholder="CVV" maxlength="3"></div>
                                 </div>
+                                <button class="btn btn-outline-dark btn-sm w-100 fw-bold" onclick="verifyAndPayCard()">Verify Card & Pay</button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <button class="btn btn-danger w-100 py-2 fw-bold rounded-pill shadow" onclick="confirmAndPlaceOrder('DIRECT')">Confirm & Place Order</button>
+                <button class="btn btn-danger w-100 py-2 fw-bold rounded-pill shadow" onclick="validateAndPlaceDirectOrder()">Confirm & Place Order</button>
             </div>
         </div>
     </div>
@@ -172,6 +182,12 @@
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 <script>
     let discount = 0;
+    let activeQrToken = "";
+    let qrPollInterval = null;
+
+    function checkUserLoggedIn() {
+        return document.getElementById("cartContentWrap").getAttribute("data-userlogged") === "true";
+    }
 
     function renderCartItems() {
         const cart = JSON.parse(localStorage.getItem("hungrymate_cart") || "[]");
@@ -266,50 +282,136 @@
     function generateDynamicOrderQR() {
         const qrContainer = document.getElementById("qrCodeContainer");
         const total = document.getElementById("finalTotalAmount").innerText;
-        const uniqueToken = "HM_" + Date.now();
-        const orderUrl = `${window.location.origin}/orders/qr-confirm?token=${uniqueToken}&amount=${total}`;
+        activeQrToken = "HM_" + Date.now();
+        
+        // Local network accessible link
+        const orderUrl = `${window.location.protocol}//${window.location.hostname}:${window.location.port}/orders/qr-mobile-confirm?token=${activeQrToken}&amount=${total}`;
         
         qrContainer.innerHTML = "";
         QRCode.toCanvas(orderUrl, { width: 170, margin: 1 }, function (error, canvas) {
             if (!error) qrContainer.appendChild(canvas);
         });
+
+        if (qrPollInterval) clearInterval(qrPollInterval);
+        qrPollInterval = setInterval(async () => {
+            try {
+                const res = await fetch(`/orders/api/check-qr-status?token=${activeQrToken}`);
+                const data = await res.json();
+                if (data.confirmed) {
+                    clearInterval(qrPollInterval);
+                    triggerCelebrationAndRedirect("QR_SCAN_MOBILE");
+                }
+            } catch(e) {}
+        }, 1800);
     }
 
     function verifyAndPayUPI() {
         const upi = document.getElementById("upiIdInput").value.trim();
-        if (upi.includes("@")) {
-            alert(`UPI ID ${upi} Verified! Confirming payment...`);
-            confirmAndPlaceOrder("UPI");
+        if (upi.includes("@") && upi.length > 5) {
+            triggerCelebrationAndRedirect("UPI");
         } else {
-            alert("Please enter a valid UPI ID (e.g. name@okhdfcbank)!");
+            alert("Invalid UPI ID! Please enter valid format like yourname@okhdfcbank or 9876543210@ybl");
         }
     }
 
-    function confirmAndPlaceOrder(method) {
+    function verifyAndPayCard() {
+        const num = document.getElementById("cardNumber").value.trim();
+        const exp = document.getElementById("cardExpiry").value.trim();
+        const cvv = document.getElementById("cardCvv").value.trim();
+
+        if (num.length === 16 && exp.includes("/") && cvv.length === 3) {
+            triggerCelebrationAndRedirect("CARD");
+        } else {
+            alert("Please provide valid Card credentials (16 Digit Card, MM/YY, and 3 Digit CVV)!");
+        }
+    }
+
+    function validateAndPlaceDirectOrder() {
+        triggerCelebrationAndRedirect("DIRECT_CHECKOUT");
+    }
+
+    function triggerCelebrationAndRedirect(method) {
+        if (!checkUserLoggedIn()) {
+            alert("Please Sign up or Log in first before booking food items!");
+            window.location.href = "/login";
+            return;
+        }
+
         const name = document.getElementById("custName").value.trim();
         const phone = document.getElementById("custPhone").value.trim();
         const address = document.getElementById("custAddress").value.trim();
         const cart = JSON.parse(localStorage.getItem("hungrymate_cart") || "[]");
 
         if (cart.length === 0) return alert("Your cart is empty!");
-        if (!name || phone.length < 10 || !address) return alert("Please fill all delivery address details!");
+        if (!name || phone.length < 10 || !address) return alert("Please fill all delivery details!");
 
-        const orderInfo = {
+        const newOrder = {
             orderId: "HM" + Math.floor(100000 + Math.random() * 900000),
             items: cart,
             totalPaid: document.getElementById("finalTotalAmount").innerText,
+            customerName: name,
+            customerPhone: phone,
             address: address,
             placedAt: new Date().toLocaleTimeString(),
-            etaMinutes: 20
+            paymentMode: method,
+            deliveryHero: "Rahul Verma (+91 98765 43210)",
+            deliveredInMinutes: 2
         };
 
-        localStorage.setItem("hungrymate_active_order", JSON.stringify(orderInfo));
+        localStorage.setItem("hungrymate_active_order", JSON.stringify(newOrder));
+
+        let hist = JSON.parse(localStorage.getItem("hungrymate_order_history") || "[]");
+        hist.unshift(newOrder);
+        localStorage.setItem("hungrymate_order_history", JSON.stringify(hist));
+
         localStorage.removeItem("hungrymate_cart");
         if (typeof refreshNavCartBadge === "function") refreshNavCartBadge();
 
-        alert("Order Booked Successfully! Redirecting to live track your delivery partner...");
-        window.location.href = "/orders/track";
+        // Trigger Confetti Party Celebration
+        confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
+        document.getElementById("orderSuccessModal").classList.remove("d-none");
+
+        setTimeout(() => {
+            window.location.href = "/orders/track";
+        }, 2200);
     }
+
+    // Worldwide Live Address Suggestions
+    const addrInput = document.getElementById("custAddress");
+    const addrBox = document.getElementById("addressSuggestionsBox");
+    let addrDebounce = null;
+
+    addrInput.addEventListener("input", () => {
+        const query = addrInput.value.trim();
+        clearTimeout(addrDebounce);
+        addrBox.innerHTML = "";
+        if (!query) {
+            addrBox.classList.add("d-none");
+            return;
+        }
+
+        addrDebounce = setTimeout(() => {
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        addrBox.classList.remove("d-none");
+                        data.forEach(item => {
+                            const li = document.createElement("li");
+                            li.className = "list-group-item list-group-item-action small py-2";
+                            li.style.cursor = "pointer";
+                            li.innerHTML = `<i class="fa-solid fa-location-dot text-danger me-2"></i>${item.display_name}`;
+                            li.onclick = () => {
+                                addrInput.value = item.display_name;
+                                addrBox.classList.add("d-none");
+                            };
+                            addrBox.appendChild(li);
+                        });
+                    }
+                })
+                .catch(() => {});
+        }, 300);
+    });
 
     document.addEventListener("DOMContentLoaded", () => {
         renderCartItems();
