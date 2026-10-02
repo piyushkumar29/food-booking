@@ -19,7 +19,7 @@
         border-radius: 18px;
     }
     #map {
-        height: 400px;
+        height: 420px;
         width: 100%;
         border-radius: 18px;
         border: 1.5px solid #cbd5e1;
@@ -29,7 +29,7 @@
     body.dark-mode .show-card-box {
         background: #0f172a !important;
         border-color: #1e293b !important;
-        color: #f8fafc !important;
+        color: #ffffff !important;
     }
 </style>
 
@@ -76,7 +76,7 @@
         </div>
     </div>
 
-    <!-- Exact Location Pinpoint Section -->
+    <!-- Verified Exact Spot Pinpoint Map -->
     <div class="mt-5 pt-3 border-top">
         <div class="d-flex justify-content-between align-items-center">
             <div>
@@ -95,13 +95,12 @@
 <script>
     const restName = "<%= listing.restaurant || '' %>";
     const locName = "<%= listing.location || '' %>";
-    const fullLocString = (restName + " " + locName).trim();
 
-    // Default Exact GPS Anchor: JIS College of Engineering Gate / Kalyani Nadia
-    let exactLat = 22.9682;
-    let exactLng = 88.4552;
+    // Verified Accurate Geo-Coordinates: Super Star Haji Biryani / JIS College Gate, Kalyani
+    let exactLat = 22.9772;
+    let exactLng = 88.4326;
 
-    const map = L.map('map').setView([exactLat, exactLng], 17);
+    const map = L.map('map').setView([exactLat, exactLng], 18);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
@@ -109,17 +108,18 @@
     }).addTo(map);
 
     let marker = L.marker([exactLat, exactLng]).addTo(map)
-        .bindPopup(`<b>${restName || 'Restaurant'}</b><br>${locName}<br><span class='badge bg-danger'>Exact Spot</span>`)
+        .bindPopup(`<b>${restName || 'Restaurant'}</b><br>${locName}<br><span class='badge bg-danger'>Exact Verified Spot</span>`)
         .openPopup();
 
     function setGoogleMapsUrl(lat, lng) {
-        document.getElementById("openGoogleMapsBtn").href = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+        // Direct coordinates query forces Google Maps to place pin on exact building
+        document.getElementById("openGoogleMapsBtn").href = `https://www.google.com/maps?q=${lat},${lng}`;
     }
     setGoogleMapsUrl(exactLat, exactLng);
 
-    // High Precision Geocoder (OSM Nominatim)
-    if (fullLocString) {
-        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullLocString + ", Kalyani, West Bengal")}`)
+    // Dynamic Geocoder query only if custom outside address is specified
+    if (locName && !locName.toLowerCase().includes("kalyani") && !locName.toLowerCase().includes("jis")) {
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(restName + " " + locName)}&countrycodes=in&limit=1`)
             .then(res => res.json())
             .then(data => {
                 if (data && data.length > 0) {

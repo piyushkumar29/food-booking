@@ -1,6 +1,6 @@
 <% layout("/layouts/boilerplate") %>
 
-<!-- Confetti & HTML2PDF CDN -->
+<!-- Confetti & PDF Libraries -->
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
@@ -8,34 +8,40 @@
     .track-card-box {
         background: #ffffff; border-radius: 24px; padding: 2.2rem;
         border: 1.5px solid #e2e8f0; box-shadow: 0 16px 36px rgba(15,23,42,0.08);
-        max-width: 920px; margin: 2rem auto 4rem auto;
+        max-width: 940px; margin: 2rem auto 4rem auto;
     }
     .delivery-partner-badge {
         background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 16px;
         padding: 1rem 1.4rem; display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;
     }
     .curved-track-container {
-        position: relative; width: 100%; height: 200px; margin: 2rem 0;
+        position: relative; width: 100%; height: 260px; margin: 1.5rem 0;
     }
     #deliveryBikeElement {
         position: absolute; font-size: 2.4rem; color: #f59e0b;
         filter: drop-shadow(0 4px 12px rgba(0,0,0,0.35));
         transform: translate(-50%, -50%); transition: transform 0.05s linear;
+        z-index: 10;
     }
     body.dark-mode .track-card-box {
-        background: #0f172a !important; border-color: #1e293b !important; color: #f8fafc !important;
+        background: #0f172a !important; border-color: #1e293b !important; color: #ffffff !important;
     }
     body.dark-mode .delivery-partner-badge {
         background: #1e293b !important; border-color: #334155 !important; color: #ffffff !important;
     }
-
-    /* Celebration Completed Banner */
-    #deliveryCompletedBanner {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        color: #ffffff; border-radius: 18px; padding: 1.5rem; text-align: center; margin-bottom: 2rem;
+    body.dark-mode #trackDestAddress, 
+    body.dark-mode #trackOrderTime,
+    body.dark-mode .track-station-label {
+        color: #ffffff !important;
     }
 
-    /* Hidden Printable Invoice Template */
+    /* Celebration Banner */
+    #deliveryCompletedBanner {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: #ffffff; border-radius: 20px; padding: 1.8rem; text-align: center; margin-bottom: 2rem;
+    }
+
+    /* Printable Standard Invoice Template */
     #invoicePrintSection {
         background: #ffffff; color: #000000; padding: 2.5rem; border-radius: 12px; font-family: 'Plus Jakarta Sans', sans-serif;
     }
@@ -43,19 +49,19 @@
 
 <div class="track-card-box">
     
-    <!-- Congratulations Celebration Notification -->
+    <!-- Congratulations Celebration Notification (Delivered State) -->
     <div id="deliveryCompletedBanner" class="d-none shadow-lg">
         <h3 class="fw-bold mb-1"><i class="fa-solid fa-circle-check me-2"></i>Hurray! Food Delivered Successfully</h3>
-        <p class="mb-2">Your delicious order was handed over at your doorstep on time. Enjoy your hot meal!</p>
-        <button class="btn btn-light rounded-pill px-4 fw-bold text-success shadow-sm" onclick="downloadOrderInvoice()">
-            <i class="fa-solid fa-file-invoice-dollar me-2"></i>Download Official Bill Invoice (PDF)
+        <p class="mb-3">Your order was handed over at your doorstep on time. Enjoy your meal!</p>
+        <button class="btn btn-light rounded-pill px-4 py-2 fw-bold text-success shadow" onclick="downloadOrderInvoice()">
+            <i class="fa-solid fa-file-invoice-dollar me-2"></i>Download Official Tax Invoice (PDF)
         </button>
     </div>
 
     <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
         <div>
             <h4 class="fw-bold mb-0" style="color: #fe424d;"><i class="fa-solid fa-motorcycle me-2"></i>Live Order Delivery Tracking</h4>
-            <span class="small text-muted">Order ID: <strong id="trackOrderId">HM-LOADING</strong></span>
+            <span class="small" style="color: #64748b;">Order ID: <strong id="trackOrderId" class="text-warning">HM-LOADING</strong></span>
         </div>
         <div class="text-end">
             <span class="badge bg-warning text-dark px-3 py-2 fs-6 rounded-pill">
@@ -82,29 +88,37 @@
         </div>
     </div>
 
-    <!-- Realistic Ultra-Curved Map Route Track -->
+    <!-- Chowmein / Maggi Multi-Curved Road with 6 Stages -->
     <div class="curved-track-container">
-        <svg viewBox="0 0 900 180" width="100%" height="100%">
-            <!-- Double S-Curved Realistic Route Road -->
-            <path id="routeCurve" d="M 30,140 C 200,20 280,170 450,40 C 620,160 740,20 870,110" fill="none" stroke="#cbd5e1" stroke-width="9" stroke-linecap="round" stroke-dasharray="10,8" />
+        <svg viewBox="0 0 940 240" width="100%" height="100%">
+            <!-- Chowmein / Maggi Sine Wave Wavy Path -->
+            <path id="routeCurve" d="M 40,190 C 130,40 210,240 310,80 C 420,240 500,30 620,180 C 730,240 820,30 900,120" fill="none" stroke="#cbd5e1" stroke-width="10" stroke-linecap="round" stroke-dasharray="10,8" />
+            
+            <!-- Checkpoint Markers on the Curves -->
+            <circle cx="40" cy="190" r="7" fill="#fe424d" />
+            <circle cx="310" cy="80" r="7" fill="#f59e0b" />
+            <circle cx="620" cy="180" r="7" fill="#3b82f6" />
+            <circle cx="900" cy="120" r="7" fill="#10b981" />
         </svg>
         <i class="fa-solid fa-motorcycle" id="deliveryBikeElement"></i>
     </div>
 
-    <div class="d-flex justify-content-between px-3 text-muted fw-bold small">
-        <span class="text-danger"><i class="fa-solid fa-utensils me-1"></i> Haji Biryani Kitchen</span>
-        <span class="text-warning"><i class="fa-solid fa-road me-1"></i> Kalyani S-Road Expressway</span>
-        <span class="text-success"><i class="fa-solid fa-house-chimney me-1"></i> Customer Doorstep</span>
+    <!-- 4 Clear Status Stations along the route -->
+    <div class="row text-center fw-bold small g-2 mb-3">
+        <div class="col-3 text-danger"><i class="fa-solid fa-kitchen-set me-1"></i> 1. Haji Kitchen</div>
+        <div class="col-3 text-warning"><i class="fa-solid fa-bridge me-1"></i> 2. Kalyani Flyover</div>
+        <div class="col-3 text-primary"><i class="fa-solid fa-building-columns me-1"></i> 3. JIS Campus Gate</div>
+        <div class="col-3 text-success"><i class="fa-solid fa-house-chimney me-1"></i> 4. Doorstep</div>
     </div>
 
     <div class="row mt-4 pt-3 border-top g-3">
         <div class="col-md-6">
             <h6 class="fw-bold mb-1 text-primary"><i class="fa-solid fa-location-arrow me-1"></i> Delivering To:</h6>
-            <p id="trackDestAddress" class="small text-muted mb-0">Opposite JIS College, Kalyani</p>
+            <p id="trackDestAddress" class="small mb-0">Opposite JIS College, Kalyani</p>
         </div>
         <div class="col-md-6 text-md-end">
             <h6 class="fw-bold mb-1 text-success"><i class="fa-solid fa-clock me-1"></i> Order Placed Time:</h6>
-            <p id="trackOrderTime" class="small text-muted mb-0">--:--:--</p>
+            <p id="trackOrderTime" class="small mb-0">--:--:--</p>
         </div>
     </div>
 
@@ -112,9 +126,7 @@
     <div class="mt-5 pt-4 border-top">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="fw-bold mb-0"><i class="fa-solid fa-clock-rotate-left text-danger me-2"></i>Your Past Delivery History</h5>
-            <button class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-bold" onclick="downloadOrderInvoice()">
-                <i class="fa-solid fa-receipt me-1"></i> Download Latest Bill
-            </button>
+            <span class="badge bg-secondary" id="invoiceLockedStatusBadge"><i class="fa-solid fa-lock me-1"></i>Invoice Unlocks After Delivery</span>
         </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle">
@@ -155,7 +167,7 @@
             <div class="col-6 text-end">
                 <strong>Delivery Partner:</strong>
                 <p class="small text-muted mb-0">Rahul Verma (+91 98765 43210)</p>
-                <p class="small text-muted mb-0">Kalyani Hub West Bengal</p>
+                <p class="small text-muted mb-0">Kalyani Central Hub, West Bengal</p>
             </div>
         </div>
         <table class="table table-bordered my-3">
@@ -173,6 +185,8 @@
 </div>
 
 <script>
+    let isDeliveredComplete = false;
+
     document.addEventListener("DOMContentLoaded", () => {
         const order = JSON.parse(localStorage.getItem("hungrymate_active_order") || "null");
         const bike = document.getElementById("deliveryBikeElement");
@@ -184,7 +198,7 @@
             document.getElementById("trackDestAddress").innerText = order.address;
             document.getElementById("trackOrderTime").innerText = order.placedAt;
 
-            // 2 Minutes (120 Seconds) Real Duration Animation
+            // 2 Minutes (120 Seconds) Real Duration Simulation
             const TOTAL_DURATION_MS = 120 * 1000;
             const startTime = Date.now();
             const pathLength = path.getTotalLength();
@@ -195,8 +209,8 @@
                 
                 const point = path.getPointAtLength(progress * pathLength);
                 
-                const xPercent = (point.x / 900) * 100;
-                const yPercent = (point.y / 180) * 100;
+                const xPercent = (point.x / 940) * 100;
+                const yPercent = (point.y / 240) * 100;
                 
                 bike.style.left = xPercent + "%";
                 bike.style.top = yPercent + "%";
@@ -209,10 +223,17 @@
                 if (progress >= 1) {
                     etaText.innerText = "Order Delivered!";
                     clearInterval(animInterval);
+                    isDeliveredComplete = true;
 
-                    // Trigger Hurray Celebration Banner & Confetti
+                    // Update order deliver state
+                    order.isDelivered = true;
+                    localStorage.setItem("hungrymate_active_order", JSON.stringify(order));
+
+                    // Show Hurray Completed Banner & Download Invoice Button
                     document.getElementById("deliveryCompletedBanner").classList.remove("d-none");
-                    confetti({ particleCount: 150, spread: 80, origin: { y: 0.5 } });
+                    document.getElementById("invoiceLockedStatusBadge").className = "badge bg-success";
+                    document.getElementById("invoiceLockedStatusBadge").innerHTML = "<i class='fa-solid fa-check me-1'></i>Invoice Ready";
+                    confetti({ particleCount: 160, spread: 85, origin: { y: 0.5 } });
                 }
             }, 50);
         } else {
@@ -234,7 +255,7 @@
                         <td class="text-truncate" style="max-width: 200px;">${h.address}</td>
                         <td>${h.items ? h.items.length : 1} dishes</td>
                         <td><strong class="text-danger">&#8377;${h.totalPaid}</strong></td>
-                        <td><span class="badge bg-success">Delivered in ${h.deliveredInMinutes || 2}m</span></td>
+                        <td><span class="badge bg-success">Delivered</span></td>
                     </tr>
                 `;
             });
@@ -242,6 +263,11 @@
     });
 
     function downloadOrderInvoice() {
+        if (!isDeliveredComplete) {
+            alert("Invoice can only be downloaded once your delivery partner reaches your doorstep!");
+            return;
+        }
+
         const order = JSON.parse(localStorage.getItem("hungrymate_active_order") || "null");
         if (!order) return alert("No order found to generate invoice!");
 

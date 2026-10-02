@@ -6,6 +6,7 @@ const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 const path = require("path");
+const os = require("os");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const ExpressError = require("./utils/ExpressError.js");
@@ -215,6 +216,21 @@ app.get("/cart", (req, res) => res.render("listings/cart.ejs"));
 app.get("/offers", (req, res) => res.render("listings/offers.ejs"));
 app.get("/orders/track", (req, res) => res.render("listings/track.ejs"));
 
+// Fetch Machine Local Network IP (For Cross-Device Phone QR Connection)
+app.get("/api/get-server-ip", (req, res) => {
+    const interfaces = os.networkInterfaces();
+    let localIp = "localhost";
+    for (const name of Object.keys(interfaces)) {
+        for (const iface of interfaces[name]) {
+            if (iface.family === 'IPv4' && !iface.internal) {
+                localIp = iface.address;
+                break;
+            }
+        }
+    }
+    res.json({ ip: localIp });
+});
+
 // QR Phone Sync Memory Store
 const verifiedQrTokens = new Set();
 
@@ -227,15 +243,22 @@ app.get("/orders/qr-mobile-confirm", (req, res) => {
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Confirm Hungrymate Order</title>
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+            <style>
+                body { background-color: #f8fafc; font-family: sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 1rem; }
+                .pay-card { background: #ffffff; border-radius: 24px; padding: 2rem; box-shadow: 0 15px 35px rgba(0,0,0,0.1); max-width: 380px; width: 100%; text-align: center; }
+            </style>
         </head>
-        <body class="bg-light d-flex align-items-center justify-content-center" style="min-height: 100vh; padding: 1rem;">
-            <div class="card p-4 text-center shadow-lg border-0 rounded-4" style="max-width: 400px; width: 100%;">
-                <h3 class="fw-bold text-danger mb-2">Hungrymate</h3>
-                <p class="text-muted small">Instant Phone Payment Authorization</p>
-                <div class="display-6 fw-bold my-3 text-dark">&#8377;${amount || 0}</div>
+        <body>
+            <div class="pay-card">
+                <img src="/mypic.png" style="height: 55px; margin-bottom: 1rem;" />
+                <h4 class="fw-bold text-dark mb-1">Hungrymate Pay</h4>
+                <p class="text-muted small">One-Tap Mobile Payment Authorization</p>
+                <div class="display-5 fw-bold my-3 text-danger">&#8377;${amount || 0}</div>
                 <form method="POST" action="/orders/api/confirm-qr-token">
                     <input type="hidden" name="token" value="${token}">
-                    <button class="btn btn-success btn-lg w-100 rounded-pill fw-bold shadow py-2">Confirm & Place Order</button>
+                    <button class="btn btn-success btn-lg w-100 rounded-pill fw-bold shadow py-3">
+                        ✓ Authorize & Confirm Order
+                    </button>
                 </form>
             </div>
         </body>
@@ -247,10 +270,14 @@ app.post("/orders/api/confirm-qr-token", (req, res) => {
     const { token } = req.body;
     if (token) verifiedQrTokens.add(token);
     res.send(`
-        <div style="font-family:sans-serif; text-align:center; padding:3rem;">
-            <h2 style="color:#16a34a;">Order Confirmed!</h2>
-            <p>Your desktop browser will now automatically redirect to the Live Delivery Partner tracking page.</p>
-        </div>
+        <!DOCTYPE html>
+        <html>
+        <head><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+        <body style="font-family:sans-serif; text-align:center; padding:3rem; background:#f0fdf4;">
+            <h2 style="color:#16a34a;">Payment Confirmed!</h2>
+            <p>Your desktop browser will now automatically confirm and open the live delivery tracking route.</p>
+        </body>
+        </html>
     `);
 });
 
@@ -269,4 +296,5 @@ app.use((err, req, res, next) => {
     res.status(statusCode).render("error.ejs", { message });
 });
 
-app.listen(3000, () => console.log("server is listening to port 3000"));
+// Bind to 0.0.0.0 so phone on same Wi-Fi can easily access
+app.listen(3000, "0.0.0.0", () => console.log("Server listening on port 3000"));

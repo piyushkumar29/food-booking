@@ -3,7 +3,7 @@
     
     <!-- Left Logo & Navigation Links -->
     <div class="d-flex align-items-center flex-shrink-0 gap-3">
-      <a class="navbar-brand me-2 p-0 d-flex align-items-center" href="/listings">
+      <a class="navbar-brand me-3 p-0 d-flex align-items-center" href="/listings">
         <img src="/mypic.png" alt="Hungrymate Logo" style="height: 52px; width: auto; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.12));" />
       </a>
 
@@ -65,7 +65,7 @@
 
       <% if(!currUser) { %>
         <a class="btn nav-auth-signup-btn rounded-pill px-3 py-1 fw-bold btn-sm" href="/signup">Sign up</a>
-        <a class="btn btn-dark rounded-pill px-3 py-1 fw-bold btn-sm" href="/login">Log in</a>
+        <a class="btn nav-auth-login-btn rounded-pill px-3 py-1 fw-bold btn-sm" href="/login">Log in</a>
       <% } %>
 
       <% if(currUser) { %>
@@ -147,7 +147,7 @@
         text-decoration: none !important;
         background-color: transparent !important;
         border: 1.5px solid transparent !important;
-        transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        transition: all 0.25s ease !important;
     }
     .icon-item { margin-right: 0.5rem; font-size: 1rem; }
     .nav-all-food .icon-item { color: #fe424d; }
@@ -166,28 +166,37 @@
     .nav-auth-signup-btn {
         border: 1.5px solid #212529 !important;
         color: #212529 !important;
+        background: transparent !important;
+    }
+    .nav-auth-login-btn {
+        background: #212529 !important;
+        color: #ffffff !important;
+        border: 1.5px solid #212529 !important;
     }
 
-    /* Pink Theme Capsule on Dark Mode with Black Text */
+    /* Sticker Gradient Pinkish Capsule on Dark Mode with Crisp Black Text */
     body.dark-mode .nav-pill-btn {
-        background-color: #ec4899 !important;
+        background: linear-gradient(135deg, #fe424d 0%, #ec4899 100%) !important;
         color: #000000 !important;
-        border-color: #ec4899 !important;
+        border: none !important;
         box-shadow: 0 4px 14px rgba(236, 72, 153, 0.35) !important;
     }
     body.dark-mode .nav-pill-btn .icon-item {
         color: #000000 !important;
     }
     body.dark-mode .nav-pill-btn:hover {
-        background-color: #f472b6 !important;
-        border-color: #f472b6 !important;
-        color: #000000 !important;
-        transform: translateY(-3px) scale(1.03);
-        box-shadow: 0 8px 22px rgba(236, 72, 153, 0.55) !important;
+        transform: translateY(-3px) scale(1.04) !important;
+        box-shadow: 0 8px 24px rgba(254, 66, 77, 0.55) !important;
+        filter: brightness(1.1);
     }
     body.dark-mode .nav-auth-signup-btn {
         border-color: #ffffff !important;
         color: #ffffff !important;
+    }
+    body.dark-mode .nav-auth-login-btn {
+        background: #ffffff !important;
+        color: #000000 !important;
+        border-color: #ffffff !important;
     }
 
     .profile-avatar-circle {
@@ -200,7 +209,7 @@
         font-size: 0.75rem; font-weight: 600; color: #1e293b;
         max-width: 85px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1;
     }
-    body.dark-mode .profile-username-label { color: #f8fafc !important; }
+    body.dark-mode .profile-username-label { color: #ffffff !important; }
 </style>
 
 <script>
@@ -234,7 +243,7 @@ function refreshNavCartBadge() {
 document.addEventListener("DOMContentLoaded", refreshNavCartBadge);
 window.addEventListener("storage", refreshNavCartBadge);
 
-// Smart Live Worldwide Autocomplete & Search Engine
+// Smart Live Worldwide Autocomplete
 const sInput = document.getElementById("foodSearchInput");
 const sBox = document.getElementById("searchHistoryBox");
 const sList = document.getElementById("historyList");
@@ -250,12 +259,12 @@ function renderSearchDropdown(items, isHint) {
         return;
     }
     sBox.classList.remove("d-none");
-    sHeader.innerHTML = isHint ? '<i class="fa-solid fa-earth-americas text-primary me-1"></i> WORLDWIDE MATCHES' : '<i class="fa-solid fa-clock-rotate-left me-1"></i> RECENT SEARCHES';
+    sHeader.innerHTML = isHint ? '<i class="fa-solid fa-earth-americas text-primary me-1"></i> TOP SEARCH MATCHES' : '<i class="fa-solid fa-clock-rotate-left me-1"></i> RECENT SEARCHES';
     sClear.style.display = isHint ? "none" : "inline";
 
     items.forEach(txt => {
         const li = document.createElement("li");
-        li.innerHTML = `<span><i class="fa-solid ${isHint ? 'fa-location-dot text-danger' : 'fa-clock text-muted'} me-2"></i>${txt}</span>`;
+        li.innerHTML = `<span><i class="fa-solid ${isHint ? 'fa-magnifying-glass text-danger' : 'fa-clock text-muted'} me-2"></i>${txt}</span>`;
         li.onclick = () => {
             sInput.value = txt;
             sBox.classList.add("d-none");
@@ -291,14 +300,14 @@ if (sInput) {
             renderSearchDropdown(hist, false);
         } else {
             searchDebounceTimer = setTimeout(() => {
-                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=5`)
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=in&limit=5`)
                     .then(res => res.json())
                     .then(data => {
                         const recs = data.map(d => d.display_name.split(',').slice(0, 3).join(','));
                         if (recs.length > 0) renderSearchDropdown(recs, true);
                     })
                     .catch(() => {});
-            }, 300);
+            }, 250);
         }
     });
 }
