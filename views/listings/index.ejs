@@ -1,7 +1,6 @@
 <% layout("/layouts/boilerplate") %>
 
 <style>
-    /* Top Action Bar */
     .top-action-bar {
         display: flex;
         align-items: center;
@@ -11,7 +10,6 @@
         gap: 1rem;
         box-sizing: border-box;
     }
-
     .filter-wrapper {
         display: flex;
         align-items: center;
@@ -19,23 +17,17 @@
         min-width: 0;
         overflow: hidden;
     }
-
     #filters {
         display: flex;
         flex-wrap: nowrap;
         overflow-x: auto;
         scroll-behavior: smooth;
-        gap: 1.8rem;
+        gap: 1.6rem;
         padding: 0.4rem 0.2rem;
         width: 100%;
-        min-width: 0;
-        -ms-overflow-style: none;
         scrollbar-width: none;
     }
-    #filters::-webkit-scrollbar {
-        display: none;
-    }
-
+    #filters::-webkit-scrollbar { display: none; }
     .filter {
         text-align: center;
         opacity: 0.65;
@@ -48,63 +40,42 @@
         transform: translateY(-2px) scale(1.05);
     }
     .filter div i {
-        font-size: 1.45rem;
+        font-size: 1.4rem;
         margin-bottom: 0.25rem;
         display: inline-block;
     }
     .filter p {
-        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
         font-size: 0.72rem;
         font-weight: 700;
-        letter-spacing: 0.6px;
+        letter-spacing: 0.5px;
         text-transform: uppercase;
         margin: 0;
-        color: #222;
-        white-space: nowrap;
-        user-select: none;
+        color: #0f172a;
     }
-
-    body.dark-mode .filter div i {
-        color: #ffc107 !important;
-    }
-    body.dark-mode .filter p {
-        color: #ffffff !important;
-    }
+    body.dark-mode .filter div i { color: #f59e0b !important; }
+    body.dark-mode .filter p { color: #ffffff !important; }
 
     .scroll-btn {
         background-color: #ffffff;
-        border: 1px solid #ced4da;
+        border: 1px solid #cbd5e1;
         border-radius: 50%;
         width: 34px;
         height: 34px;
-        min-width: 34px;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-        z-index: 5;
         flex-shrink: 0;
     }
     body.dark-mode .scroll-btn {
-        background-color: #222222 !important;
-        border-color: #444444 !important;
-        color: #ffffff !important;
-    }
-    body.dark-mode .scroll-btn i {
+        background-color: #1e293b !important;
+        border-color: #334155 !important;
         color: #ffffff !important;
     }
 
-    /* Toggles */
-    .toggle-group-container {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        flex-shrink: 0;
-    }
     .clickable-toggle-box {
         background-color: #ffffff;
-        border: 1.5px solid #d0d5dd;
+        border: 1.5px solid #cbd5e1;
         border-radius: 30px;
         padding: 0.35rem 0.75rem;
         display: inline-flex;
@@ -112,28 +83,15 @@
         gap: 0.45rem;
         cursor: pointer;
         user-select: none;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
     }
     body.dark-mode .clickable-toggle-box {
-        background-color: #222222 !important;
-        border-color: #444444 !important;
+        background-color: #1e293b !important;
+        border-color: #334155 !important;
         color: #ffffff !important;
     }
-    .clickable-toggle-box .toggle-label {
-        font-size: 0.78rem;
-        font-weight: 700;
-        margin: 0;
-        white-space: nowrap;
-    }
-    .clickable-toggle-box .form-check-input {
-        cursor: pointer;
-        width: 2rem;
-        height: 1.05rem;
-        margin: 0;
-        pointer-events: none;
-    }
+    .toggle-label { font-size: 0.78rem; font-weight: 700; margin: 0; }
 
-    /* PURE 3-COLUMN RESPONSIVE CSS GRID (NO MORE 1-COLUMN OVERFLOW) */
+    /* Responsive Grid */
     .pure-food-grid {
         display: grid !important;
         grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
@@ -142,32 +100,25 @@
         margin-top: 1rem !important;
     }
     @media (max-width: 991px) {
-        .pure-food-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        }
+        .pure-food-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
     }
     @media (max-width: 575px) {
-        .pure-food-grid {
-            grid-template-columns: 1fr !important;
-        }
+        .pure-food-grid { grid-template-columns: 1fr !important; }
     }
 
-    .listing-link {
-        text-decoration: none !important;
-        color: inherit !important;
-        display: block;
-    }
     .listing-card {
         border: none !important;
-        border-radius: 1rem !important;
+        border-radius: 1.1rem !important;
         overflow: hidden !important;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.07) !important;
+        box-shadow: 0 4px 16px rgba(15,23,42,0.06) !important;
         transition: transform 0.25s ease, box-shadow 0.25s ease !important;
         background: #ffffff;
+        display: flex;
+        flex-direction: column;
     }
     .listing-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 8px 24px rgba(0,0,0,0.14) !important;
+        box-shadow: 0 10px 24px rgba(15,23,42,0.14) !important;
     }
     .listing-card img {
         height: 18.5rem !important;
@@ -175,119 +126,93 @@
         object-fit: cover !important;
     }
     body.dark-mode .listing-card {
-        background-color: #1e1e1e !important;
-        color: #ffffff !important;
+        background-color: #1e293b !important;
+        border: 1px solid #334155 !important;
     }
-    body.dark-mode .listing-card b,
-    body.dark-mode .listing-card p {
-        color: #ffffff !important;
-    }
-    body.dark-mode .listing-card small {
-        color: #aaaaaa !important;
+    .offer-tag-badge {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        background: linear-gradient(135deg, #fe424d 0%, #ec4899 100%);
+        color: #ffffff;
+        font-weight: 800;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.25);
     }
 </style>
 
 <div class="top-action-bar">
-    <!-- Filters Carousel -->
     <div class="filter-wrapper">
-        <button class="scroll-btn me-2" id="slideLeft" type="button">
-            <i class="fa-solid fa-chevron-left"></i>
-        </button>
-
+        <button class="scroll-btn me-2" id="slideLeft"><i class="fa-solid fa-chevron-left"></i></button>
         <div id="filters">
-            <div class="filter active-filter" data-category="all">
-                <div><i class="fa-solid fa-utensils"></i></div>
-                <p>All</p>
-            </div>
-            <div class="filter" data-category="trending">
-                <div><i class="fa-solid fa-fire text-warning"></i></div>
-                <p>Trending</p>
-            </div>
-            <div class="filter" data-category="biryani">
-                <div><i class="fa-solid fa-bowl-rice"></i></div>
-                <p>Biryani/Rice</p>
-            </div>
-            <div class="filter" data-category="pizza">
-                <div><i class="fa-solid fa-pizza-slice"></i></div>
-                <p>Pizza/Fast Food</p>
-            </div>
-            <div class="filter" data-category="burger">
-                <div><i class="fa-solid fa-burger"></i></div>
-                <p>Burger</p>
-            </div>
-            <div class="filter" data-category="veg">
-                <div><i class="fa-solid fa-seedling text-success"></i></div>
-                <p>Pure Veg</p>
-            </div>
-            <div class="filter" data-category="non-veg">
-                <div><i class="fa-solid fa-drumstick-bite text-danger"></i></div>
-                <p>Non Veg</p>
-            </div>
-            <div class="filter" data-category="thali">
-                <div><i class="fa-solid fa-plate-wheat"></i></div>
-                <p>Indian Thali</p>
-            </div>
-            <div class="filter" data-category="dessert">
-                <div><i class="fa-solid fa-ice-cream"></i></div>
-                <p>Ice-cream</p>
-            </div>
-            <div class="filter" data-category="bakery">
-                <div><i class="fa-solid fa-cake-candles"></i></div>
-                <p>Cake/Bakery</p>
-            </div>
-            <div class="filter" data-category="beverages">
-                <div><i class="fa-solid fa-mug-hot"></i></div>
-                <p>Chai/Coffee</p>
-            </div>
-            <div class="filter" data-category="drinks">
-                <div><i class="fa-solid fa-wine-glass"></i></div>
-                <p>Cold Drinks</p>
-            </div>
+            <div class="filter active-filter" data-category="all"><div><i class="fa-solid fa-utensils"></i></div><p>All</p></div>
+            <div class="filter" data-category="trending"><div><i class="fa-solid fa-fire text-warning"></i></div><p>Trending</p></div>
+            <div class="filter" data-category="biryani"><div><i class="fa-solid fa-bowl-rice"></i></div><p>Biryani/Rice</p></div>
+            <div class="filter" data-category="pizza"><div><i class="fa-solid fa-pizza-slice"></i></div><p>Pizza/Fast Food</p></div>
+            <div class="filter" data-category="burger"><div><i class="fa-solid fa-burger"></i></div><p>Burger</p></div>
+            <div class="filter" data-category="veg"><div><i class="fa-solid fa-seedling text-success"></i></div><p>Pure Veg</p></div>
+            <div class="filter" data-category="non-veg"><div><i class="fa-solid fa-drumstick-bite text-danger"></i></div><p>Non Veg</p></div>
+            <div class="filter" data-category="thali"><div><i class="fa-solid fa-plate-wheat"></i></div><p>Indian Thali</p></div>
+            <div class="filter" data-category="dessert"><div><i class="fa-solid fa-ice-cream"></i></div><p>Ice-cream</p></div>
+            <div class="filter" data-category="bakery"><div><i class="fa-solid fa-cake-candles"></i></div><p>Cake/Bakery</p></div>
         </div>
-
-        <button class="scroll-btn ms-2" id="slideRight" type="button">
-            <i class="fa-solid fa-chevron-right"></i>
-        </button>
+        <button class="scroll-btn ms-2" id="slideRight"><i class="fa-solid fa-chevron-right"></i></button>
     </div>
 
-    <!-- Toggles -->
-    <div class="toggle-group-container">
+    <div class="d-flex align-items-center gap-2">
         <div class="clickable-toggle-box" id="vegPill">
-            <span class="toggle-label">🟢 Veg</span>
-            <input class="form-check-input" type="checkbox" id="onlyVegToggle" role="switch">
+            <span class="toggle-label">&#x1F7E2; Veg</span>
+            <input class="form-check-input mt-0" type="checkbox" id="onlyVegToggle" role="switch">
         </div>
-
         <div class="clickable-toggle-box" id="darkPill">
             <span class="toggle-label" id="darkLabel"><i class="fa-solid fa-moon"></i> Dark</span>
-            <input class="form-check-input" type="checkbox" id="darkModeToggle" role="switch">
+            <input class="form-check-input mt-0" type="checkbox" id="darkModeToggle" role="switch">
         </div>
     </div>
 </div>
 
-<!-- 3-Column Solid CSS Grid -->
 <div class="pure-food-grid" id="listingsContainer">
     <% for(let listing of allListings) { %>
-        <div class="food-card-box" 
+        <div class="food-card-box"
              data-title="<%= (listing.title || '').toLowerCase() %>"
              data-restaurant="<%= (listing.restaurant || '').toLowerCase() %>"
              data-location="<%= (listing.location || '').toLowerCase() %>"
              data-category="<%= (listing.category || '').toLowerCase() %>"
              data-isveg="<%= String(listing.isVeg) %>">
-            <a href="/listings/<%= listing._id %>" class="listing-link">
-                <div class="card listing-card shadow-sm h-100">
-                    <img src="<%= listing.image.url %>" class="card-img-top" alt="listing_image">
-                    <div class="card-body py-3 px-3">
+            
+            <div class="card listing-card shadow-sm h-100 position-relative">
+                <span class="offer-tag-badge">FLAT 60% OFF</span>
+                <a href="/listings/<%= listing._id %>" class="text-decoration-none text-dark">
+                    <img src="<%= listing.image.url %>" class="card-img-top" alt="<%= listing.title %>">
+                </a>
+                
+                <div class="card-body p-3 d-flex flex-column justify-content-between">
+                    <div>
                         <div class="d-flex justify-content-between align-items-center mb-1">
-                            <h6 class="card-title fw-bold mb-0 text-truncate fs-5" style="max-width: 85%;"><%= listing.title %></h6>
-                            <span><%= (listing.isVeg === true || String(listing.isVeg) === 'true') ? "🟢" : "🔴" %></span>
+                            <h6 class="card-title fw-bold text-truncate mb-0" style="max-width: 80%;">
+                                <%= listing.title %>
+                            </h6>
+                            <span><%= (listing.isVeg === true || String(listing.isVeg) === 'true') ? '🟢' : '🔴' %></span>
                         </div>
-                        <small class="text-muted d-block mb-1 text-truncate" style="font-size: 0.88rem;">
-                            <%= listing.restaurant ? listing.restaurant + ' • ' : '' %><%= listing.location || '' %>
+                        <small class="text-muted d-block text-truncate mb-2">
+                            <%= listing.restaurant ? listing.restaurant + ' &bull; ' : '' %><%= listing.location %>
                         </small>
-                        <p class="card-text fw-bold mb-0 fs-5">&#8377; <%= listing.price ? listing.price.toLocaleString("en-IN") : 0 %></p>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
+                        <span class="fw-bold fs-5 text-dark" style="color: #fe424d !important;">
+                            &#8377;<%= listing.price ? listing.price.toLocaleString("en-IN") : '0' %>
+                        </span>
+                        
+                        <!-- Real Dynamic Add To Cart Trigger -->
+                        <button class="btn btn-sm btn-outline-danger fw-bold rounded-pill px-3" onclick="addToCart('<%= listing._id %>', '<%= listing.title.replace(/'/g, '') %>', <%= listing.price %>, '<%= listing.image.url %>')">
+                            <i class="fa-solid fa-plus me-1"></i> Add to Cart
+                        </button>
                     </div>
                 </div>
-            </a>
+            </div>
         </div>
     <% } %>
 </div>
@@ -295,16 +220,30 @@
 <div id="noMatchMessage" class="text-center py-5 d-none">
     <i class="fa-solid fa-bowl-food fs-1 text-muted mb-3"></i>
     <h4 class="text-secondary">No food items found!</h4>
-    <p class="text-muted">Try searching for another dish or turn off 'Only Veg'.</p>
+    <p class="text-muted">Try searching with another keyword or toggle veg options.</p>
 </div>
 
 <script>
-    // 1. Carousel Scroll
+    // Cart Addition Logic
+    function addToCart(id, title, price, image) {
+        let cart = JSON.parse(localStorage.getItem("hungrymate_cart") || "[]");
+        const existing = cart.find(item => item.id === id);
+        if (existing) {
+            existing.quantity += 1;
+        } else {
+            cart.push({ id, title, price, image, quantity: 1 });
+        }
+        localStorage.setItem("hungrymate_cart", JSON.stringify(cart));
+        if (typeof refreshNavCartBadge === "function") refreshNavCartBadge();
+        alert(`${title} added to your cart!`);
+    }
+
+    // Carousel Scroll Buttons
     const filterBox = document.getElementById("filters");
     document.getElementById("slideLeft").addEventListener("click", () => filterBox.scrollBy({ left: -260, behavior: "smooth" }));
     document.getElementById("slideRight").addEventListener("click", () => filterBox.scrollBy({ left: 260, behavior: "smooth" }));
 
-    // 2. Veg Toggle Pill
+    // Veg Toggle Filter
     const vegPill = document.getElementById("vegPill");
     const onlyVegToggle = document.getElementById("onlyVegToggle");
     vegPill.addEventListener("click", () => {
@@ -312,7 +251,7 @@
         applyAllFilters();
     });
 
-    // 3. Dark Mode Persistence
+    // Dark Mode Toggle
     const darkPill = document.getElementById("darkPill");
     const darkModeToggle = document.getElementById("darkModeToggle");
     const darkLabel = document.getElementById("darkLabel");
@@ -321,25 +260,19 @@
         if (isDark) {
             document.body.classList.add("dark-mode");
             darkModeToggle.checked = true;
-            darkLabel.innerHTML = `<i class="fa-solid fa-sun text-warning"></i> Light`;
+            darkLabel.innerHTML = '<i class="fa-solid fa-sun text-warning"></i> Light';
             localStorage.setItem("hungrymate_dark_theme", "active");
         } else {
             document.body.classList.remove("dark-mode");
             darkModeToggle.checked = false;
-            darkLabel.innerHTML = `<i class="fa-solid fa-moon"></i> Dark`;
+            darkLabel.innerHTML = '<i class="fa-solid fa-moon"></i> Dark';
             localStorage.setItem("hungrymate_dark_theme", "inactive");
         }
     }
+    if (localStorage.getItem("hungrymate_dark_theme") === "active") updateDarkMode(true);
+    darkPill.addEventListener("click", () => updateDarkMode(!darkModeToggle.checked));
 
-    if (localStorage.getItem("hungrymate_dark_theme") === "active") {
-        updateDarkMode(true);
-    }
-
-    darkPill.addEventListener("click", () => {
-        updateDarkMode(!darkModeToggle.checked);
-    });
-
-    // 4. Combined Filter Engine (Search + Categories + Veg)
+    // Combined Real-Time Filter & Search Engine
     const foodCards = document.querySelectorAll(".food-card-box");
     const searchInput = document.getElementById("foodSearchInput");
     const categoryFilters = document.querySelectorAll(".filter");
@@ -356,23 +289,16 @@
             const restaurant = card.getAttribute("data-restaurant") || "";
             const location = card.getAttribute("data-location") || "";
             const category = card.getAttribute("data-category") || "";
-            const isVeg = (card.getAttribute("data-isveg") === "true");
+            const isVeg = card.getAttribute("data-isveg") === "true";
 
             const matchSearch = !query || title.includes(query) || restaurant.includes(query) || location.includes(query) || category.includes(query);
-            const matchVeg = !vegOnly || isVeg === true;
+            const matchVeg = !vegOnly || isVeg;
+            let matchCat = (activeCat === "all" || activeCat === "trending");
+            if (activeCat === "veg") matchCat = isVeg;
+            else if (activeCat === "non-veg") matchCat = !isVeg;
+            else if (activeCat !== "all" && activeCat !== "trending") matchCat = category.includes(activeCat) || title.includes(activeCat);
 
-            let matchCategory = true;
-            if (activeCat !== "all" && activeCat !== "trending") {
-                if (activeCat === "veg") {
-                    matchCategory = (isVeg === true);
-                } else if (activeCat === "non-veg") {
-                    matchCategory = (isVeg === false);
-                } else {
-                    matchCategory = category.includes(activeCat) || title.includes(activeCat);
-                }
-            }
-
-            if (matchSearch && matchVeg && matchCategory) {
+            if (matchSearch && matchVeg && matchCat) {
                 card.style.display = "block";
                 visibleCount++;
             } else {
@@ -380,12 +306,11 @@
             }
         });
 
-        if (visibleCount === 0) {
-            noMatchMsg.classList.remove("d-none");
-        } else {
-            noMatchMsg.classList.add("d-none");
-        }
+        if (visibleCount === 0) noMatchMsg.classList.remove("d-none");
+        else noMatchMsg.classList.add("d-none");
     }
+
+    if (searchInput) searchInput.addEventListener("input", applyAllFilters);
 
     categoryFilters.forEach(f => {
         f.addEventListener("click", () => {
@@ -395,78 +320,4 @@
             applyAllFilters();
         });
     });
-
-    // 5. Search History Management
-    const searchHistoryBox = document.getElementById("searchHistoryBox");
-    const historyList = document.getElementById("historyList");
-    const clearHistoryBtn = document.getElementById("clearHistoryBtn");
-
-    function fetchHistory() {
-        return JSON.parse(localStorage.getItem("hungrymate_search_history") || "[]");
-    }
-
-    function addHistory(term) {
-        if (!term) return;
-        let history = fetchHistory().filter(i => i.toLowerCase() !== term.toLowerCase());
-        history.unshift(term);
-        if (history.length > 5) history.pop();
-        localStorage.setItem("hungrymate_search_history", JSON.stringify(history));
-        renderHistory();
-    }
-
-    function renderHistory() {
-        if (!historyList) return;
-        const history = fetchHistory();
-        historyList.innerHTML = "";
-        if (history.length === 0) {
-            historyList.innerHTML = `<li class="px-3 py-2 text-muted" style="font-size: 0.8rem;">No recent searches</li>`;
-            return;
-        }
-        history.forEach(item => {
-            const li = document.createElement("li");
-            li.className = "history-entry-item";
-            li.innerHTML = `<span><i class="fa-solid fa-clock-rotate-left text-muted me-2"></i>${item}</span><i class="fa-solid fa-arrow-turn-down text-muted" style="font-size:0.75rem; transform: rotate(90deg);"></i>`;
-            li.addEventListener("click", () => {
-                searchInput.value = item;
-                searchHistoryBox.classList.add("d-none");
-                applyAllFilters();
-            });
-            historyList.appendChild(li);
-        });
-    }
-
-    if (searchInput) {
-        searchInput.addEventListener("focus", () => {
-            renderHistory();
-            searchHistoryBox.classList.remove("d-none");
-        });
-
-        searchInput.addEventListener("input", () => {
-            applyAllFilters();
-        });
-
-        document.getElementById("foodSearchForm").addEventListener("submit", (e) => {
-            e.preventDefault();
-            const val = searchInput.value.trim();
-            if (val) {
-                addHistory(val);
-                searchHistoryBox.classList.add("d-none");
-            }
-            applyAllFilters();
-        });
-
-        document.addEventListener("click", (e) => {
-            if (!e.target.closest("#foodSearchForm") && !e.target.closest("#searchHistoryBox")) {
-                searchHistoryBox.classList.add("d-none");
-            }
-        });
-    }
-
-    if (clearHistoryBtn) {
-        clearHistoryBtn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            localStorage.removeItem("hungrymate_search_history");
-            renderHistory();
-        });
-    }
 </script>

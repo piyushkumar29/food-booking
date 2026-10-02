@@ -1,0 +1,318 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+    .cart-container-box {
+        max-width: 980px;
+        margin: 2rem auto 4rem auto;
+    }
+    .cart-card-item {
+        background: #ffffff;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .order-summary-card {
+        background: #ffffff;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 25px rgba(15,23,42,0.06);
+    }
+    .qr-box-wrap {
+        background: #f8fafc;
+        border: 2px dashed #cbd5e1;
+        border-radius: 16px;
+        padding: 1.5rem;
+        text-align: center;
+    }
+    body.dark-mode .cart-card-item, body.dark-mode .order-summary-card {
+        background: #0f172a !important;
+        border-color: #1e293b !important;
+        color: #f8fafc !important;
+    }
+    body.dark-mode .qr-box-wrap {
+        background: #1e293b !important;
+        border-color: #334155 !important;
+    }
+</style>
+
+<div class="cart-container-box">
+    <h3 class="fw-bold mb-3"><i class="fa-solid fa-bag-shopping text-danger me-2"></i>Your Food Cart</h3>
+
+    <div class="row">
+        <!-- Cart Items List -->
+        <div class="col-lg-7">
+            <div id="cartItemsContainer"></div>
+            <div id="emptyCartMessage" class="text-center py-5 d-none">
+                <i class="fa-solid fa-cart-arrow-down fs-1 text-muted mb-3"></i>
+                <h5 class="text-secondary">Your cart is empty!</h5>
+                <a href="/listings" class="btn btn-outline-danger rounded-pill px-4 mt-2">Explore Menu</a>
+            </div>
+
+            <!-- Delivery Address Details Form -->
+            <div class="order-summary-card mt-3">
+                <h5 class="fw-bold mb-3 text-primary"><i class="fa-solid fa-location-dot me-2"></i>Delivery Address & Contact</h5>
+                <div class="mb-2">
+                    <label class="form-label small fw-semibold">Recipient Full Name</label>
+                    <input type="text" id="custName" class="form-control" placeholder="Piyush Kumar" required>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small fw-semibold">Contact Phone (10 digits)</label>
+                    <input type="tel" id="custPhone" class="form-control" placeholder="9876543210" required>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small fw-semibold">Complete Street Address / Landmark</label>
+                    <textarea id="custAddress" class="form-control" rows="2" placeholder="Flat 4B, Sector V, Salt Lake, Kolkata" required></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Price Breakdown & Payments -->
+        <div class="col-lg-5">
+            <div class="order-summary-card">
+                <h5 class="fw-bold mb-3 border-bottom pb-2">Bill Summary</h5>
+                
+                <!-- Coupon Apply Section -->
+                <div class="input-group mb-3">
+                    <input type="text" id="couponInput" class="form-control text-uppercase" placeholder="Enter Coupon Code">
+                    <button class="btn btn-dark fw-bold px-3" onclick="applyCouponCode()">Apply</button>
+                </div>
+                <div id="couponStatus" class="small mb-3"></div>
+
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Items Subtotal:</span>
+                    <span class="fw-semibold">&#8377;<span id="subtotalAmount">0</span></span>
+                </div>
+                <div class="d-flex justify-content-between mb-2 text-muted small">
+                    <span>Platform Fee:</span>
+                    <span>&#8377;9</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2 text-muted small">
+                    <span>Handling Fee:</span>
+                    <span class="text-success fw-bold">FREE (&#8377;0)</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2 text-muted small">
+                    <span>Delivery Fee:</span>
+                    <span class="text-success fw-bold">FREE (&#8377;0)</span>
+                </div>
+                <div class="d-flex justify-content-between mb-3 text-success fw-semibold" id="discountRow" style="display: none !important;">
+                    <span>Coupon Discount:</span>
+                    <span>-&#8377;<span id="discountAmount">0</span></span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between fs-5 fw-bold mb-4">
+                    <span>To Pay:</span>
+                    <span class="text-danger">&#8377;<span id="finalTotalAmount">0</span></span>
+                </div>
+
+                <!-- Payment Methods Accordion -->
+                <h6 class="fw-bold mb-2">Select Payment Method</h6>
+                <div class="accordion mb-3" id="paymentOptions">
+                    
+                    <!-- Dynamic Phone QR Scan -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#payQR" onclick="generateDynamicOrderQR()">
+                                <i class="fa-solid fa-qrcode text-primary me-2"></i> Dynamic Phone QR Code
+                            </button>
+                        </h2>
+                        <div id="payQR" class="accordion-collapse collapse show" data-bs-parent="#paymentOptions">
+                            <div class="accordion-body qr-box-wrap">
+                                <p class="small text-muted mb-2">Scan with Phone Camera / Any UPI App to open the confirmation order link:</p>
+                                <div id="qrCodeContainer" class="d-flex justify-content-center my-2"></div>
+                                <span class="badge bg-success mt-2">Scan & Confirm to Book</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- UPI ID (GPay, PhonePe, Paytm) -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#payUPI">
+                                <i class="fa-brands fa-google-pay text-danger fs-4 me-2"></i> UPI ID (GPay / PhonePe / Paytm)
+                            </button>
+                        </h2>
+                        <div id="payUPI" class="accordion-collapse collapse" data-bs-parent="#paymentOptions">
+                            <div class="accordion-body">
+                                <input type="text" id="upiIdInput" class="form-control mb-2" placeholder="username@okhdfcbank / number@ybl">
+                                <button class="btn btn-outline-dark btn-sm w-100 fw-bold" onclick="verifyAndPayUPI()">Verify & Pay</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cards -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#payCard">
+                                <i class="fa-solid fa-credit-card text-success me-2"></i> Debit / Credit Card
+                            </button>
+                        </h2>
+                        <div id="payCard" class="accordion-collapse collapse" data-bs-parent="#paymentOptions">
+                            <div class="accordion-body">
+                                <input type="text" id="cardNumber" class="form-control mb-2" placeholder="16 Digit Card Number" maxlength="19">
+                                <div class="row g-2">
+                                    <div class="col-6"><input type="text" id="cardExpiry" class="form-control" placeholder="MM/YY"></div>
+                                    <div class="col-6"><input type="password" id="cardCvv" class="form-control" placeholder="CVV" maxlength="3"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn btn-danger w-100 py-2 fw-bold rounded-pill shadow" onclick="confirmAndPlaceOrder('DIRECT')">Confirm & Place Order</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script>
+    let discount = 0;
+
+    function renderCartItems() {
+        const cart = JSON.parse(localStorage.getItem("hungrymate_cart") || "[]");
+        const container = document.getElementById("cartItemsContainer");
+        const emptyMsg = document.getElementById("emptyCartMessage");
+        container.innerHTML = "";
+
+        if (cart.length === 0) {
+            emptyMsg.classList.remove("d-none");
+            updatePriceBreakdown(0);
+            return;
+        }
+        emptyMsg.classList.add("d-none");
+
+        let subtotal = 0;
+        cart.forEach((item, index) => {
+            subtotal += item.price * item.quantity;
+            container.innerHTML += `
+                <div class="cart-card-item">
+                    <div class="d-flex align-items-center gap-3">
+                        <img src="${item.image}" alt="${item.title}" style="width: 65px; height: 65px; object-fit: cover; border-radius: 12px;">
+                        <div>
+                            <h6 class="fw-bold mb-0">${item.title}</h6>
+                            <span class="text-danger fw-semibold">&#8377;${item.price}</span>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-sm btn-outline-secondary px-2" onclick="modifyQuantity(${index}, -1)">-</button>
+                        <span class="fw-bold px-1">${item.quantity}</span>
+                        <button class="btn btn-sm btn-outline-secondary px-2" onclick="modifyQuantity(${index}, 1)">+</button>
+                        <button class="btn btn-sm btn-link text-danger ms-2" onclick="removeCartItem(${index})"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </div>
+            `;
+        });
+        updatePriceBreakdown(subtotal);
+    }
+
+    function modifyQuantity(index, change) {
+        let cart = JSON.parse(localStorage.getItem("hungrymate_cart") || "[]");
+        cart[index].quantity += change;
+        if (cart[index].quantity <= 0) cart.splice(index, 1);
+        localStorage.setItem("hungrymate_cart", JSON.stringify(cart));
+        renderCartItems();
+        if (typeof refreshNavCartBadge === "function") refreshNavCartBadge();
+    }
+
+    function removeCartItem(index) {
+        let cart = JSON.parse(localStorage.getItem("hungrymate_cart") || "[]");
+        cart.splice(index, 1);
+        localStorage.setItem("hungrymate_cart", JSON.stringify(cart));
+        renderCartItems();
+        if (typeof refreshNavCartBadge === "function") refreshNavCartBadge();
+    }
+
+    function updatePriceBreakdown(subtotal) {
+        document.getElementById("subtotalAmount").innerText = subtotal;
+        const platformFee = subtotal > 0 ? 9 : 0;
+        let finalAmount = subtotal + platformFee - discount;
+        if (finalAmount < 0) finalAmount = 0;
+        document.getElementById("finalTotalAmount").innerText = finalAmount;
+    }
+
+    function applyCouponCode() {
+        const code = document.getElementById("couponInput").value.trim().toUpperCase();
+        const subtotal = parseInt(document.getElementById("subtotalAmount").innerText) || 0;
+        const statusBox = document.getElementById("couponStatus");
+        const discRow = document.getElementById("discountRow");
+
+        if (code === "1STUSERFREE") {
+            discount = subtotal + 9;
+            statusBox.innerHTML = '<span class="text-success fw-bold">1STUSERFREE Applied! Order is 100% Free!</span>';
+        } else if (code === "FLAT60%" || code === "FLAT60") {
+            discount = Math.round(subtotal * 0.6);
+            statusBox.innerHTML = `<span class="text-success fw-bold">FLAT60% Applied! Saved &#8377;${discount}</span>`;
+        } else if (code === "HUNGRY20") {
+            discount = Math.round(subtotal * 0.2);
+            statusBox.innerHTML = `<span class="text-success fw-bold">HUNGRY20 Applied! Saved &#8377;${discount}</span>`;
+        } else {
+            statusBox.innerHTML = '<span class="text-danger fw-bold">Invalid Coupon Code!</span>';
+            discount = 0;
+        }
+
+        if (discount > 0) {
+            discRow.style.setProperty("display", "flex", "important");
+            document.getElementById("discountAmount").innerText = discount;
+        }
+        updatePriceBreakdown(subtotal);
+        generateDynamicOrderQR();
+    }
+
+    function generateDynamicOrderQR() {
+        const qrContainer = document.getElementById("qrCodeContainer");
+        const total = document.getElementById("finalTotalAmount").innerText;
+        const uniqueToken = "HM_" + Date.now();
+        const orderUrl = `${window.location.origin}/orders/qr-confirm?token=${uniqueToken}&amount=${total}`;
+        
+        qrContainer.innerHTML = "";
+        QRCode.toCanvas(orderUrl, { width: 170, margin: 1 }, function (error, canvas) {
+            if (!error) qrContainer.appendChild(canvas);
+        });
+    }
+
+    function verifyAndPayUPI() {
+        const upi = document.getElementById("upiIdInput").value.trim();
+        if (upi.includes("@")) {
+            alert(`UPI ID ${upi} Verified! Confirming payment...`);
+            confirmAndPlaceOrder("UPI");
+        } else {
+            alert("Please enter a valid UPI ID (e.g. name@okhdfcbank)!");
+        }
+    }
+
+    function confirmAndPlaceOrder(method) {
+        const name = document.getElementById("custName").value.trim();
+        const phone = document.getElementById("custPhone").value.trim();
+        const address = document.getElementById("custAddress").value.trim();
+        const cart = JSON.parse(localStorage.getItem("hungrymate_cart") || "[]");
+
+        if (cart.length === 0) return alert("Your cart is empty!");
+        if (!name || phone.length < 10 || !address) return alert("Please fill all delivery address details!");
+
+        const orderInfo = {
+            orderId: "HM" + Math.floor(100000 + Math.random() * 900000),
+            items: cart,
+            totalPaid: document.getElementById("finalTotalAmount").innerText,
+            address: address,
+            placedAt: new Date().toLocaleTimeString(),
+            etaMinutes: 20
+        };
+
+        localStorage.setItem("hungrymate_active_order", JSON.stringify(orderInfo));
+        localStorage.removeItem("hungrymate_cart");
+        if (typeof refreshNavCartBadge === "function") refreshNavCartBadge();
+
+        alert("Order Booked Successfully! Redirecting to live track your delivery partner...");
+        window.location.href = "/orders/track";
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        renderCartItems();
+        generateDynamicOrderQR();
+    });
+</script>

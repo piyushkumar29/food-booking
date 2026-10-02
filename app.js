@@ -13,8 +13,13 @@ const session = require("express-session");
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
-const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const User = require("./models/user.js");
+
+// All 4 Real OAuth Strategies
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const GitHubStrategy = require("passport-github2").Strategy;
+const LinkedInStrategy = require("passport-linkedin-oauth2").Strategy;
+const MicrosoftStrategy = require("passport-microsoft").Strategy;
 
 const listingRouter = require("./routes/listing.js");
 const reviewRouter = require("./routes/review.js");
@@ -22,11 +27,7 @@ const userRouter = require("./routes/user.js");
 
 const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
 
-main().then(() => {
-    console.log("connected to DB");
-}).catch(err => {
-    console.log(err);
-});
+main().then(() => console.log("connected to DB")).catch(err => console.log(err));
 
 async function main(){
     await mongoose.connect(MONGO_URL);
@@ -34,7 +35,6 @@ async function main(){
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
-// Photo payload (base64) ke liye body limit 10MB rakhi gayi hai
 app.use(express.urlencoded({extended: true, limit: '10mb'}));
 app.use(express.json({limit: '10mb'}));
 app.use(methodOverride("_method"));
@@ -59,11 +59,9 @@ app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
 
-// ========================================================
-// 👑 PERMANENT REAL OWNER CREDENTIALS CHECKER
-// ========================================================
+// Owner Role Credentials
 const OWNER_EMAIL = "piyushkumarg292007@gmail.com";
-const OWNER_USERNAMES = ["piyush", "piyush kumar", "Piyush Kumar"];
+const OWNER_USERNAMES = ["piyush", "piyush kumar", "piyushkumar"];
 
 function checkIsOwner(email, username) {
     if (email && email.toLowerCase().trim() === OWNER_EMAIL.toLowerCase()) return true;
@@ -71,56 +69,82 @@ function checkIsOwner(email, username) {
     return false;
 }
 
-// Google OAuth Strategy
-passport.use(new GoogleStrategy({
-    clientID: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "http://localhost:3000/auth/google/callback"
-  },
-  async function(accessToken, refreshToken, profile, done) {
+// Universal Social Login Handler
+async function handleSocialUser(profile, done) {
     try {
         const email = profile.emails && profile.emails[0] ? profile.emails[0].value.toLowerCase().trim() : "";
         const photo = profile.photos && profile.photos[0] ? profile.photos[0].value : "";
-        const displayName = profile.displayName || "piyush kumar";
+        const displayName = profile.displayName || profile.username || "foodie";
 
         let user = await User.findOne({
-            $or: [{ googleId: profile.id }, ...(email ? [{ email: email }] : [])]
+            $or: [{ googleId: profile.id }, { githubId: profile.id }, ...(email ? [{ email: email }] : [])]
         });
 
         const isOwnerAccount = checkIsOwner(email, displayName);
 
         if (!user) {
             user = new User({
-                username: displayName,
-                email: email || `${displayName.replace(/\s+/g, '')}@google.auth`,
+                username: displayName.replace(/\s+/g, '').toLowerCase() + Math.floor(10 + Math.random() * 90),
+                email: email || `${displayName.replace(/\s+/g, '')}@social.auth`,
                 avatar: photo,
-                googleId: profile.id,
                 isOwner: isOwnerAccount
             });
-            await User.register(user, `GoogleOAuth#${profile.id}`);
+            await User.register(user, `OAuthPass#${profile.id}`);
         } else {
-            // Agar user ne pehle se custom avatar ya name edit kiya hai to wo preserve rahega
-            if (isOwnerAccount && !user.isOwner) {
-                user.isOwner = true;
-            }
+            if (isOwnerAccount && !user.isOwner) user.isOwner = true;
             if (!user.avatar && photo) user.avatar = photo;
-            if (!user.googleId) user.googleId = profile.id;
             await user.save();
         }
         return done(null, user);
     } catch (err) {
         return done(err, null);
     }
-  }
-));
+}
+
+// 1. Google OAuth
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    passport.use(new GoogleStrategy({
+        clientID: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        callbackURL: "http://localhost:3000/auth/google/callback"
+    }, (token, refresh, profile, done) => handleSocialUser(profile, done)));
+}
+
+// 2. GitHub OAuth
+if (process.env.GITHUB_CLIENT_ID && !process.env.GITHUB_CLIENT_ID.includes("your_")) {
+    passport.use(new GitHubStrategy({
+        clientID: process.env.GITHUB_CLIENT_ID,
+        clientSecret: process.env.GITHUB_CLIENT_SECRET,
+        callbackURL: "http://localhost:3000/auth/github/callback",
+        scope: ['user:email']
+    }, (token, refresh, profile, done) => handleSocialUser(profile, done)));
+}
+
+// 3. LinkedIn OAuth
+if (process.env.LINKEDIN_CLIENT_ID && !process.env.LINKEDIN_CLIENT_ID.includes("your_")) {
+    passport.use(new LinkedInStrategy({
+        clientID: process.env.LINKEDIN_CLIENT_ID,
+        clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
+        callbackURL: "http://localhost:3000/auth/linkedin/callback",
+        scope: ['r_emailaddress', 'r_liteprofile']
+    }, (token, refresh, profile, done) => handleSocialUser(profile, done)));
+}
+
+// 4. Microsoft OAuth
+if (process.env.MICROSOFT_CLIENT_ID && !process.env.MICROSOFT_CLIENT_ID.includes("your_")) {
+    passport.use(new MicrosoftStrategy({
+        clientID: process.env.MICROSOFT_CLIENT_ID,
+        clientSecret: process.env.MICROSOFT_CLIENT_SECRET,
+        callbackURL: "http://localhost:3000/auth/microsoft/callback",
+        scope: ['user.read']
+    }, (token, refresh, profile, done) => handleSocialUser(profile, done)));
+}
 
 passport.serializeUser((user, done) => done(null, user.id));
 passport.deserializeUser(async (id, done) => {
     try {
         const user = await User.findById(id);
-        if (user && checkIsOwner(user.email, user.username)) {
-            user.isOwner = true;
-        }
+        if (user && checkIsOwner(user.email, user.username)) user.isOwner = true;
         done(null, user);
     } catch (err) {
         done(err, null);
@@ -128,11 +152,9 @@ passport.deserializeUser(async (id, done) => {
 });
 
 app.use(async (req, res, next) => {
-    if (req.user) {
-        if (checkIsOwner(req.user.email, req.user.username) && !req.user.isOwner) {
-            req.user.isOwner = true;
-            await User.findByIdAndUpdate(req.user._id, { isOwner: true });
-        }
+    if (req.user && checkIsOwner(req.user.email, req.user.username) && !req.user.isOwner) {
+        req.user.isOwner = true;
+        await User.findByIdAndUpdate(req.user._id, { isOwner: true });
     }
     res.locals.success = req.flash("success");
     res.locals.error = req.flash("error");
@@ -140,101 +162,80 @@ app.use(async (req, res, next) => {
     next();
 });
 
-// ========================================================
-// 💾 PERMANENT DATABASE PROFILE UPDATES (NAME & AVATAR)
-// ========================================================
-// 1. Permanent Name Edit Route
+// Profile Updates
 app.post("/user/update-name", async (req, res) => {
-    try {
-        if (!req.isAuthenticated()) {
-            req.flash("error", "Please login first!");
-            return res.redirect("/login");
-        }
-        const { newName } = req.body;
-        if (!newName || newName.trim().length === 0) {
-            req.flash("error", "Name cannot be empty!");
-            return res.redirect("/listings");
-        }
-
-        const trimmedName = newName.trim();
+    if (!req.isAuthenticated()) return res.redirect("/login");
+    const { newName } = req.body;
+    if (newName && newName.trim()) {
         const user = await User.findById(req.user._id);
-
-        user.username = trimmedName;
-        if (checkIsOwner(user.email, trimmedName)) {
-            user.isOwner = true;
-        }
-
+        user.username = newName.trim();
+        if (checkIsOwner(user.email, user.username)) user.isOwner = true;
         await user.save();
-        req.flash("success", "Profile name updated permanently!");
-        res.redirect("/listings");
-    } catch (err) {
-        req.flash("error", "Could not update name: " + err.message);
-        res.redirect("/listings");
+        req.flash("success", "Profile name updated!");
     }
+    res.redirect("/listings");
 });
 
-// 2. Permanent Photo Edit Route (Stored in MongoDB)
 app.post("/user/update-avatar", async (req, res) => {
-    try {
-        if (!req.isAuthenticated()) {
-            req.flash("error", "Please login first!");
-            return res.redirect("/login");
-        }
-        const { avatarData } = req.body;
-        if (!avatarData) {
-            req.flash("error", "No image provided!");
-            return res.redirect("/listings");
-        }
-
+    if (!req.isAuthenticated()) return res.redirect("/login");
+    const { avatarData } = req.body;
+    if (avatarData) {
         await User.findByIdAndUpdate(req.user._id, { avatar: avatarData });
-        req.flash("success", "Profile photo updated permanently!");
-        res.redirect("/listings");
-    } catch (err) {
-        req.flash("error", "Failed to upload photo: " + err.message);
-        res.redirect("/listings");
+        req.flash("success", "Profile photo updated!");
     }
+    res.redirect("/listings");
 });
 
-// Real Google OAuth Routes
-app.get("/auth/google", passport.authenticate("google", { 
-    scope: ["profile", "email"],
-    prompt: "select_account"
-}));
-
-app.get("/auth/google/callback", 
-    passport.authenticate("google", { failureRedirect: "/login", failureFlash: true }),
-    (req, res) => {
-        if (req.user.isOwner) {
-            req.flash("success", `Welcome Boss! Owner controls activated.`);
-        } else {
-            req.flash("success", `Welcome ${req.user.username}! Logged in successfully.`);
-        }
-        res.redirect("/listings");
-    }
-);
-
-app.get("/auth/:provider", (req, res) => {
-    const provider = req.params.provider.toUpperCase();
-    req.flash("error", `${provider} keys not configured yet. Please use Google Login!`);
-    res.redirect("/signup");
+// Real OAuth Routes
+app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"], prompt: "select_account" }));
+app.get("/auth/google/callback", passport.authenticate("google", { failureRedirect: "/login", failureFlash: true }), (req, res) => {
+    req.flash("success", `Welcome ${req.user.username}!`);
+    res.redirect("/listings");
 });
 
-// Main App Routes
+app.get("/auth/github", passport.authenticate("github", { scope: ['user:email'] }));
+app.get("/auth/github/callback", passport.authenticate("github", { failureRedirect: "/login", failureFlash: true }), (req, res) => {
+    req.flash("success", `Welcome ${req.user.username}!`);
+    res.redirect("/listings");
+});
+
+app.get("/auth/linkedin", passport.authenticate("linkedin"));
+app.get("/auth/linkedin/callback", passport.authenticate("linkedin", { failureRedirect: "/login", failureFlash: true }), (req, res) => {
+    req.flash("success", `Welcome ${req.user.username}!`);
+    res.redirect("/listings");
+});
+
+app.get("/auth/microsoft", passport.authenticate("microsoft"));
+app.get("/auth/microsoft/callback", passport.authenticate("microsoft", { failureRedirect: "/login", failureFlash: true }), (req, res) => {
+    req.flash("success", `Welcome ${req.user.username}!`);
+    res.redirect("/listings");
+});
+
+// Dedicated Food Cart, Offers & Live Tracking Pages
+app.get("/cart", (req, res) => res.render("listings/cart.ejs"));
+app.get("/offers", (req, res) => res.render("listings/offers.ejs"));
+app.get("/orders/track", (req, res) => res.render("listings/track.ejs"));
+
+// QR Phone Confirmation Route
+app.get("/orders/qr-confirm", (req, res) => {
+    res.send(`
+        <div style="font-family:sans-serif; text-align:center; padding:3rem;">
+            <h2 style="color:#16a34a;">Order Confirmed!</h2>
+            <p>Your payment of <strong>&#8377;${req.query.amount || 0}</strong> was verified.</p>
+            <p>You can return to your computer screen or refresh to live track your order.</p>
+        </div>
+    `);
+});
+
+// Main Route Bindings
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
 app.use("/", userRouter);
 
-// 404 Error Handler
-app.use((req, res, next) => {
-    next(new ExpressError(404, "Page not found!"));
-});
-
-// Global Error Handler
+app.use((req, res, next) => next(new ExpressError(404, "Page not found!")));
 app.use((err, req, res, next) => {
     let { statusCode = 500, message = "something went wrong" } = err;
     res.status(statusCode).render("error.ejs", { message });
 });
 
-app.listen(3000, () => {
-    console.log("server is listening to port 3000");
-});
+app.listen(3000, () => console.log("server is listening to port 3000"));

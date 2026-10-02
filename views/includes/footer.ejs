@@ -1,17 +1,35 @@
 <footer>
-    <div class="f-info">
-        <div class="f-info-socials-link">
-            <i class="fa-brands fa-facebook" style="color: rgb(3, 3, 3);"></i>
-            <i class="fa-brands fa-instagram" style="color: rgb(5, 5, 5);"></i>
-            <i class="fa-brands fa-twitter" style="color: rgb(8, 8, 8);"></i>
-            <i class="fa-brands fa-youtube" style="color: rgb(5, 5, 5);"></i>
-            <i class="fa-brands fa-linkedin" style="color: rgb(10, 10, 10);"></i>
+    <div class="f-info py-4 text-center">
+        <!-- Personal Active Profile Links -->
+        <div class="f-info-socials-link d-flex justify-content-center gap-3 fs-5 mb-2">
+            <a href="https://www.linkedin.com/in/piyush-kumar-405073289" target="_blank" rel="noopener noreferrer" title="LinkedIn" style="color: #0a66c2;">
+                <i class="fa-brands fa-linkedin"></i>
+            </a>
+            <a href="https://github.com/Piyushkumar93" target="_blank" rel="noopener noreferrer" title="GitHub" style="color: #0f172a;">
+                <i class="fa-brands fa-github"></i>
+            </a>
+            <a href="https://www.youtube.com" target="_blank" rel="noopener noreferrer" title="YouTube" style="color: #ff0000;">
+                <i class="fa-brands fa-youtube"></i>
+            </a>
+            <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" title="Instagram" style="color: #e4405f;">
+                <i class="fa-brands fa-instagram"></i>
+            </a>
         </div>
-        <div class="f-info-brand">&copy; HUNGRYMATE Private Limited</div>
-        <div>Created by Piyush Kumar, CEO of Hungrymate</div>
-        <div class="f-info-links">
-            <a href="/privacy">Privacy</a>
-            <a href="/terms">Terms</a>
+
+        <div class="f-info-brand fw-bold" style="color: #334155;">
+            &copy; <span id="currentYear"></span> HUNGRYMATE Private Limited
+        </div>
+        <div class="small mt-1" style="color: #64748b;">
+            Engineered & Managed by <strong style="color: #fe424d;">Piyush Kumar</strong>, Founder of Hungrymate
+        </div>
+        <div class="f-info-links d-flex justify-content-center gap-3 small mt-2">
+            <a href="/privacy" class="text-decoration-none fw-semibold" style="color: #475569;">Privacy</a>
+            <span>&bull;</span>
+            <a href="/terms" class="text-decoration-none fw-semibold" style="color: #475569;">Terms</a>
         </div>
     </div>
 </footer>
+
+<script>
+    document.getElementById("currentYear").textContent = new Date().getFullYear();
+</script>

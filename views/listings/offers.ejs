@@ -1,0 +1,77 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+    .offers-hero {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        color: #ffffff;
+        border-radius: 24px;
+        padding: 3rem 2rem;
+        text-align: center;
+        margin-top: 1rem;
+        box-shadow: 0 14px 30px rgba(15,23,42,0.18);
+    }
+    .coupon-card {
+        background: #ffffff;
+        border: 2px dashed #f59e0b;
+        border-radius: 18px;
+        padding: 1.5rem;
+        transition: transform 0.2s ease;
+    }
+    .coupon-card:hover {
+        transform: translateY(-4px);
+    }
+    body.dark-mode .coupon-card {
+        background: #0f172a !important;
+        border-color: #ec4899 !important;
+        color: #f8fafc !important;
+    }
+</style>
+
+<div class="container my-3">
+    <div class="offers-hero">
+        <span class="badge bg-danger fs-6 px-3 py-2 mb-3 rounded-pill"><i class="fa-solid fa-bolt me-1"></i> MEGA FOOD FESTIVAL</span>
+        <h1 class="fw-bold display-5" style="color: #f59e0b;">Flat 60% Off on All Orders</h1>
+        <p class="fs-5 text-light opacity-75">Valid for the next 10 Days across all predefined and upcoming dishes!</p>
+        <div class="d-inline-block bg-white text-dark px-4 py-2 rounded-pill fw-bold fs-6">
+            <i class="fa-regular fa-clock text-danger me-2"></i>Offer Expires in: <span id="offerTimer" class="text-danger fw-bold">9 Days 23h 59m</span>
+        </div>
+    </div>
+
+    <h4 class="fw-bold mt-5 mb-4"><i class="fa-solid fa-ticket text-danger me-2"></i>Available Coupon Codes</h4>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="coupon-card">
+                <span class="badge bg-success mb-2">100% OFF</span>
+                <h5 class="fw-bold">1STUSERFREE</h5>
+                <p class="small text-muted mb-3">Order items absolutely free with zero fees for first-time orders.</p>
+                <button class="btn btn-outline-dark btn-sm rounded-pill fw-bold w-100" onclick="copyCoupon('1STUSERFREE')">Copy Code</button>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="coupon-card">
+                <span class="badge bg-danger mb-2">FLAT 60% OFF</span>
+                <h5 class="fw-bold">FLAT60%</h5>
+                <p class="small text-muted mb-3">Get straight 60% instant discount on total food items.</p>
+                <button class="btn btn-outline-dark btn-sm rounded-pill fw-bold w-100" onclick="copyCoupon('FLAT60%')">Copy Code</button>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="coupon-card">
+                <span class="badge bg-warning text-dark mb-2">20% OFF</span>
+                <h5 class="fw-bold">HUNGRY20</h5>
+                <p class="small text-muted mb-3">Save additional 20% on all biryanis, pizzas, and desserts.</p>
+                <button class="btn btn-outline-dark btn-sm rounded-pill fw-bold w-100" onclick="copyCoupon('HUNGRY20')">Copy Code</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function copyCoupon(code) {
+        navigator.clipboard.writeText(code);
+        alert(`Coupon ${code} copied to clipboard! Paste it on the Cart checkout page.`);
+    }
+</script>

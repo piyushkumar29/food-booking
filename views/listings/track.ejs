@@ -1,0 +1,99 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+    .track-card-box {
+        background: #ffffff;
+        border-radius: 24px;
+        padding: 2.2rem;
+        border: 1.5px solid #e2e8f0;
+        box-shadow: 0 16px 36px rgba(15,23,42,0.08);
+        max-width: 860px;
+        margin: 2rem auto 4rem auto;
+    }
+    .track-road {
+        height: 8px;
+        background: #cbd5e1;
+        border-radius: 10px;
+        position: relative;
+        margin: 4rem 1rem 2rem 1rem;
+    }
+    .track-bike-icon {
+        position: absolute;
+        top: -24px;
+        left: 5%;
+        font-size: 2rem;
+        color: #f59e0b;
+        filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+        transition: left 1s linear;
+    }
+    body.dark-mode .track-card-box {
+        background: #0f172a !important;
+        border-color: #1e293b !important;
+        color: #f8fafc !important;
+    }
+</style>
+
+<div class="track-card-box">
+    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+        <div>
+            <h4 class="fw-bold mb-0" style="color: #fe424d;"><i class="fa-solid fa-motorcycle me-2"></i>Live Order Delivery Tracking</h4>
+            <span class="small text-muted">Order ID: <strong id="trackOrderId">HM-FETCHING</strong></span>
+        </div>
+        <div class="text-end">
+            <span class="badge bg-warning text-dark px-3 py-2 fs-6 rounded-pill">Estimated Time: <strong id="etaCounter">18 mins</strong></span>
+        </div>
+    </div>
+
+    <!-- Animated Road & Partner Bike Indicator -->
+    <div class="track-road">
+        <i class="fa-solid fa-motorcycle track-bike-icon" id="deliveryBike"></i>
+    </div>
+
+    <div class="d-flex justify-content-between px-2 text-muted fw-bold small">
+        <span class="text-danger"><i class="fa-solid fa-utensils me-1"></i> Restaurant Kitchen</span>
+        <span class="text-warning"><i class="fa-solid fa-road me-1"></i> In Transit</span>
+        <span class="text-success"><i class="fa-solid fa-house-chimney me-1"></i> Your Doorstep</span>
+    </div>
+
+    <div class="row mt-4 pt-3 border-top g-3">
+        <div class="col-md-6">
+            <h6 class="fw-bold mb-1 text-primary"><i class="fa-solid fa-location-arrow me-1"></i> Delivering To:</h6>
+            <p id="trackDestAddress" class="small text-muted mb-0">Loading customer location...</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <h6 class="fw-bold mb-1 text-success"><i class="fa-solid fa-clock me-1"></i> Real Indian Time Placed:</h6>
+            <p id="trackOrderTime" class="small text-muted mb-0">--:--:--</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const order = JSON.parse(localStorage.getItem("hungrymate_active_order") || "null");
+        const bike = document.getElementById("deliveryBike");
+        const etaText = document.getElementById("etaCounter");
+
+        if (order) {
+            document.getElementById("trackOrderId").innerText = order.orderId;
+            document.getElementById("trackDestAddress").innerText = order.address;
+            document.getElementById("trackOrderTime").innerText = order.placedAt;
+
+            let progress = 10;
+            let eta = 18;
+
+            const interval = setInterval(() => {
+                if (progress < 92) {
+                    progress += 4;
+                    bike.style.left = progress + "%";
+                    if (eta > 2) eta -= 1;
+                    etaText.innerText = eta + " mins";
+                } else {
+                    etaText.innerText = "Arrived at Doorstep!";
+                    clearInterval(interval);
+                }
+            }, 3000);
+        } else {
+            document.getElementById("trackDestAddress").innerText = "No active order placed yet. Please order items from the menu!";
+        }
+    });
+</script>
