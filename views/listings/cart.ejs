@@ -1,11 +1,10 @@
 <% layout("/layouts/boilerplate") %>
 
-<!-- Confetti & QR Libraries -->
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 
 <style>
-    .cart-container-box { max-width: 980px; margin: 2rem auto 4rem auto; }
+    .cart-container-box { max-width: 1040px; margin: 2rem auto 4rem auto; }
     .cart-card-item {
         background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px;
         padding: 1rem; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between;
@@ -14,18 +13,29 @@
         background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 20px;
         padding: 1.5rem; box-shadow: 0 10px 25px rgba(15,23,42,0.06);
     }
-    .qr-box-wrap {
-        background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 16px; padding: 1.5rem; text-align: center;
+    
+    /* Flipkart Style Payment Box */
+    .fk-payment-box {
+        background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 16px; overflow: hidden;
     }
-    body.dark-mode .cart-card-item, body.dark-mode .order-summary-card {
-        background: #0f172a !important; border-color: #1e293b !important; color: #ffffff !important;
+    .fk-pay-row {
+        padding: 1rem 1.2rem; border-bottom: 1px solid #e2e8f0; cursor: pointer; transition: background 0.2s ease;
     }
-    body.dark-mode .qr-box-wrap { background: #1e293b !important; border-color: #334155 !important; }
+    .fk-pay-row:hover { background: #f8fafc; }
+    .fk-pay-row.active { background: #f0fdf4; border-left: 4px solid #16a34a; }
+    
+    body.dark-mode .cart-card-item, 
+    body.dark-mode .order-summary-card,
+    body.dark-mode .fk-payment-box {
+        background: #121212 !important; border-color: #27272a !important; color: #ffffff !important;
+    }
+    body.dark-mode .fk-pay-row { border-bottom-color: #27272a !important; }
+    body.dark-mode .fk-pay-row:hover { background: #1c1c21 !important; }
+    body.dark-mode .fk-pay-row.active { background: #142318 !important; border-left-color: #22c55e !important; }
 
-    /* Success Tick Overlay Modal */
     #orderSuccessModal {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.78); display: flex; align-items: center; justify-content: center;
+        background: rgba(0, 0, 0, 0.85); display: flex; align-items: center; justify-content: center;
         z-index: 9999;
     }
     .success-card-content {
@@ -35,24 +45,23 @@
     @keyframes popUp { 0% { transform: scale(0.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 </style>
 
-<!-- Order Success Animation Modal -->
 <div id="orderSuccessModal" class="d-none">
     <div class="success-card-content shadow-lg">
         <div class="mb-3">
             <i class="fa-solid fa-circle-check text-success" style="font-size: 4.8rem;"></i>
         </div>
         <h3 class="fw-bold text-dark mb-1">Hurray! Order Confirmed</h3>
-        <p class="text-muted small">Phone payment authorized. Kitchen has begun preparation!</p>
+        <p class="text-muted small">Your food is now being prepared in the kitchen!</p>
         <div class="spinner-border text-danger spinner-border-sm mt-2" role="status"></div>
-        <div class="small text-muted mt-2">Redirecting to live tracking...</div>
+        <div class="small text-muted mt-2">Opening Live Delivery Track...</div>
     </div>
 </div>
 
 <div class="cart-container-box" id="cartContentWrap" data-userlogged="<%= currUser ? 'true' : 'false' %>">
-    <h3 class="fw-bold mb-3"><i class="fa-solid fa-bag-shopping text-danger me-2"></i>Your Food Cart</h3>
+    <h3 class="fw-bold mb-3"><i class="fa-solid fa-bag-shopping text-danger me-2"></i>Checkout & Payment</h3>
 
     <div class="row">
-        <!-- Cart Items List -->
+        <!-- Left: Cart Items & Step 1 Delivery Address -->
         <div class="col-lg-7">
             <div id="cartItemsContainer"></div>
             <div id="emptyCartMessage" class="text-center py-5 d-none">
@@ -61,10 +70,10 @@
                 <a href="/listings" class="btn btn-outline-danger rounded-pill px-4 mt-2">Explore Menu</a>
             </div>
 
-            <!-- Step 1: Delivery Address Details Form -->
+            <!-- Step 1: Delivery Address Details -->
             <div class="order-summary-card mt-3 position-relative" id="step1AddressBox">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="fw-bold text-primary m-0"><i class="fa-solid fa-1 me-2 badge bg-primary rounded-circle"></i> Delivery Address & Contact</h5>
+                    <h5 class="fw-bold text-primary m-0"><i class="fa-solid fa-1 me-2 badge bg-primary rounded-circle"></i> Delivery Address & Details</h5>
                     <span class="badge bg-secondary" id="step1StatusBadge">Step 1 of 2</span>
                 </div>
 
@@ -77,23 +86,22 @@
                     <input type="tel" id="custPhone" class="form-control" placeholder="9876543210" maxlength="10" required>
                 </div>
                 <div class="mb-3 position-relative">
-                    <label class="form-label small fw-semibold">Complete Street Address (All India)</label>
-                    <textarea id="custAddress" class="form-control" rows="2" placeholder="Type letters to auto-recommend... e.g. Opposite JIS College, Kalyani..." autocomplete="off" required></textarea>
+                    <label class="form-label small fw-semibold">Delivery Address (Real-time Worldwide Suggestions)</label>
+                    <textarea id="custAddress" class="form-control" rows="2" placeholder="Start typing: e.g. Opposite JIS College, Kalyani..." autocomplete="off" required></textarea>
                     
-                    <!-- All-India Live Auto Suggestions Dropdown -->
-                    <ul id="addressSuggestionsBox" class="list-group position-absolute w-100 shadow-lg d-none" style="z-index: 1050; max-height: 180px; overflow-y: auto;"></ul>
+                    <ul id="addressSuggestionsBox" class="list-group position-absolute w-100 shadow-lg d-none" style="z-index: 1050; max-height: 190px; overflow-y: auto;"></ul>
                 </div>
 
-                <button class="btn btn-primary w-100 py-2 fw-bold rounded-pill" onclick="proceedToPaymentStep()">
+                <button class="btn btn-primary w-100 py-2 fw-bold rounded-pill shadow-sm" onclick="proceedToPaymentStep()">
                     Confirm Address & Proceed to Payment <i class="fa-solid fa-arrow-right ms-1"></i>
                 </button>
             </div>
         </div>
 
-        <!-- Step 2: Bill Summary & Payments -->
+        <!-- Right: Bill Summary & Flipkart-Style Gateways -->
         <div class="col-lg-5">
             <div class="order-summary-card">
-                <h5 class="fw-bold mb-3 border-bottom pb-2">Bill Summary</h5>
+                <h5 class="fw-bold mb-3 border-bottom pb-2">Price Details</h5>
                 
                 <div class="input-group mb-3">
                     <input type="text" id="couponInput" class="form-control text-uppercase" placeholder="Enter Coupon Code">
@@ -102,7 +110,7 @@
                 <div id="couponStatus" class="small mb-3"></div>
 
                 <div class="d-flex justify-content-between mb-2">
-                    <span>Items Subtotal:</span>
+                    <span>Price (<span id="cartCountTotal">0</span> items):</span>
                     <span class="fw-semibold">&#8377;<span id="subtotalAmount">0</span></span>
                 </div>
                 <div class="d-flex justify-content-between mb-2 text-muted small">
@@ -110,83 +118,95 @@
                     <span>&#8377;9</span>
                 </div>
                 <div class="d-flex justify-content-between mb-2 text-muted small">
-                    <span>Handling Fee:</span>
-                    <span class="text-success fw-bold">FREE (&#8377;0)</span>
-                </div>
-                <div class="d-flex justify-content-between mb-2 text-muted small">
-                    <span>Delivery Fee:</span>
-                    <span class="text-success fw-bold">FREE (&#8377;0)</span>
+                    <span>Delivery Charges:</span>
+                    <span class="text-success fw-bold">FREE</span>
                 </div>
                 <div class="d-flex justify-content-between mb-3 text-success fw-semibold" id="discountRow" style="display: none !important;">
-                    <span>Coupon Discount:</span>
+                    <span>Total Discount:</span>
                     <span>-&#8377;<span id="discountAmount">0</span></span>
                 </div>
                 <hr>
                 <div class="d-flex justify-content-between fs-5 fw-bold mb-4">
-                    <span>To Pay:</span>
+                    <span>Total Amount:</span>
                     <span class="text-danger">&#8377;<span id="finalTotalAmount">0</span></span>
                 </div>
 
-                <!-- Payment Options Block (Unlocked only after Address confirmation) -->
-                <div id="paymentMethodsLockWrap" style="opacity: 0.45; pointer-events: none; transition: all 0.3s ease;">
+                <!-- Flipkart Style Payment Options Block -->
+                <div id="paymentMethodsLockWrap" style="opacity: 0.4; pointer-events: none; transition: all 0.3s ease;">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="fw-bold m-0"><i class="fa-solid fa-2 me-1 badge bg-success rounded-circle"></i> Payment Options</h6>
-                        <span class="badge bg-danger" id="payLockBadge"><i class="fa-solid fa-lock me-1"></i>Fill Address First</span>
+                        <h6 class="fw-bold m-0"><i class="fa-solid fa-shield-halved text-success me-1"></i> Select Payment Option</h6>
+                        <span class="badge bg-danger" id="payLockBadge"><i class="fa-solid fa-lock me-1"></i>Locked</span>
                     </div>
 
-                    <div class="accordion mb-3" id="paymentOptions">
-                        <!-- Cross-Device Real Network Mobile QR Scan -->
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#payQR" onclick="generateDynamicOrderQR()">
-                                    <i class="fa-solid fa-qrcode text-primary me-2"></i> Dynamic Phone QR Code
-                                </button>
-                            </h2>
-                            <div id="payQR" class="accordion-collapse collapse show" data-bs-parent="#paymentOptions">
-                                <div class="accordion-body qr-box-wrap">
-                                    <p class="small text-muted mb-2">Scan from any Phone Camera / Scanner App:</p>
-                                    <div id="qrCodeContainer" class="d-flex justify-content-center my-2"></div>
-                                    <span class="badge bg-warning text-dark mt-2" id="qrWaitingBadge"><i class="fa-solid fa-spinner fa-spin me-1"></i> Waiting for phone scan & confirm...</span>
-                                </div>
+                    <div class="fk-payment-box mb-3">
+                        <!-- Option 1: UPI -->
+                        <div class="fk-pay-row active" onclick="switchFkPayTab('upi')">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="fkPayRadio" id="radioUpi" checked>
+                                <label class="form-check-label fw-bold d-flex justify-content-between align-items-center w-100" for="radioUpi">
+                                    <span>UPI (PhonePe / GPay / Paytm)</span>
+                                    <img src="https://img.icons8.com/color/48/000000/google-pay-india.png" style="height: 22px;">
+                                </label>
+                            </div>
+                            <div id="tabBodyUpi" class="mt-2 ps-4">
+                                <input type="text" id="upiIdInput" class="form-control form-control-sm mb-2" placeholder="e.g. name@okhdfcbank or 9876543210@ybl">
+                                <button class="btn btn-warning btn-sm fw-bold w-100" onclick="verifyAndPayUPI()">Pay via UPI</button>
                             </div>
                         </div>
 
-                        <!-- UPI ID (GPay / PhonePe / Paytm) -->
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#payUPI">
-                                    <i class="fa-brands fa-google-pay text-danger fs-4 me-2"></i> UPI (GPay / PhonePe / Paytm)
-                                </button>
-                            </h2>
-                            <div id="payUPI" class="accordion-collapse collapse" data-bs-parent="#paymentOptions">
-                                <div class="accordion-body">
-                                    <input type="text" id="upiIdInput" class="form-control mb-2" placeholder="name@okhdfcbank or 9876543210@ybl">
-                                    <button class="btn btn-outline-dark btn-sm w-100 fw-bold" onclick="verifyAndPayUPI()">Verify & Pay</button>
-                                </div>
+                        <!-- Option 2: Dynamic Phone QR -->
+                        <div class="fk-pay-row" onclick="switchFkPayTab('qr')">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="fkPayRadio" id="radioQr">
+                                <label class="form-check-label fw-bold d-flex justify-content-between align-items-center w-100" for="radioQr">
+                                    <span>QR Code Scan & Pay</span>
+                                    <i class="fa-solid fa-qrcode text-primary fs-5"></i>
+                                </label>
+                            </div>
+                            <div id="tabBodyQr" class="mt-2 ps-4 d-none text-center">
+                                <div id="qrCodeContainer" class="d-flex justify-content-center my-2"></div>
+                                <span class="badge bg-warning text-dark" id="qrWaitingBadge"><i class="fa-solid fa-spinner fa-spin me-1"></i> Scan from phone camera...</span>
                             </div>
                         </div>
 
-                        <!-- Cards -->
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#payCard">
-                                    <i class="fa-solid fa-credit-card text-success me-2"></i> Debit / Credit Card
-                                </button>
-                            </h2>
-                            <div id="payCard" class="accordion-collapse collapse" data-bs-parent="#paymentOptions">
-                                <div class="accordion-body">
-                                    <input type="text" id="cardNumber" class="form-control mb-2" placeholder="16 Digit Card Number" maxlength="16">
-                                    <div class="row g-2 mb-2">
-                                        <div class="col-6"><input type="text" id="cardExpiry" class="form-control" placeholder="MM/YY" maxlength="5"></div>
-                                        <div class="col-6"><input type="password" id="cardCvv" class="form-control" placeholder="CVV" maxlength="3"></div>
-                                    </div>
-                                    <button class="btn btn-outline-dark btn-sm w-100 fw-bold" onclick="verifyAndPayCard()">Verify Card & Pay</button>
+                        <!-- Option 3: Credit / Debit Cards -->
+                        <div class="fk-pay-row" onclick="switchFkPayTab('card')">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="fkPayRadio" id="radioCard">
+                                <label class="form-check-label fw-bold d-flex justify-content-between align-items-center w-100" for="radioCard">
+                                    <span>Credit / Debit / ATM Card</span>
+                                    <i class="fa-solid fa-credit-card text-success fs-5"></i>
+                                </label>
+                            </div>
+                            <div id="tabBodyCard" class="mt-2 ps-4 d-none">
+                                <input type="text" id="cardNumber" class="form-control form-control-sm mb-2" placeholder="16 Digit Card Number" maxlength="16">
+                                <div class="row g-2 mb-2">
+                                    <div class="col-6"><input type="text" id="cardExpiry" class="form-control form-control-sm" placeholder="MM/YY" maxlength="5"></div>
+                                    <div class="col-6"><input type="password" id="cardCvv" class="form-control form-control-sm" placeholder="CVV" maxlength="3"></div>
                                 </div>
+                                <button class="btn btn-warning btn-sm fw-bold w-100" onclick="verifyAndPayCard()">Pay Securely</button>
+                            </div>
+                        </div>
+
+                        <!-- Option 4: Cash on Delivery -->
+                        <div class="fk-pay-row" onclick="switchFkPayTab('cod')">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="fkPayRadio" id="radioCod">
+                                <label class="form-check-label fw-bold d-flex justify-content-between align-items-center w-100" for="radioCod">
+                                    <span>Cash on Delivery (COD)</span>
+                                    <i class="fa-solid fa-hand-holding-dollar text-success fs-5"></i>
+                                </label>
+                            </div>
+                            <div id="tabBodyCod" class="mt-2 ps-4 d-none">
+                                <p class="small text-muted mb-2">Pay cash or scan partner's QR at doorstep.</p>
+                                <button class="btn btn-warning btn-sm fw-bold w-100" onclick="triggerCelebrationAndRedirect('Cash on Delivery')">Confirm COD Order</button>
                             </div>
                         </div>
                     </div>
 
-                    <button class="btn btn-danger w-100 py-2 fw-bold rounded-pill shadow" onclick="triggerCelebrationAndRedirect('DIRECT_COD')">Place Order (Cash on Delivery)</button>
+                    <div class="text-center small text-muted">
+                        <i class="fa-solid fa-lock text-success me-1"></i> Safe and Secure Payments. 100% Authentic.
+                    </div>
                 </div>
             </div>
         </div>
@@ -203,6 +223,33 @@
         return document.getElementById("cartContentWrap").getAttribute("data-userlogged") === "true";
     }
 
+    function switchFkPayTab(tab) {
+        document.querySelectorAll('.fk-pay-row').forEach(r => r.classList.remove('active'));
+        document.getElementById('tabBodyUpi').classList.add('d-none');
+        document.getElementById('tabBodyQr').classList.add('d-none');
+        document.getElementById('tabBodyCard').classList.add('d-none');
+        document.getElementById('tabBodyCod').classList.add('d-none');
+
+        if(tab === 'upi') {
+            document.getElementById('radioUpi').checked = true;
+            document.getElementById('radioUpi').closest('.fk-pay-row').classList.add('active');
+            document.getElementById('tabBodyUpi').classList.remove('d-none');
+        } else if(tab === 'qr') {
+            document.getElementById('radioQr').checked = true;
+            document.getElementById('radioQr').closest('.fk-pay-row').classList.add('active');
+            document.getElementById('tabBodyQr').classList.remove('d-none');
+            generateDynamicOrderQR();
+        } else if(tab === 'card') {
+            document.getElementById('radioCard').checked = true;
+            document.getElementById('radioCard').closest('.fk-pay-row').classList.add('active');
+            document.getElementById('tabBodyCard').classList.remove('d-none');
+        } else if(tab === 'cod') {
+            document.getElementById('radioCod').checked = true;
+            document.getElementById('radioCod').closest('.fk-pay-row').classList.add('active');
+            document.getElementById('tabBodyCod').classList.remove('d-none');
+        }
+    }
+
     function renderCartItems() {
         const cart = JSON.parse(localStorage.getItem("hungrymate_cart") || "[]");
         const container = document.getElementById("cartItemsContainer");
@@ -217,8 +264,10 @@
         emptyMsg.classList.add("d-none");
 
         let subtotal = 0;
+        let count = 0;
         cart.forEach((item, index) => {
             subtotal += item.price * item.quantity;
+            count += item.quantity;
             container.innerHTML += `
                 <div class="cart-card-item">
                     <div class="d-flex align-items-center gap-3">
@@ -237,6 +286,7 @@
                 </div>
             `;
         });
+        document.getElementById("cartCountTotal").innerText = count;
         updatePriceBreakdown(subtotal);
     }
 
@@ -290,20 +340,18 @@
             document.getElementById("discountAmount").innerText = discount;
         }
         updatePriceBreakdown(subtotal);
-        if (isAddressConfirmed) generateDynamicOrderQR();
     }
 
-    // Step 1 to Step 2 Validation
     function proceedToPaymentStep() {
         const name = document.getElementById("custName").value.trim();
         const phone = document.getElementById("custPhone").value.trim();
         const address = document.getElementById("custAddress").value.trim();
         const cart = JSON.parse(localStorage.getItem("hungrymate_cart") || "[]");
 
-        if (cart.length === 0) return alert("Your cart is empty! Please add food items first.");
+        if (cart.length === 0) return alert("Your cart is empty! Please select food items first.");
         if (!name) return alert("Please enter recipient name!");
         if (phone.length < 10) return alert("Please enter valid 10-digit mobile number!");
-        if (address.length < 8) return alert("Please enter complete delivery street address!");
+        if (address.length < 5) return alert("Please enter delivery location address!");
 
         isAddressConfirmed = true;
         document.getElementById("step1StatusBadge").className = "badge bg-success";
@@ -315,11 +363,9 @@
         document.getElementById("payLockBadge").className = "badge bg-success";
         document.getElementById("payLockBadge").innerHTML = "<i class='fa-solid fa-unlock me-1'></i>Unlocked";
 
-        generateDynamicOrderQR();
         payWrap.scrollIntoView({ behavior: 'smooth' });
     }
 
-    // Dynamic QR with Local Machine IP for Phone Cameras
     function generateDynamicOrderQR() {
         fetch("/api/get-server-ip")
             .then(res => res.json())
@@ -328,7 +374,6 @@
                 const total = document.getElementById("finalTotalAmount").innerText;
                 activeQrToken = "HM_" + Date.now();
                 
-                // Uses PC's real network IP so phone scanner opens mobile confirm page
                 const orderUrl = `http://${net.ip}:3000/orders/qr-mobile-confirm?token=${activeQrToken}&amount=${total}`;
                 
                 qrContainer.innerHTML = "";
@@ -343,7 +388,7 @@
                         const data = await res.json();
                         if (data.confirmed) {
                             clearInterval(qrPollInterval);
-                            triggerCelebrationAndRedirect("QR_MOBILE_SCAN");
+                            triggerCelebrationAndRedirect("QR_PHONE_VERIFIED");
                         }
                     } catch(e) {}
                 }, 1500);
@@ -353,28 +398,31 @@
 
     function verifyAndPayUPI() {
         const upi = document.getElementById("upiIdInput").value.trim();
-        if (upi.includes("@") && upi.length > 5) {
+        const validHandles = ["@okhdfcbank", "@okaxis", "@oksbi", "@okicici", "@ybl", "@paytm", "@ibl", "@axl"];
+        const hasValidHandle = validHandles.some(h => upi.endsWith(h));
+
+        if (upi.includes("@") && upi.length >= 8 && hasValidHandle) {
             triggerCelebrationAndRedirect("UPI");
         } else {
-            alert("Invalid UPI ID! Please fill valid handle (e.g. name@okhdfcbank / 9876543210@ybl)");
+            alert("Invalid UPI ID! Please enter a real UPI handle like name@okhdfcbank or 9876543210@ybl");
         }
     }
 
     function verifyAndPayCard() {
-        const num = document.getElementById("cardNumber").value.trim();
-        const exp = document.getElementById("cardExpiry").value.trim();
-        const cvv = document.getElementById("cardCvv").value.trim();
+        const num = document.getElementById('cardNumber').value.trim();
+        const exp = document.getElementById('cardExpiry').value.trim();
+        const cvv = document.getElementById('cardCvv').value.trim();
 
-        if (num.length === 16 && exp.includes("/") && cvv.length === 3) {
-            triggerCelebrationAndRedirect("CARD");
+        if (num.length === 16 && /^\d+$/.test(num) && exp.includes("/") && cvv.length === 3) {
+            triggerCelebrationAndRedirect("DEBIT_CREDIT_CARD");
         } else {
-            alert("Please fill all valid card details (16-Digit Card, MM/YY, and 3-Digit CVV)!");
+            alert("Invalid Card Details! Please fill real 16-digit Card Number, MM/YY, and 3-digit CVV.");
         }
     }
 
     function triggerCelebrationAndRedirect(method) {
         if (!checkUserLoggedIn()) {
-            alert("Please Sign up or Log in first to book food items!");
+            alert("Please Sign up or Log in first before booking food items!");
             window.location.href = "/login";
             return;
         }
@@ -384,6 +432,15 @@
         const address = document.getElementById("custAddress").value.trim();
         const cart = JSON.parse(localStorage.getItem("hungrymate_cart") || "[]");
 
+        let maxPrep = 15;
+        let mainRestaurant = "Chef Kitchen";
+        cart.forEach(it => {
+            if (it.prepTime && it.prepTime > maxPrep) maxPrep = it.prepTime;
+            if (it.restaurant) mainRestaurant = it.restaurant;
+        });
+
+        const totalDurationMins = maxPrep + 12;
+
         const newOrder = {
             orderId: "HM" + Math.floor(100000 + Math.random() * 900000),
             items: cart,
@@ -391,10 +448,13 @@
             customerName: name,
             customerPhone: phone,
             address: address,
+            restaurantName: mainRestaurant,
             placedAt: new Date().toLocaleTimeString(),
+            timestampStart: Date.now(),
+            totalDurationMins: totalDurationMins,
             paymentMode: method,
             deliveryHero: "Rahul Verma (+91 98765 43210)",
-            deliveredInMinutes: 2,
+            deliveryHeroId: "HM-DEL-984",
             isDelivered: false
         };
 
@@ -407,7 +467,7 @@
         localStorage.removeItem("hungrymate_cart");
         if (typeof refreshNavCartBadge === "function") refreshNavCartBadge();
 
-        confetti({ particleCount: 130, spread: 75, origin: { y: 0.6 } });
+        confetti({ particleCount: 140, spread: 80, origin: { y: 0.6 } });
         document.getElementById("orderSuccessModal").classList.remove("d-none");
 
         setTimeout(() => {
@@ -415,7 +475,7 @@
         }, 2200);
     }
 
-    // All-India Realtime Geocoding Suggestions
+    // Google Map Style Real-Time Autocomplete API
     const addrInput = document.getElementById("custAddress");
     const addrBox = document.getElementById("addressSuggestionsBox");
     let addrDebounce = null;
@@ -430,18 +490,20 @@
         }
 
         addrDebounce = setTimeout(() => {
-            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=in&limit=6`)
+            fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=6`)
                 .then(res => res.json())
                 .then(data => {
-                    if (data && data.length > 0) {
+                    if (data.features && data.features.length > 0) {
                         addrBox.classList.remove("d-none");
-                        data.forEach(item => {
+                        data.features.forEach(f => {
+                            const p = f.properties;
+                            const fullAddr = [p.name, p.street, p.city, p.state, p.country].filter(Boolean).join(', ');
                             const li = document.createElement("li");
                             li.className = "list-group-item list-group-item-action small py-2";
                             li.style.cursor = "pointer";
-                            li.innerHTML = `<i class="fa-solid fa-location-dot text-danger me-2"></i>${item.display_name}`;
+                            li.innerHTML = `<i class="fa-solid fa-location-dot text-danger me-2"></i>${fullAddr}`;
                             li.onclick = () => {
-                                addrInput.value = item.display_name;
+                                addrInput.value = fullAddr;
                                 addrBox.classList.add("d-none");
                             };
                             addrBox.appendChild(li);

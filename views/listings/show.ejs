@@ -26,9 +26,30 @@
         margin-top: 1rem;
         z-index: 1;
     }
+    .info-stat-pill {
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 0.8rem;
+        color: #0f172a;
+    }
     body.dark-mode .show-card-box {
-        background: #0f172a !important;
-        border-color: #1e293b !important;
+        background: #121212 !important;
+        border-color: #27272a !important;
+        color: #ffffff !important;
+    }
+    /* Fixed Dark Mode Prep Time & Mildness Contrast */
+    body.dark-mode .info-stat-pill {
+        background-color: #1e1e24 !important;
+        border-color: #33333e !important;
+        color: #ffffff !important;
+    }
+    body.dark-mode .info-stat-pill small {
+        color: #a1a1aa !important;
+    }
+    body.dark-mode .review-card {
+        background: #18181b !important;
+        border-color: #27272a !important;
         color: #ffffff !important;
     }
 </style>
@@ -49,16 +70,17 @@
                 
                 <p class="lead fs-6"><%= listing.description %></p>
 
+                <!-- High Contrast Info Pills -->
                 <div class="row g-2 mb-3">
                     <div class="col-6">
-                        <div class="p-2 border rounded-3 bg-light text-dark">
-                            <small class="text-muted d-block">Preparation Time</small>
+                        <div class="info-stat-pill">
+                            <small class="d-block">Preparation Time</small>
                             <strong><i class="fa-regular fa-clock me-1 text-danger"></i><%= listing.preparationTime || 20 %> Mins</strong>
                         </div>
                     </div>
                     <div class="col-6">
-                        <div class="p-2 border rounded-3 bg-light text-dark">
-                            <small class="text-muted d-block">Spiciness Level</small>
+                        <div class="info-stat-pill">
+                            <small class="d-block">Spiciness Level</small>
                             <strong><i class="fa-solid fa-pepper-hot me-1 text-warning"></i><%= listing.spiciness || 'Medium' %></strong>
                         </div>
                     </div>
@@ -68,7 +90,7 @@
             <div>
                 <div class="d-flex align-items-center justify-content-between mt-3 pt-3 border-top">
                     <span class="display-6 fw-bold text-danger">&#8377;<%= listing.price %></span>
-                    <button class="btn btn-danger btn-lg rounded-pill px-4 fw-bold shadow" onclick="addToCart('<%= listing._id %>', '<%= listing.title.replace(/'/g, '') %>', <%= listing.price %>, '<%= listing.image.url %>')">
+                    <button class="btn btn-danger btn-lg rounded-pill px-4 fw-bold shadow" onclick="addToCart('<%= listing._id %>', '<%= listing.title.replace(/'/g, '') %>', <%= listing.price %>, '<%= listing.image.url %>', <%= listing.preparationTime || 20 %>, '<%= (listing.restaurant || '').replace(/'/g, '') %>')">
                         <i class="fa-solid fa-cart-shopping me-2"></i>Add to Cart
                     </button>
                 </div>
@@ -76,7 +98,7 @@
         </div>
     </div>
 
-    <!-- Verified Exact Spot Pinpoint Map -->
+    <!-- Verified Exact Spot Map Section -->
     <div class="mt-5 pt-3 border-top">
         <div class="d-flex justify-content-between align-items-center">
             <div>
@@ -89,6 +111,57 @@
         </div>
 
         <div id="map"></div>
+    </div>
+
+    <!-- Feedback & Reviews Section (Editable only by author) -->
+    <div class="mt-5 pt-3 border-top">
+        <h4 class="fw-bold mb-3"><i class="fa-solid fa-comments text-danger me-2"></i>Customer Reviews & Ratings</h4>
+        
+        <% if(currUser) { %>
+            <div class="card p-3 mb-4 border rounded-3 review-card">
+                <h6 class="fw-bold mb-2">Leave a Feedback</h6>
+                <form action="/listings/<%= listing._id %>/reviews" method="POST">
+                    <div class="mb-2">
+                        <label class="form-label small">Rating (1 to 5 Stars)</label>
+                        <select name="review[rating]" class="form-select form-select-sm" style="max-width: 140px;">
+                            <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+                            <option value="4">⭐⭐⭐⭐ (4)</option>
+                            <option value="3">⭐⭐⭐ (3)</option>
+                            <option value="2">⭐⭐ (2)</option>
+                            <option value="1">⭐ (1)</option>
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <textarea name="review[comment]" rows="2" class="form-control" placeholder="Write your experience with this food item..." required></textarea>
+                    </div>
+                    <button class="btn btn-sm btn-dark fw-bold rounded-pill px-3">Submit Feedback</button>
+                </form>
+            </div>
+        <% } %>
+
+        <div class="row g-3">
+            <% if(listing.reviews && listing.reviews.length > 0) { %>
+                <% for(let r of listing.reviews) { %>
+                    <div class="col-md-6">
+                        <div class="card p-3 border rounded-3 review-card shadow-sm h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <h6 class="fw-bold m-0"><%= r.author ? r.author.username : 'Foodie' %></h6>
+                                <span class="text-warning small"><%= '⭐'.repeat(r.rating) %></span>
+                            </div>
+                            <p class="small text-muted mb-2"><%= r.comment %></p>
+
+                            <% if(currUser && r.author && currUser._id.equals(r.author._id)) { %>
+                                <form action="/listings/<%= listing._id %>/reviews/<%= r._id %>?_method=DELETE" method="POST" class="mt-auto">
+                                    <button class="btn btn-sm btn-outline-danger py-0 px-2 rounded-pill" style="font-size: 0.72rem;">Delete Review</button>
+                                </form>
+                            <% } %>
+                        </div>
+                    </div>
+                <% } %>
+            <% } else { %>
+                <p class="text-muted small">No reviews yet for this dish. Be the first one to order and review!</p>
+            <% } %>
+        </div>
     </div>
 </div>
 
@@ -108,38 +181,21 @@
     }).addTo(map);
 
     let marker = L.marker([exactLat, exactLng]).addTo(map)
-        .bindPopup(`<b>${restName || 'Restaurant'}</b><br>${locName}<br><span class='badge bg-danger'>Exact Verified Spot</span>`)
+        .bindPopup(`<b>${restName || 'Restaurant'}</b><br>${locName}<br><span class='badge bg-danger'>Exact Spot</span>`)
         .openPopup();
 
     function setGoogleMapsUrl(lat, lng) {
-        // Direct coordinates query forces Google Maps to place pin on exact building
         document.getElementById("openGoogleMapsBtn").href = `https://www.google.com/maps?q=${lat},${lng}`;
     }
     setGoogleMapsUrl(exactLat, exactLng);
 
-    // Dynamic Geocoder query only if custom outside address is specified
-    if (locName && !locName.toLowerCase().includes("kalyani") && !locName.toLowerCase().includes("jis")) {
-        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(restName + " " + locName)}&countrycodes=in&limit=1`)
-            .then(res => res.json())
-            .then(data => {
-                if (data && data.length > 0) {
-                    exactLat = parseFloat(data[0].lat);
-                    exactLng = parseFloat(data[0].lon);
-                    map.setView([exactLat, exactLng], 18);
-                    marker.setLatLng([exactLat, exactLng]);
-                    setGoogleMapsUrl(exactLat, exactLng);
-                }
-            })
-            .catch(() => {});
-    }
-
-    function addToCart(id, title, price, image) {
+    function addToCart(id, title, price, image, prepTime, restaurant) {
         let cart = JSON.parse(localStorage.getItem("hungrymate_cart") || "[]");
         const existing = cart.find(item => item.id === id);
         if (existing) {
             existing.quantity += 1;
         } else {
-            cart.push({ id, title, price, image, quantity: 1 });
+            cart.push({ id, title, price, image, prepTime: prepTime || 20, restaurant: restaurant || "Chef Kitchen", quantity: 1 });
         }
         localStorage.setItem("hungrymate_cart", JSON.stringify(cart));
         if (typeof refreshNavCartBadge === "function") refreshNavCartBadge();

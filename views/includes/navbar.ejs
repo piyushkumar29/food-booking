@@ -27,7 +27,7 @@
       </div>
     </div>
 
-    <!-- Center Search Bar with Worldwide Live Autocomplete -->
+    <!-- Center Food Name Search Bar with Food Suggestions Dropdown -->
     <div class="position-relative mx-3 flex-grow-1" style="max-width: 440px;">
       <form class="d-flex align-items-center m-0" id="foodSearchForm" onsubmit="return false;">
         <div class="input-group w-100 position-relative">
@@ -35,7 +35,7 @@
             class="form-control rounded-pill pe-5 py-2 shadow-none" 
             type="search" 
             id="foodSearchInput" 
-            placeholder="Search food, restaurants, or dishes..." 
+            placeholder="Search delicious food, dishes, restaurants..." 
             autocomplete="off"
             style="border: 1.5px solid #cbd5e1; font-size: 0.9rem;"
           />
@@ -45,9 +45,10 @@
         </div>
       </form>
 
+      <!-- Food Name Suggestions List -->
       <div id="searchHistoryBox" class="position-absolute border rounded-3 shadow-lg w-100 mt-1 d-none" style="z-index: 1060; max-height: 240px; overflow-y: auto; left: 0;">
         <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom" style="font-size: 0.78rem; opacity: 0.85;">
-          <span class="fw-bold" id="searchDropdownHeader"><i class="fa-solid fa-clock-rotate-left me-1"></i> RECENT SEARCHES</span>
+          <span class="fw-bold" id="searchDropdownHeader"><i class="fa-solid fa-utensils text-danger me-1"></i> FOOD DISHES</span>
           <span role="button" id="clearHistoryBtn" class="text-danger fw-semibold" style="cursor: pointer;">Clear</span>
         </div>
         <ul id="historyList" class="list-unstyled m-0 p-0"></ul>
@@ -174,21 +175,24 @@
         border: 1.5px solid #212529 !important;
     }
 
-    /* Sticker Gradient Pinkish Capsule on Dark Mode with Crisp Black Text */
+    /* Dark Mode Capsule Color: #D0C09E & Solid Black Text */
     body.dark-mode .nav-pill-btn {
-        background: linear-gradient(135deg, #fe424d 0%, #ec4899 100%) !important;
+        background-color: #D0C09E !important;
         color: #000000 !important;
-        border: none !important;
-        box-shadow: 0 4px 14px rgba(236, 72, 153, 0.35) !important;
+        border: 1.5px solid #D0C09E !important;
+        box-shadow: 0 4px 14px rgba(208, 192, 158, 0.25) !important;
     }
     body.dark-mode .nav-pill-btn .icon-item {
         color: #000000 !important;
     }
     body.dark-mode .nav-pill-btn:hover {
-        transform: translateY(-3px) scale(1.04) !important;
-        box-shadow: 0 8px 24px rgba(254, 66, 77, 0.55) !important;
-        filter: brightness(1.1);
+        background-color: #dfd2b5 !important;
+        border-color: #dfd2b5 !important;
+        color: #000000 !important;
+        transform: translateY(-3px) scale(1.03) !important;
+        box-shadow: 0 8px 20px rgba(208, 192, 158, 0.45) !important;
     }
+
     body.dark-mode .nav-auth-signup-btn {
         border-color: #ffffff !important;
         color: #ffffff !important;
@@ -243,14 +247,22 @@ function refreshNavCartBadge() {
 document.addEventListener("DOMContentLoaded", refreshNavCartBadge);
 window.addEventListener("storage", refreshNavCartBadge);
 
-// Smart Live Worldwide Autocomplete
+// Smart Food Names Autocomplete (Food Dishes Only)
+const popularFoodItems = [
+    "Chicken Biryani", "Mutton Dum Biryani", "Paneer Tikka Biryani", "Overloaded Farmhouse Pizza", 
+    "Peri Peri Chicken Pizza", "Cheese Garlic Bread", "Crispy Veg Maharaja Burger", "BBQ Chicken Burger", 
+    "Kolkata Chicken Roll", "Paneer Kathi Roll", "Steamed Chicken Momos", "Fried Veg Momos", 
+    "Peri Peri French Fries", "Paneer Butter Masala", "Dal Makhani", "Kadhai Paneer", "Butter Garlic Naan", 
+    "Butter Chicken", "Mutton Kosha", "Tandoori Chicken", "Chicken Tikka Kebab", "Maharaja Non-Veg Thali", 
+    "Pure Veg Deluxe Thali", "Crispy Masala Dosa", "Hot Gulab Jamun", "Belgian Chocolate Sundae", 
+    "Dutch Truffle Cake", "Red Velvet Pastry", "Belgian Chocolate Shake", "Cold Coffee"
+];
+
 const sInput = document.getElementById("foodSearchInput");
 const sBox = document.getElementById("searchHistoryBox");
 const sList = document.getElementById("historyList");
 const sHeader = document.getElementById("searchDropdownHeader");
 const sClear = document.getElementById("clearHistoryBtn");
-
-let searchDebounceTimer = null;
 
 function renderSearchDropdown(items, isHint) {
     sList.innerHTML = "";
@@ -259,12 +271,12 @@ function renderSearchDropdown(items, isHint) {
         return;
     }
     sBox.classList.remove("d-none");
-    sHeader.innerHTML = isHint ? '<i class="fa-solid fa-earth-americas text-primary me-1"></i> TOP SEARCH MATCHES' : '<i class="fa-solid fa-clock-rotate-left me-1"></i> RECENT SEARCHES';
+    sHeader.innerHTML = isHint ? '<i class="fa-solid fa-utensils text-danger me-1"></i> FOOD DISHES' : '<i class="fa-solid fa-clock-rotate-left me-1"></i> RECENT SEARCHES';
     sClear.style.display = isHint ? "none" : "inline";
 
     items.forEach(txt => {
         const li = document.createElement("li");
-        li.innerHTML = `<span><i class="fa-solid ${isHint ? 'fa-magnifying-glass text-danger' : 'fa-clock text-muted'} me-2"></i>${txt}</span>`;
+        li.innerHTML = `<span><i class="fa-solid ${isHint ? 'fa-bowl-food text-warning' : 'fa-clock text-muted'} me-2"></i>${txt}</span>`;
         li.onclick = () => {
             sInput.value = txt;
             sBox.classList.add("d-none");
@@ -293,21 +305,13 @@ if (sInput) {
     });
 
     sInput.addEventListener("input", () => {
-        const q = sInput.value.trim();
-        clearTimeout(searchDebounceTimer);
+        const q = sInput.value.trim().toLowerCase();
         if (!q) {
             const hist = JSON.parse(localStorage.getItem("hungrymate_search_hist") || "[]");
             renderSearchDropdown(hist, false);
         } else {
-            searchDebounceTimer = setTimeout(() => {
-                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=in&limit=5`)
-                    .then(res => res.json())
-                    .then(data => {
-                        const recs = data.map(d => d.display_name.split(',').slice(0, 3).join(','));
-                        if (recs.length > 0) renderSearchDropdown(recs, true);
-                    })
-                    .catch(() => {});
-            }, 250);
+            const matches = popularFoodItems.filter(item => item.toLowerCase().includes(q));
+            renderSearchDropdown(matches, true);
         }
     });
 }

@@ -41,7 +41,7 @@
     }
     .filter div i { font-size: 1.4rem; margin-bottom: 0.25rem; display: inline-block; }
     .filter p { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; margin: 0; color: #0f172a; }
-    body.dark-mode .filter div i { color: #f59e0b !important; }
+    body.dark-mode .filter div i { color: #FFC107 !important; }
     body.dark-mode .filter p { color: #ffffff !important; }
 
     .scroll-btn {
@@ -53,8 +53,8 @@
         cursor: pointer; flex-shrink: 0;
     }
     body.dark-mode .scroll-btn {
-        background-color: #1e293b !important;
-        border-color: #334155 !important;
+        background-color: #121212 !important;
+        border-color: #27272a !important;
         color: #ffffff !important;
     }
 
@@ -70,8 +70,8 @@
         user-select: none;
     }
     body.dark-mode .clickable-toggle-box {
-        background-color: #1e293b !important;
-        border-color: #334155 !important;
+        background-color: #121212 !important;
+        border-color: #27272a !important;
         color: #ffffff !important;
     }
     .toggle-label { font-size: 0.78rem; font-weight: 700; margin: 0; }
@@ -93,7 +93,7 @@
 
     .listing-card {
         border: none !important;
-        border-radius: 1.3rem !important;
+        border-radius: 1.35rem !important;
         overflow: hidden !important;
         box-shadow: 0 6px 20px rgba(15,23,42,0.06) !important;
         transition: transform 0.25s ease, box-shadow 0.25s ease !important;
@@ -111,16 +111,24 @@
         object-fit: cover !important;
     }
     body.dark-mode .listing-card {
-        background-color: #1e293b !important;
-        border: 1px solid #334155 !important;
+        background-color: #121212 !important;
+        border: 1px solid #27272a !important;
     }
     .offer-tag-badge {
         position: absolute;
         top: 12px; left: 12px;
         background: linear-gradient(135deg, #fe424d 0%, #ec4899 100%);
         color: #ffffff; font-weight: 800; font-size: 0.75rem;
-        padding: 0.25rem 0.6rem; border-radius: 8px;
+        padding: 0.28rem 0.65rem; border-radius: 8px;
         box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    }
+    .rating-top-badge {
+        position: absolute;
+        top: 12px; right: 12px;
+        background: rgba(0, 0, 0, 0.75);
+        color: #FFD700; font-weight: 800; font-size: 0.78rem;
+        padding: 0.25rem 0.6rem; border-radius: 8px;
+        backdrop-filter: blur(4px);
     }
 
     /* Fixed Clean Margin & Padding for Price & Add To Cart Button */
@@ -128,26 +136,23 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-top: 1.4rem;
-        padding-top: 1.1rem;
-        padding-bottom: 0.6rem;
-        padding-left: 0.35rem;
-        padding-right: 0.35rem;
+        margin-top: 1.2rem;
+        padding: 0.85rem 0.6rem 0.5rem 0.6rem;
         border-top: 1px solid #f1f5f9;
     }
     .food-card-price {
         font-weight: 800;
-        font-size: 1.25rem;
+        font-size: 1.35rem;
         color: #fe424d;
         letter-spacing: -0.5px;
     }
     .btn-add-cart-pill {
-        border: 1.5px solid #fe424d;
+        border: 2px solid #fe424d;
         color: #fe424d;
         background: transparent;
         font-weight: 700;
-        font-size: 0.85rem;
-        padding: 0.45rem 1.25rem;
+        font-size: 0.88rem;
+        padding: 0.45rem 1.3rem;
         border-radius: 50px;
         transition: all 0.25s ease;
     }
@@ -157,21 +162,24 @@
         transform: scale(1.04);
     }
 
-    /* Dark Mode Yellow Theme */
+    /* Punchy Original Yellow In Dark Mode */
     body.dark-mode .card-action-footer {
-        border-top-color: #334155 !important;
+        border-top-color: #27272a !important;
     }
     body.dark-mode .food-card-price {
-        color: #f59e0b !important;
+        color: #FFC107 !important;
     }
     body.dark-mode .btn-add-cart-pill {
-        border-color: #f59e0b !important;
-        color: #f59e0b !important;
+        background-color: #FFC107 !important;
+        border-color: #FFC107 !important;
+        color: #000000 !important;
+        font-weight: 800 !important;
     }
     body.dark-mode .btn-add-cart-pill:hover {
-        background: #f59e0b !important;
-        color: #000000 !important;
-        box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4) !important;
+        background-color: #FFD700 !important;
+        border-color: #FFD700 !important;
+        transform: scale(1.05) translateY(-2px);
+        box-shadow: 0 4px 15px rgba(255, 215, 0, 0.45) !important;
     }
 </style>
 
@@ -185,7 +193,7 @@
             <div class="filter" data-category="pizza"><div><i class="fa-solid fa-pizza-slice"></i></div><p>Pizza/Fast Food</p></div>
             <div class="filter" data-category="burger"><div><i class="fa-solid fa-burger"></i></div><p>Burger</p></div>
             <div class="filter" data-category="veg"><div><i class="fa-solid fa-seedling text-success"></i></div><p>Pure Veg</p></div>
-            <div class="filter" data-category="non-veg"><div><i class="fa-solid fa-drumstick-bite text-danger"></i></div><p>Non Veg</p></div>
+            <div class="filter" data-category="non veg"><div><i class="fa-solid fa-drumstick-bite text-danger"></i></div><p>Non Veg</p></div>
             <div class="filter" data-category="thali"><div><i class="fa-solid fa-plate-wheat"></i></div><p>Indian Thali</p></div>
             <div class="filter" data-category="dessert"><div><i class="fa-solid fa-ice-cream"></i></div><p>Ice-cream</p></div>
             <div class="filter" data-category="bakery"><div><i class="fa-solid fa-cake-candles"></i></div><p>Cake/Bakery</p></div>
@@ -207,6 +215,13 @@
 
 <div class="pure-food-grid" id="listingsContainer">
     <% for(let listing of allListings) { %>
+        <% 
+            let avgRating = 4.8;
+            if(listing.reviews && listing.reviews.length > 0) {
+                let sum = listing.reviews.reduce((acc, r) => acc + r.rating, 0);
+                avgRating = (sum / listing.reviews.length).toFixed(1);
+            }
+        %>
         <div class="food-card-box"
              data-title="<%= (listing.title || '').toLowerCase() %>"
              data-restaurant="<%= (listing.restaurant || '').toLowerCase() %>"
@@ -216,6 +231,8 @@
             
             <div class="card listing-card shadow-sm h-100 position-relative">
                 <span class="offer-tag-badge">FLAT 60% OFF</span>
+                <span class="rating-top-badge"><i class="fa-solid fa-star me-1"></i><%= avgRating %></span>
+
                 <a href="/listings/<%= listing._id %>" class="text-decoration-none text-dark">
                     <img src="<%= listing.image.url %>" class="card-img-top" alt="<%= listing.title %>">
                 </a>
@@ -233,14 +250,14 @@
                         </small>
                     </div>
 
-                    <!-- Clean Formatted Action Footer with Spacing -->
+                    <!-- Clean Formatted Action Footer with Spacing & Punchy Colors -->
                     <div class="card-action-footer">
                         <span class="food-card-price">
                             &#8377;<%= listing.price ? listing.price.toLocaleString("en-IN") : '0' %>
                         </span>
                         
-                        <button class="btn btn-add-cart-pill shadow-sm" onclick="addToCart('<%= listing._id %>', '<%= listing.title.replace(/'/g, '') %>', <%= listing.price %>, '<%= listing.image.url %>')">
-                            <i class="fa-solid fa-plus me-1"></i> Add to Cart
+                        <button class="btn btn-add-cart-pill shadow-sm" onclick="addToCart('<%= listing._id %>', '<%= listing.title.replace(/'/g, '') %>', <%= listing.price %>, '<%= listing.image.url %>', <%= listing.preparationTime || 20 %>, '<%= (listing.restaurant || '').replace(/'/g, '') %>')">
+                            + Add to Cart
                         </button>
                     </div>
                 </div>
@@ -256,13 +273,13 @@
 </div>
 
 <script>
-    function addToCart(id, title, price, image) {
+    function addToCart(id, title, price, image, prepTime, restaurant) {
         let cart = JSON.parse(localStorage.getItem("hungrymate_cart") || "[]");
         const existing = cart.find(item => item.id === id);
         if (existing) {
             existing.quantity += 1;
         } else {
-            cart.push({ id, title, price, image, quantity: 1 });
+            cart.push({ id, title, price, image, prepTime: prepTime || 20, restaurant: restaurant || "Chef Kitchen", quantity: 1 });
         }
         localStorage.setItem("hungrymate_cart", JSON.stringify(cart));
         if (typeof refreshNavCartBadge === "function") refreshNavCartBadge();
@@ -322,7 +339,7 @@
             const matchVeg = !vegOnly || isVeg;
             let matchCat = (activeCat === "all" || activeCat === "trending");
             if (activeCat === "veg") matchCat = isVeg;
-            else if (activeCat === "non-veg") matchCat = !isVeg;
+            else if (activeCat === "non veg" || activeCat === "non-veg") matchCat = !isVeg;
             else if (activeCat !== "all" && activeCat !== "trending") matchCat = category.includes(activeCat) || title.includes(activeCat);
 
             if (matchSearch && matchVeg && matchCat) {
