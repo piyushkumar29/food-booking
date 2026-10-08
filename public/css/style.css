@@ -123,7 +123,7 @@ body {
 }
 
 /* =========================================================
-   IMAGE & BADGES (FLAT DISCOUNT & RATING RESTORED)
+   IMAGE & BADGES (PINKISH GRADIENT & RATING RESTORED)
    ========================================================= */
 
 .card-img-wrapper {
@@ -155,30 +155,30 @@ body {
   }
 }
 
-/* 1. FLAT DISCOUNT BADGE (Top-Left Pill) */
+/* 1. PINKISH RED GRADIENT FLAT 60% OFF BADGE */
 .offer-tag-badge {
   position: absolute !important;
   top: 12px !important;
   left: 12px !important;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  background: linear-gradient(135deg, #fe424d 0%, #ec4899 100%) !important;
   color: #ffffff !important;
   font-size: 0.72rem !important;
   font-weight: 800 !important;
   letter-spacing: 0.5px !important;
   padding: 0.32rem 0.75rem !important;
   border-radius: 50px !important;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25) !important;
+  box-shadow: 0 3px 10px rgba(254, 66, 77, 0.35) !important;
   z-index: 10 !important;
   pointer-events: none !important;
   text-transform: uppercase !important;
 }
 
-/* 2. RATING BADGE (Top-Right Glassmorphism Pill) */
+/* 2. RATING BADGE (Dark Pill with Star) */
 .rating-top-badge {
   position: absolute !important;
   top: 12px !important;
   right: 12px !important;
-  background: rgba(15, 23, 42, 0.75) !important;
+  background: rgba(15, 23, 42, 0.78) !important;
   backdrop-filter: blur(6px) !important;
   -webkit-backdrop-filter: blur(6px) !important;
   color: #ffffff !important;
@@ -195,7 +195,7 @@ body {
 }
 
 .rating-top-badge i {
-  color: #facc15 !important; /* Gold Star */
+  color: #facc15 !important;
   font-size: 0.75rem !important;
 }
 
