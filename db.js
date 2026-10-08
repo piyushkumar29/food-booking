@@ -13,13 +13,13 @@ function getMongoUri() {
     const uri =
         process.env.MONGO_URL ||
         process.env.MONGODB_URI ||
-        process.env.MONGODB_URL;
+        process.env.ATLASDB_URL;
 
-    if (uri) {
-        return uri;
+    if (uri && uri.trim() !== "") {
+        return uri.trim();
     }
 
-    // Localhost only
+    // Localhost fallback sirf tab jab bilkul koi cloud env na mile
     if (!process.env.VERCEL && process.env.NODE_ENV !== "production") {
         return "mongodb://127.0.0.1:27017/wanderlust";
     }
@@ -32,7 +32,7 @@ async function connectDB() {
 
     if (!uri) {
         throw new Error(
-            "MONGO_URL is not configured. Add MongoDB Atlas connection string in Vercel."
+            "MongoDB URI is not configured. Add MONGO_URL in your environment variables."
         );
     }
 
@@ -48,9 +48,9 @@ async function connectDB() {
     if (!globalCache.promise) {
         globalCache.promise = mongoose
             .connect(uri, {
-                serverSelectionTimeoutMS: 5000,
-                connectTimeoutMS: 5000,
-                socketTimeoutMS: 10000,
+                serverSelectionTimeoutMS: 8000,
+                connectTimeoutMS: 8000,
+                socketTimeoutMS: 15000,
                 maxPoolSize: 10,
                 minPoolSize: 0,
                 maxIdleTimeMS: 60000,
@@ -59,7 +59,7 @@ async function connectDB() {
                 globalCache.connection =
                     mongooseInstance.connection;
 
-                console.log("MongoDB connected successfully");
+                console.log("Connected to Cloud MongoDB Atlas successfully");
 
                 return globalCache.connection;
             })

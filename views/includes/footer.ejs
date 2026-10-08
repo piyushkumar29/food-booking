@@ -1,43 +1,18 @@
-<footer>
-    <div class="f-info py-4 text-center">
-        <!-- Personal Active Profile Links -->
-        <div class="f-info-socials-link d-flex justify-content-center gap-3 fs-5 mb-2">
-            <a href="https://www.linkedin.com/in/piyush-kumar-405073289" target="_blank" rel="noopener noreferrer" title="LinkedIn" style="color: #0a66c2;">
-                <i class="fa-brands fa-linkedin"></i>
-            </a>
-            <a href="https://github.com/Piyushkumar93" target="_blank" rel="noopener noreferrer" title="GitHub" class="footer-github-icon">
-                <i class="fa-brands fa-github"></i>
-            </a>
-            <a href="https://www.youtube.com" target="_blank" rel="noopener noreferrer" title="YouTube" style="color: #ff0000;">
-                <i class="fa-brands fa-youtube"></i>
-            </a>
-            <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" title="Instagram" style="color: #e4405f;">
-                <i class="fa-brands fa-instagram"></i>
-            </a>
-        </div>
-
-        <div class="f-info-brand fw-bold mb-1" style="color: #1e293b;">
-            &copy; <span id="currentYear"></span> HUNGRYMATE Private Limited
-        </div>
-        <div class="small mb-2" style="color: #475569;">
-            Engineered & Managed by <strong style="color: #fe424d;">Piyush Kumar</strong>, Founder of Hungrymate
-        </div>
-        <div class="f-info-links d-flex justify-content-center gap-3 small">
-            <a href="/privacy" class="text-decoration-none fw-semibold">Privacy</a>
-            <span>&bull;</span>
-            <a href="/terms" class="text-decoration-none fw-semibold">Terms</a>
-        </div>
+<footer class="f-info py-4 text-center">
+    <div class="f-info-socials mb-2">
+        <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-linkedin"></i></a>
+        <a href="https://github.com" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-github"></i></a>
+        <a href="https://youtube.com" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-youtube"></i></a>
+        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-instagram"></i></a>
+    </div>
+    <div class="f-info-brand mb-1">
+        <span>&copy; 2026 HUNGRYMATE Private Limited</span>
+    </div>
+    <div class="small text-muted mb-2">
+        Engineered & Managed by <strong class="text-danger">Piyush Kumar</strong>, Founder of Hungrymate
+    </div>
+    <div class="f-info-links">
+        <a href="/privacy">Privacy</a> &bull;
+        <a href="/terms">Terms</a>
     </div>
 </footer>
-
-<style>
-    .footer-github-icon { color: #0f172a; }
-    body.dark-mode .footer-github-icon { color: #ffffff !important; }
-    body.dark-mode .f-info-brand { color: #ffffff !important; }
-    body.dark-mode .f-info small { color: #cbd5e1 !important; }
-    body.dark-mode .f-info-links a { color: #f59e0b !important; }
-</style>
-
-<script>
-    document.getElementById("currentYear").textContent = new Date().getFullYear();
-</script>

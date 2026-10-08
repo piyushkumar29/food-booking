@@ -1,16 +1,21 @@
-<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top py-2 px-3 shadow-sm">
-  <div class="container-fluid d-flex align-items-center justify-content-between p-0">
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top shadow-sm hm-main-navbar py-2 px-2 px-md-3">
+  <div class="container-fluid d-flex align-items-center justify-content-between p-0 flex-nowrap">
     
-    <!-- Left Logo & Navigation Links -->
-    <div class="d-flex align-items-center flex-shrink-0 gap-3">
-      <a class="navbar-brand me-3 p-0 d-flex align-items-center" href="/listings">
-        <img src="/mypic.png" alt="Hungrymate Logo" style="height: 52px; width: auto; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.12));" />
+    <!-- Left: Logo & Desktop Navigation Links -->
+    <div class="d-flex align-items-center flex-shrink-0 gap-2 gap-lg-3">
+      <a class="navbar-brand m-0 p-0 d-flex align-items-center" href="/listings">
+        <img src="/mypic.png" alt="Hungrymate Logo" style="height: 46px; width: auto; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.12));" />
       </a>
 
-      <div class="d-none d-lg-flex align-items-center gap-3">
+      <div class="d-none d-lg-flex align-items-center gap-1">
         <a class="nav-pill-btn nav-all-food" href="/listings">
           <i class="fa-solid fa-utensils icon-item"></i> All food items
         </a>
+
+        <!-- Same Restaurant Option Modal Trigger -->
+        <button type="button" class="nav-pill-btn nav-same-rest-btn border-0" data-bs-toggle="modal" data-bs-target="#sameRestaurantModal">
+          <i class="fa-solid fa-store icon-item text-primary"></i> Same Restaurant Dishes
+        </button>
 
         <% if (currUser && currUser.isOwner) { %>
           <a class="nav-pill-btn owner-highlight-btn" href="/listings/new">
@@ -22,22 +27,22 @@
           <i class="fa-solid fa-motorcycle icon-item"></i> Track Order
         </a>
         <a class="nav-pill-btn nav-offers" href="/offers">
-          <i class="fa-solid fa-tags icon-item"></i> Offers & Discounts
+          <i class="fa-solid fa-tags icon-item"></i> Offers
         </a>
       </div>
     </div>
 
-    <!-- Center Food Name Search Bar with Food Suggestions Dropdown -->
-    <div class="position-relative mx-3 flex-grow-1" style="max-width: 440px;">
-      <form class="d-flex align-items-center m-0" id="foodSearchForm" onsubmit="return false;">
+    <!-- Center (Desktop Single Line Fit): Responsive Food Search Bar -->
+    <div class="position-relative mx-2 flex-grow-1 d-none d-md-block" style="max-width: 420px;">
+      <form class="d-flex align-items-center m-0 w-100" id="foodSearchForm" onsubmit="return false;">
         <div class="input-group w-100 position-relative">
           <input 
             class="form-control rounded-pill pe-5 py-2 shadow-none" 
             type="search" 
             id="foodSearchInput" 
-            placeholder="Search delicious food, dishes, restaurants..." 
+            placeholder="Search food, restaurants, or dishes..." 
             autocomplete="off"
-            style="border: 1.5px solid #cbd5e1; font-size: 0.9rem;"
+            style="border: 1.5px solid #cbd5e1; font-size: 0.88rem;"
           />
           <button class="btn position-absolute end-0 top-50 translate-middle-y me-2 border-0 bg-transparent text-secondary p-0" type="submit" id="searchSubmitBtn">
             <i class="fa-solid fa-magnifying-glass fs-6"></i>
@@ -45,28 +50,28 @@
         </div>
       </form>
 
-      <!-- Food Name Suggestions List -->
       <div id="searchHistoryBox" class="position-absolute border rounded-3 shadow-lg w-100 mt-1 d-none" style="z-index: 1060; max-height: 240px; overflow-y: auto; left: 0;">
         <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom" style="font-size: 0.78rem; opacity: 0.85;">
-          <span class="fw-bold" id="searchDropdownHeader"><i class="fa-solid fa-utensils text-danger me-1"></i> FOOD DISHES</span>
+          <span class="fw-bold" id="searchDropdownHeader"><i class="fa-solid fa-utensils text-danger me-1"></i> SUGGESTIONS</span>
           <span role="button" id="clearHistoryBtn" class="text-danger fw-semibold" style="cursor: pointer;">Clear</span>
         </div>
         <ul id="historyList" class="list-unstyled m-0 p-0"></ul>
       </div>
     </div>
 
-    <!-- Right Actions -->
-    <div class="d-flex align-items-center gap-3 flex-shrink-0">
-      
-      <a href="/cart" class="btn btn-light border position-relative rounded-pill px-3 py-1 d-flex align-items-center gap-2 text-decoration-none" title="View Cart">
-        <i class="fa-solid fa-cart-shopping text-danger fs-5"></i>
-        <span class="d-none d-sm-inline fw-semibold" style="font-size: 0.88rem;">Cart</span>
-        <span id="navCartCountBadge" class="badge rounded-pill bg-danger" style="font-size: 0.72rem;">0</span>
+    <!-- Right: Cart & User Account -->
+    <div class="d-flex align-items-center gap-2 flex-shrink-0">
+      <a href="/cart" class="btn btn-light border position-relative rounded-pill px-3 py-1 d-flex align-items-center gap-1 text-decoration-none" title="View Cart">
+        <i class="fa-solid fa-cart-shopping text-danger"></i>
+        <span class="d-none d-sm-inline fw-semibold" style="font-size: 0.85rem;">Cart</span>
+        <span id="navCartCountBadge" class="badge rounded-pill bg-danger" style="font-size: 0.7rem;">0</span>
       </a>
 
       <% if(!currUser) { %>
-        <a class="btn nav-auth-signup-btn rounded-pill px-3 py-1 fw-bold btn-sm" href="/signup">Sign up</a>
-        <a class="btn nav-auth-login-btn rounded-pill px-3 py-1 fw-bold btn-sm" href="/login">Log in</a>
+        <div class="d-flex gap-1">
+          <a class="btn nav-auth-signup-btn rounded-pill px-2 px-sm-3 py-1 fw-bold btn-sm" href="/signup">Sign up</a>
+          <a class="btn nav-auth-login-btn rounded-pill px-2 px-sm-3 py-1 fw-bold btn-sm" href="/login">Log in</a>
+        </div>
       <% } %>
 
       <% if(currUser) { %>
@@ -79,17 +84,11 @@
                 <span class="avatar-letter"><%= currUser.username.charAt(0).toUpperCase() %></span>
               <% } %>
             </div>
-            <span class="profile-username-label mt-1">
-              <%= currUser.username %>
-              <% if(currUser.isOwner) { %>
-                <i class="fa-solid fa-crown text-warning small ms-1" title="Owner"></i>
-              <% } %>
-            </span>
           </div>
 
-          <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2 p-3 rounded-4" style="min-width: 250px;">
+          <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2 p-3 rounded-4" style="min-width: 240px; z-index: 1080;">
             <li class="text-center pb-2 border-bottom mb-2">
-              <div class="fw-bold text-dark user-card-name d-flex align-items-center justify-content-center gap-1">
+              <div class="fw-bold text-dark user-card-name">
                 <span><%= currUser.username %></span>
                 <% if(currUser.isOwner) { %>
                   <span class="badge bg-warning text-dark px-2 py-0" style="font-size: 0.65rem;">OWNER</span>
@@ -97,14 +96,12 @@
               </div>
               <div class="text-muted small text-truncate"><%= currUser.email %></div>
             </li>
-
             <li>
               <button type="button" class="dropdown-item py-2 rounded-2 d-flex align-items-center gap-2" onclick="promptEditName('<%= currUser.username %>')">
                 <i class="fa-solid fa-pen-to-square text-primary"></i>
                 <span>Edit Name</span>
               </button>
             </li>
-
             <li>
               <label for="avatarFileInput" class="dropdown-item py-2 rounded-2 d-flex align-items-center gap-2 mb-0" style="cursor: pointer;">
                 <i class="fa-solid fa-camera text-danger"></i>
@@ -112,7 +109,6 @@
               </label>
               <input type="file" id="avatarFileInput" accept="image/*" class="d-none" onchange="uploadPermanentAvatar(event)" />
             </li>
-
             <li><hr class="dropdown-divider"></li>
             <li>
               <a class="dropdown-item text-danger py-2 rounded-2 d-flex align-items-center gap-2" href="/logout">
@@ -126,12 +122,86 @@
     </div>
 
   </div>
+
+  <!-- Mobile Search Bar (Only shown on small screens < 768px in its own clean row) -->
+  <div class="d-md-none w-100 mt-2 position-relative">
+    <div class="input-group w-100 position-relative">
+      <input 
+        class="form-control rounded-pill pe-5 py-2 shadow-none" 
+        type="search" 
+        id="mobileFoodSearchInput" 
+        placeholder="Search food or restaurants..." 
+        autocomplete="off"
+        style="border: 1.5px solid #cbd5e1; font-size: 0.85rem;"
+      />
+      <button class="btn position-absolute end-0 top-50 translate-middle-y me-2 border-0 bg-transparent text-secondary p-0" type="button">
+        <i class="fa-solid fa-magnifying-glass fs-6"></i>
+      </button>
+    </div>
+  </div>
 </nav>
+
+<!-- Flipkart Style Mobile Bottom Navigation Bar (< 992px) -->
+<div class="flipkart-bottom-bar d-lg-none border-top">
+  <a href="/listings" class="fk-bar-item active">
+    <i class="fa-solid fa-house"></i>
+    <span>Home</span>
+  </a>
+  <a href="javascript:void(0)" class="fk-bar-item" data-bs-toggle="modal" data-bs-target="#sameRestaurantModal">
+    <i class="fa-solid fa-store"></i>
+    <span>Restaurants</span>
+  </a>
+  <a href="/cart" class="fk-bar-item position-relative">
+    <i class="fa-solid fa-cart-shopping"></i>
+    <span>Cart</span>
+    <span id="mobileCartBadge" class="position-absolute badge rounded-pill bg-danger" style="top: 2px; right: 22%; font-size: 0.62rem;">0</span>
+  </a>
+  <a href="/orders/track" class="fk-bar-item">
+    <i class="fa-solid fa-motorcycle"></i>
+    <span>Track</span>
+  </a>
+  <% if(currUser) { %>
+    <a href="/logout" class="fk-bar-item text-danger">
+      <i class="fa-solid fa-arrow-right-from-bracket"></i>
+      <span>Exit</span>
+    </a>
+  <% } else { %>
+    <a href="/login" class="fk-bar-item">
+      <i class="fa-solid fa-user"></i>
+      <span>Account</span>
+    </a>
+  <% } %>
+</div>
+
+<!-- Modal: Same Restaurant Search & Quick Picker (Existing All Items Fetcher) -->
+<div class="modal fade" id="sameRestaurantModal" tabindex="-1" aria-labelledby="sameRestaurantModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content rounded-4 border-0 shadow">
+      <div class="modal-header border-bottom pb-2">
+        <div>
+          <h5 class="modal-title fw-bold" id="sameRestaurantModalLabel"><i class="fa-solid fa-store text-danger me-2"></i>Filter by Restaurant</h5>
+          <p class="text-muted small mb-0">Search or select any restaurant to see all dishes from it</p>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="input-group mb-3">
+          <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+          <input type="text" id="manualRestSearchInput" class="form-control border-start-0 shadow-none" placeholder="Type restaurant name e.g. Aminia, Haji Biryani..." oninput="filterRestListInModal()">
+        </div>
+
+        <h6 class="small fw-bold text-muted mb-2">ALL RESTAURANTS IN DATABASE:</h6>
+        <div id="restaurantChipsContainer" class="d-flex flex-wrap gap-2">
+          <!-- Populated from all existing items -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <form id="editNameForm" action="/user/update-name" method="POST" class="d-none">
   <input type="hidden" name="newName" id="newNameInput" />
 </form>
-
 <form id="editAvatarForm" action="/user/update-avatar" method="POST" class="d-none">
   <input type="hidden" name="avatarData" id="avatarDataInput" />
 </form>
@@ -140,17 +210,18 @@
     .nav-pill-btn {
         display: inline-flex !important;
         align-items: center !important;
-        padding: 0.52rem 1.15rem !important;
+        padding: 0.42rem 0.85rem !important;
         border-radius: 50px !important;
         font-weight: 700 !important;
-        font-size: 0.9rem !important;
+        font-size: 0.85rem !important;
         color: #1e293b !important;
         text-decoration: none !important;
         background-color: transparent !important;
         border: 1.5px solid transparent !important;
-        transition: all 0.25s ease !important;
+        transition: all 0.2s ease !important;
+        white-space: nowrap !important;
     }
-    .icon-item { margin-right: 0.5rem; font-size: 1rem; }
+    .icon-item { margin-right: 0.4rem; font-size: 0.95rem; }
     .nav-all-food .icon-item { color: #fe424d; }
     .nav-track-order .icon-item { color: #10b981; }
     .nav-offers .icon-item { color: #f59e0b; }
@@ -161,8 +232,15 @@
         border-color: #ffdada !important;
         color: #fe424d !important;
         transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(254, 66, 77, 0.16) !important;
+        box-shadow: 0 4px 12px rgba(254, 66, 77, 0.16) !important;
     }
+
+    body.dark-mode .nav-pill-btn {
+        background-color: #D0C09E !important;
+        color: #000000 !important;
+        border: 1.5px solid #D0C09E !important;
+    }
+    body.dark-mode .nav-pill-btn .icon-item { color: #000000 !important; }
 
     .nav-auth-signup-btn {
         border: 1.5px solid #212529 !important;
@@ -175,45 +253,55 @@
         border: 1.5px solid #212529 !important;
     }
 
-    /* Dark Mode Capsule Color: #D0C09E & Solid Black Text */
-    body.dark-mode .nav-pill-btn {
-        background-color: #D0C09E !important;
-        color: #000000 !important;
-        border: 1.5px solid #D0C09E !important;
-        box-shadow: 0 4px 14px rgba(208, 192, 158, 0.25) !important;
-    }
-    body.dark-mode .nav-pill-btn .icon-item {
-        color: #000000 !important;
-    }
-    body.dark-mode .nav-pill-btn:hover {
-        background-color: #dfd2b5 !important;
-        border-color: #dfd2b5 !important;
-        color: #000000 !important;
-        transform: translateY(-3px) scale(1.03) !important;
-        box-shadow: 0 8px 20px rgba(208, 192, 158, 0.45) !important;
-    }
-
-    body.dark-mode .nav-auth-signup-btn {
-        border-color: #ffffff !important;
-        color: #ffffff !important;
-    }
-    body.dark-mode .nav-auth-login-btn {
-        background: #ffffff !important;
-        color: #000000 !important;
-        border-color: #ffffff !important;
-    }
-
     .profile-avatar-circle {
-        width: 40px; height: 40px; border-radius: 50%;
+        width: 36px; height: 36px; border-radius: 50%;
         background: linear-gradient(135deg, #fe424d 0%, #ec4899 100%);
         color: #ffffff; display: flex; align-items: center; justify-content: center;
-        font-weight: 700; font-size: 1.05rem; border: 2px solid #ffffff; overflow: hidden;
+        font-weight: 700; font-size: 0.95rem; border: 2px solid #ffffff; overflow: hidden;
     }
-    .profile-username-label {
-        font-size: 0.75rem; font-weight: 600; color: #1e293b;
-        max-width: 85px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1;
+
+    .flipkart-bottom-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        padding: 0.4rem 0.2rem;
+        z-index: 1050;
+        box-shadow: 0 -4px 16px rgba(0,0,0,0.08);
     }
-    body.dark-mode .profile-username-label { color: #ffffff !important; }
+    .fk-bar-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #64748b;
+        text-decoration: none;
+        font-size: 0.65rem;
+        font-weight: 700;
+        flex: 1;
+        transition: color 0.2s ease;
+    }
+    .fk-bar-item i {
+        font-size: 1.15rem;
+        margin-bottom: 2px;
+    }
+    .fk-bar-item.active, .fk-bar-item:hover {
+        color: #fe424d;
+    }
+    body.dark-mode .flipkart-bottom-bar {
+        background: #121212 !important;
+        border-top-color: #27272a !important;
+    }
+    body.dark-mode .fk-bar-item {
+        color: #a1a1aa !important;
+    }
+    body.dark-mode .fk-bar-item.active {
+        color: #D0C09E !important;
+    }
 </style>
 
 <script>
@@ -242,90 +330,81 @@ function refreshNavCartBadge() {
     const cart = JSON.parse(localStorage.getItem("hungrymate_cart") || "[]");
     const totalCount = cart.reduce((acc, item) => acc + (item.quantity || 1), 0);
     const badge = document.getElementById("navCartCountBadge");
+    const mobileBadge = document.getElementById("mobileCartBadge");
     if (badge) badge.innerText = totalCount;
+    if (mobileBadge) mobileBadge.innerText = totalCount;
 }
 document.addEventListener("DOMContentLoaded", refreshNavCartBadge);
 window.addEventListener("storage", refreshNavCartBadge);
 
-// Smart Food Names Autocomplete (Food Dishes Only)
-const popularFoodItems = [
-    "Chicken Biryani", "Mutton Dum Biryani", "Paneer Tikka Biryani", "Overloaded Farmhouse Pizza", 
-    "Peri Peri Chicken Pizza", "Cheese Garlic Bread", "Crispy Veg Maharaja Burger", "BBQ Chicken Burger", 
-    "Kolkata Chicken Roll", "Paneer Kathi Roll", "Steamed Chicken Momos", "Fried Veg Momos", 
-    "Peri Peri French Fries", "Paneer Butter Masala", "Dal Makhani", "Kadhai Paneer", "Butter Garlic Naan", 
-    "Butter Chicken", "Mutton Kosha", "Tandoori Chicken", "Chicken Tikka Kebab", "Maharaja Non-Veg Thali", 
-    "Pure Veg Deluxe Thali", "Crispy Masala Dosa", "Hot Gulab Jamun", "Belgian Chocolate Sundae", 
-    "Dutch Truffle Cake", "Red Velvet Pastry", "Belgian Chocolate Shake", "Cold Coffee"
-];
+// Read All Restaurants directly from page and build chips
+function populateRestaurantModal() {
+    const container = document.getElementById("restaurantChipsContainer");
+    if (!container) return;
 
-const sInput = document.getElementById("foodSearchInput");
-const sBox = document.getElementById("searchHistoryBox");
-const sList = document.getElementById("historyList");
-const sHeader = document.getElementById("searchDropdownHeader");
-const sClear = document.getElementById("clearHistoryBtn");
+    let rests = new Set();
+    const cards = document.querySelectorAll(".food-card-box");
+    cards.forEach(c => {
+        const r = c.getAttribute("data-restaurant");
+        if (r && r.trim() !== "") rests.add(r.trim());
+    });
 
-function renderSearchDropdown(items, isHint) {
-    sList.innerHTML = "";
-    if (items.length === 0) {
-        sBox.classList.add("d-none");
+    if (rests.size === 0) {
+        ["super star haji briyani", "Aminia Restaurant", "Oudh 1590", "Domino's Pizza", "Pizza Hut", "Haldiram's", "Wow! Momo", "Flurys Kolkata", "Burger King", "Cafe Coffee Day"].forEach(r => rests.add(r));
+    }
+
+    container.innerHTML = "";
+    Array.from(rests).sort().forEach(r => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "btn btn-sm btn-outline-secondary rounded-pill rest-chip-btn";
+        btn.innerHTML = `<i class="fa-solid fa-store me-1 text-danger"></i> ${r}`;
+        btn.onclick = () => {
+            selectRestaurantFilter(r);
+        };
+        container.appendChild(btn);
+    });
+}
+
+function filterRestListInModal() {
+    const q = (document.getElementById("manualRestSearchInput").value || "").toLowerCase().trim();
+    const btns = document.querySelectorAll(".rest-chip-btn");
+    btns.forEach(b => {
+        if (b.innerText.toLowerCase().includes(q)) {
+            b.style.display = "inline-block";
+        } else {
+            b.style.display = "none";
+        }
+    });
+}
+
+function selectRestaurantFilter(restName) {
+    const modalEl = document.getElementById('sameRestaurantModal');
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    if (modal) modal.hide();
+
+    if (!window.location.pathname.includes("/listings") || window.location.pathname.length > 10) {
+        window.location.href = `/listings?restaurant=${encodeURIComponent(restName)}`;
         return;
     }
-    sBox.classList.remove("d-none");
-    sHeader.innerHTML = isHint ? '<i class="fa-solid fa-utensils text-danger me-1"></i> FOOD DISHES' : '<i class="fa-solid fa-clock-rotate-left me-1"></i> RECENT SEARCHES';
-    sClear.style.display = isHint ? "none" : "inline";
 
-    items.forEach(txt => {
-        const li = document.createElement("li");
-        li.innerHTML = `<span><i class="fa-solid ${isHint ? 'fa-bowl-food text-warning' : 'fa-clock text-muted'} me-2"></i>${txt}</span>`;
-        li.onclick = () => {
-            sInput.value = txt;
-            sBox.classList.add("d-none");
-            saveSearchHistory(txt);
-            if (typeof applyAllFilters === "function") applyAllFilters();
-        };
-        sList.appendChild(li);
-    });
-}
-
-function saveSearchHistory(term) {
-    if (!term) return;
-    let hist = JSON.parse(localStorage.getItem("hungrymate_search_hist") || "[]");
-    hist = hist.filter(h => h.toLowerCase() !== term.toLowerCase());
-    hist.unshift(term);
-    if (hist.length > 5) hist.pop();
-    localStorage.setItem("hungrymate_search_hist", JSON.stringify(hist));
-}
-
-if (sInput) {
-    sInput.addEventListener("focus", () => {
-        if (!sInput.value.trim()) {
-            const hist = JSON.parse(localStorage.getItem("hungrymate_search_hist") || "[]");
-            renderSearchDropdown(hist, false);
-        }
-    });
-
-    sInput.addEventListener("input", () => {
-        const q = sInput.value.trim().toLowerCase();
-        if (!q) {
-            const hist = JSON.parse(localStorage.getItem("hungrymate_search_hist") || "[]");
-            renderSearchDropdown(hist, false);
-        } else {
-            const matches = popularFoodItems.filter(item => item.toLowerCase().includes(q));
-            renderSearchDropdown(matches, true);
-        }
-    });
-}
-
-if (sClear) {
-    sClear.addEventListener("click", () => {
-        localStorage.removeItem("hungrymate_search_hist");
-        sBox.classList.add("d-none");
-    });
-}
-
-document.addEventListener("click", (e) => {
-    if (!sBox.contains(e.target) && e.target !== sInput) {
-        sBox.classList.add("d-none");
+    if (typeof filterSpecificRestaurant === "function") {
+        filterSpecificRestaurant(restName);
     }
-});
+}
+
+document.addEventListener("DOMContentLoaded", populateRestaurantModal);
+
+// Search Sync for both Mobile & Desktop Search Inputs
+const dInput = document.getElementById("foodSearchInput");
+const mInput = document.getElementById("mobileFoodSearchInput");
+
+function syncSearch(val) {
+    if (dInput && dInput.value !== val) dInput.value = val;
+    if (mInput && mInput.value !== val) mInput.value = val;
+    if (typeof applyAllFilters === "function") applyAllFilters();
+}
+
+if (dInput) dInput.addEventListener("input", (e) => syncSearch(e.target.value));
+if (mInput) mInput.addEventListener("input", (e) => syncSearch(e.target.value));
 </script>
