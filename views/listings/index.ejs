@@ -1,14 +1,15 @@
 <% layout("/layouts/boilerplate") %>
 
 <style>
+    /* Top Category Horizontal Scroll */
     .top-action-bar {
         display: flex;
         align-items: center;
         justify-content: space-between;
         width: 100%;
         max-width: 100%;
-        padding: 0.4rem 0.1rem;
-        gap: 0.6rem;
+        padding: 0.4rem 0;
+        gap: 0.5rem;
         box-sizing: border-box;
     }
     .filter-wrapper {
@@ -64,12 +65,13 @@
         background-color: #ffffff;
         border: 1.5px solid #cbd5e1;
         border-radius: 30px;
-        padding: 0.25rem 0.6rem;
+        padding: 0.25rem 0.55rem;
         display: inline-flex;
         align-items: center;
         gap: 0.35rem;
         cursor: pointer;
         user-select: none;
+        flex-shrink: 0;
     }
     body.dark-mode .clickable-toggle-box {
         background-color: #121212 !important;
@@ -81,50 +83,10 @@
     /* Pure Responsive Grid Layout across All Devices */
     .pure-food-grid {
         display: grid !important;
-        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-        gap: 1.6rem !important;
         width: 100% !important;
         max-width: 100% !important;
-        margin-top: 0.8rem !important;
+        margin-top: 0.6rem !important;
         box-sizing: border-box !important;
-    }
-
-    @media (max-width: 991px) and (min-width: 576px) {
-        .pure-food-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-            gap: 1.2rem !important;
-        }
-    }
-
-    /* All Mobile Phones (Flipkart Card View - No Side Cut) */
-    @media (max-width: 575px) {
-        .pure-food-grid {
-            grid-template-columns: 1fr !important;
-            gap: 1rem !important;
-            margin-top: 0.5rem !important;
-            padding: 0 0.1rem !important;
-        }
-        .listing-card {
-            border-radius: 14px !important;
-            width: 100% !important;
-        }
-        .listing-card img {
-            height: 13.5rem !important;
-        }
-        .card-body {
-            padding: 0.75rem !important;
-        }
-        .card-action-footer {
-            padding: 0.5rem 0 !important;
-            margin-top: 0.5rem !important;
-        }
-        .btn-add-cart-pill {
-            padding: 0.35rem 0.95rem !important;
-            font-size: 0.8rem !important;
-        }
-        .food-card-price {
-            font-size: 1.15rem !important;
-        }
     }
 
     .listing-card {
@@ -136,13 +98,15 @@
         background: #ffffff;
         display: flex;
         flex-direction: column;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
     }
     .listing-card:hover {
         transform: translateY(-4px);
         box-shadow: 0 10px 24px rgba(15,23,42,0.12) !important;
     }
     .listing-card img {
-        height: 16.5rem;
         width: 100% !important;
         object-fit: cover !important;
     }
@@ -171,13 +135,13 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-top: 1rem;
-        padding: 0.75rem 0.4rem 0.2rem 0.4rem;
+        margin-top: 0.8rem;
+        padding: 0.6rem 0.2rem 0.1rem 0.2rem;
         border-top: 1px solid #f1f5f9;
     }
     .food-card-price {
         font-weight: 800;
-        font-size: 1.3rem;
+        font-size: 1.25rem;
         color: #fe424d;
         letter-spacing: -0.5px;
     }
@@ -187,7 +151,7 @@
         background: transparent;
         font-weight: 700;
         font-size: 0.85rem;
-        padding: 0.4rem 1.15rem;
+        padding: 0.38rem 1.1rem;
         border-radius: 50px;
         transition: all 0.25s ease;
     }
@@ -242,7 +206,6 @@
     </div>
 </div>
 
-<!-- Active Restaurant Filter Notification Strip (Fix: Show All resets without redirect) -->
 <div id="activeRestaurantAlert" class="alert alert-warning py-2 px-3 small d-flex justify-content-between align-items-center my-2 d-none rounded-3">
     <span><i class="fa-solid fa-store text-danger me-1"></i> Showing all food from: <strong id="filterRestName">Restaurant</strong></span>
     <button type="button" class="btn btn-sm btn-dark rounded-pill py-0 px-3 fw-bold" onclick="clearRestaurantFilter()">Show All</button>
@@ -331,12 +294,10 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Fixed: Show All simply resets filter without any route redirection
     function clearRestaurantFilter() {
         activeRestaurantFilter = "";
         document.getElementById("activeRestaurantAlert").classList.add("d-none");
         
-        // Remove query parameter from URL without page reload
         if (window.history.replaceState) {
             const url = new URL(window.location);
             url.searchParams.delete('restaurant');

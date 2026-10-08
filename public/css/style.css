@@ -1,5 +1,11 @@
 /* =========================================================
-   HUNGRYMATE CORE STYLES & FLIPKART MOBILE RESPONSIVE ENGINE
+   HUNGRYMATE DEVICE-SPECIFIC ADAPTIVE RESPONSIVE ENGINE
+   Baseline Dimensions:
+   - Small Phone: 360px x 800px
+   - Average Phone: 390px x 844px
+   - Large Phone: 414px - 440px
+   - Tablet: 768px - 1024px
+   - Laptop / Desktop: 1200px+
    ========================================================= */
 
 :root {
@@ -9,68 +15,157 @@
   --hm-bg-light: #faf7f2;
 }
 
-* {
-  box-sizing: border-box;
+*, *::before, *::after {
+  box-sizing: border-box !important;
 }
 
-html, body {
+html {
+  width: 100% !important;
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
   margin: 0 !important;
   padding: 0 !important;
+}
+
+body {
   width: 100% !important;
-  max-width: 100% !important;
+  max-width: 100vw !important;
+  margin: 0 !important;
+  padding: 0 !important;
   overflow-x: hidden !important;
   font-family: 'Plus Jakarta Sans', sans-serif;
   background-color: var(--hm-bg-light);
+  color: #0f172a;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding-bottom: 70px !important; /* Space for Flipkart mobile bottom bar */
 }
 
-/* NAVBAR: Desktop single line row + mobile wrap */
+@media (min-width: 992px) {
+  body {
+    padding-bottom: 0px !important;
+  }
+}
+
+.main-body-container {
+  flex: 1 0 auto;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 12px !important;
+  overflow-x: hidden !important;
+}
+
+/* NAVBAR BASELINE */
 .navbar {
   min-height: 4.2rem !important;
   height: auto !important;
   background-color: #ffffff;
   padding: 0.5rem 1rem !important;
   width: 100% !important;
-  box-sizing: border-box !important;
+  max-width: 100% !important;
 }
 
-/* Mobile Screens (Phone Cards No-Cut Fix) */
-@media (max-width: 575px) {
+/* 1. CHHOTA PHONE (360px - 389px) */
+@media (max-width: 389px) {
   .main-body-container {
-    padding-left: 0.5rem !important;
-    padding-right: 0.5rem !important;
+    padding: 0 8px !important;
   }
-
   .pure-food-grid {
     grid-template-columns: 1fr !important;
-    gap: 0.85rem !important;
-    width: 100% !important;
-    margin-top: 0.5rem !important;
+    gap: 0.75rem !important;
   }
-
   .listing-card {
-    border-radius: 16px !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 auto !important;
+    border-radius: 14px !important;
   }
-
   .listing-card img {
-    height: 14rem !important;
-    width: 100% !important;
-    object-fit: cover !important;
+    height: 13rem !important;
   }
-
-  .card-body {
-    padding: 0.85rem !important;
+  .food-card-price {
+    font-size: 1.15rem !important;
   }
-
-  .card-action-footer {
-    padding: 0.4rem 0.1rem !important;
-    margin-top: 0.6rem !important;
+  .btn-add-cart-pill {
+    padding: 0.35rem 0.85rem !important;
+    font-size: 0.78rem !important;
+  }
+  .track-card-box {
+    padding: 1rem 0.75rem !important;
+    border-radius: 16px !important;
   }
 }
 
-/* FOOTER RESTORED TO ORIGINAL (No Black Color) */
+/* 2. AVERAGE PHONE (390px - 413px) */
+@media (min-width: 390px) and (max-width: 413px) {
+  .main-body-container {
+    padding: 0 12px !important;
+  }
+  .pure-food-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.9rem !important;
+  }
+  .listing-card img {
+    height: 14rem !important;
+  }
+  .track-card-box {
+    padding: 1.25rem 1rem !important;
+    border-radius: 18px !important;
+  }
+}
+
+/* 3. BADA PHONE (414px - 575px) */
+@media (min-width: 414px) and (max-width: 575px) {
+  .main-body-container {
+    padding: 0 14px !important;
+  }
+  .pure-food-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+  .listing-card img {
+    height: 15rem !important;
+  }
+  .track-card-box {
+    padding: 1.5rem 1.2rem !important;
+    border-radius: 20px !important;
+  }
+}
+
+/* 4. TABLET (576px - 991px) */
+@media (min-width: 576px) and (max-width: 991px) {
+  .main-body-container {
+    padding: 0 18px !important;
+  }
+  .pure-food-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 1.25rem !important;
+  }
+  .listing-card img {
+    height: 15.5rem !important;
+  }
+  .track-card-box {
+    padding: 1.8rem 1.5rem !important;
+  }
+}
+
+/* 5. LAPTOP / DESKTOP (992px+) */
+@media (min-width: 992px) {
+  .main-body-container {
+    padding: 0 24px !important;
+  }
+  .pure-food-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 1.8rem !important;
+  }
+  .listing-card img {
+    height: 16.5rem !important;
+  }
+  .track-card-box {
+    padding: 2.2rem !important;
+  }
+}
+
+/* FOOTER (Restored Clean Light Background) */
 .f-info {
   text-align: center;
   padding: 2rem 1rem;
@@ -78,6 +173,7 @@ html, body {
   border-top: 1.5px solid #e2e8f0 !important;
   color: #334155 !important;
   margin-top: auto;
+  width: 100% !important;
 }
 
 .f-info-brand {
@@ -108,7 +204,6 @@ html, body {
   transform: translateY(-2px);
 }
 
-/* Dark Mode Only for Footer */
 body.dark-mode .f-info {
   background-color: #09090b !important;
   border-top-color: #27272a !important;

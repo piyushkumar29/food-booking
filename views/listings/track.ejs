@@ -1,137 +1,184 @@
 <% layout("/layouts/boilerplate") %>
 
-<!-- Confetti & PDF Libraries -->
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
     .track-card-box {
-        background: #ffffff; border-radius: 24px; padding: 2.2rem;
-        border: 1.5px solid #e2e8f0; box-shadow: 0 16px 36px rgba(15,23,42,0.08);
-        max-width: 950px; margin: 2rem auto 4rem auto;
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 1.25rem;
+        border: 1.5px solid #e2e8f0;
+        box-shadow: 0 10px 30px rgba(15,23,42,0.06);
+        max-width: 950px;
+        width: 100%;
+        margin: 1rem auto 3rem auto;
+        box-sizing: border-box !important;
     }
     .delivery-partner-badge {
-        background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 16px;
-        padding: 1rem 1.4rem; display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;
+        background: #f8fafc;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 14px;
+        padding: 0.85rem 1rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
     }
     .curved-track-container {
-        position: relative; width: 100%; height: 260px; margin: 1.5rem 0;
+        position: relative;
+        width: 100%;
+        height: 180px;
+        margin: 1rem 0;
+        overflow: hidden;
     }
     #deliveryBikeElement {
-        position: absolute; font-size: 2.4rem; color: #f59e0b;
-        filter: drop-shadow(0 4px 12px rgba(0,0,0,0.35));
-        transform: translate(-50%, -50%); transition: transform 0.05s linear;
+        position: absolute;
+        font-size: 2rem;
+        color: #f59e0b;
+        filter: drop-shadow(0 3px 8px rgba(0,0,0,0.3));
+        transform: translate(-50%, -50%);
+        transition: transform 0.05s linear;
         z-index: 10;
     }
     body.dark-mode .track-card-box {
-        background: #121212 !important; border-color: #27272a !important; color: #ffffff !important;
+        background: #121212 !important;
+        border-color: #27272a !important;
+        color: #ffffff !important;
     }
     body.dark-mode .delivery-partner-badge {
-        background: #18181b !important; border-color: #3f3f46 !important; color: #ffffff !important;
+        background: #18181b !important;
+        border-color: #3f3f46 !important;
+        color: #ffffff !important;
     }
-    body.dark-mode #trackDestAddress, 
-    body.dark-mode #trackOrderTime {
+    body.dark-mode #trackDestAddress, body.dark-mode #trackOrderTime {
         color: #ffffff !important;
     }
 
     #deliveryCompletedBanner {
         background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        color: #ffffff; border-radius: 20px; padding: 1.8rem; text-align: center; margin-bottom: 2rem;
+        color: #ffffff;
+        border-radius: 16px;
+        padding: 1.25rem;
+        text-align: center;
+        margin-bottom: 1.5rem;
     }
 
-    #invoicePrintSection {
-        background: #ffffff; color: #000000; padding: 2.5rem; border-radius: 12px; font-family: 'Plus Jakarta Sans', sans-serif;
+    .excel-pdf-container {
+        padding: 25px;
+        background: #ffffff;
+        color: #000000;
+        font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+    }
+    .excel-table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 2px solid #000000;
+        margin-top: 12px;
+        margin-bottom: 15px;
+    }
+    .excel-table th, .excel-table td {
+        border: 1px solid #000000;
+        padding: 8px 10px;
+        font-size: 0.85rem;
+    }
+    .excel-table th {
+        background-color: #f1f5f9;
+        font-weight: 800;
     }
 </style>
 
 <div class="track-card-box">
     
-    <!-- Congratulations Celebration Notification (Delivered State) -->
-    <div id="deliveryCompletedBanner" class="d-none shadow-lg">
-        <h3 class="fw-bold mb-1"><i class="fa-solid fa-circle-check me-2"></i>Hurray! Food Delivered Successfully</h3>
-        <p class="mb-3">Your order was handed over at your doorstep. Enjoy your hot meal!</p>
-        <button class="btn btn-light rounded-pill px-4 py-2 fw-bold text-success shadow" onclick="downloadCurrentReceiptPdf()">
-            <i class="fa-solid fa-file-invoice-dollar me-2"></i>Download Current Order Receipt (PDF)
+    <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+        <span class="small fw-bold text-muted"><i class="fa-solid fa-list-check me-1"></i> ACTIVE ORDERS:</span>
+        <div id="multiOrdersTabStrip" class="d-flex gap-2 flex-wrap"></div>
+    </div>
+
+    <div id="deliveryCompletedBanner" class="d-none shadow-sm">
+        <h4 class="fw-bold mb-1"><i class="fa-solid fa-circle-check me-1"></i>Hurray! Food Delivered Successfully</h4>
+        <p class="small mb-2">Your meal was handed over hot & fresh. Enjoy your food!</p>
+        <button class="btn btn-light rounded-pill px-3 py-1 fw-bold text-success shadow-sm btn-sm" onclick="downloadCurrentReceiptPdf()">
+            <i class="fa-solid fa-file-invoice-dollar me-1"></i>Download Cash Memo Receipt (PDF)
         </button>
     </div>
 
-    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center border-bottom pb-3 mb-3 gap-2">
         <div>
-            <h4 class="fw-bold mb-0" style="color: #fe424d;"><i class="fa-solid fa-motorcycle me-2"></i>Live Order Delivery Tracking</h4>
-            <span class="small" style="color: #a1a1aa;">Order ID: <strong id="trackOrderId" class="text-warning">HM-NONE</strong></span>
+            <h5 class="fw-bold mb-0 text-danger"><i class="fa-solid fa-motorcycle me-1"></i>Live Order Delivery Tracking</h5>
+            <span class="small text-muted">Order ID: <strong id="trackOrderId" class="text-warning">HM-NONE</strong></span>
         </div>
-        <div class="text-end">
-            <span class="badge bg-warning text-dark px-3 py-2 fs-6 rounded-pill">
-                Remaining Time: <strong id="etaCounter">-- mins</strong>
+        <div class="d-flex align-items-center gap-2">
+            <button id="cancelOrderBtn" class="btn btn-sm btn-outline-danger rounded-pill fw-bold" onclick="cancelActiveOrder()">
+                <i class="fa-solid fa-ban me-1"></i> Cancel
+            </button>
+            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold">
+                ETA: <strong id="etaCounter">-- mins</strong>
             </span>
         </div>
     </div>
 
-    <!-- Delivery Hero Details -->
     <div class="delivery-partner-badge">
-        <div class="d-flex align-items-center gap-3">
-            <div class="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center fw-bold fs-4" style="width: 50px; height: 50px;">
+        <div class="d-flex align-items-center gap-2">
+            <div class="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center fw-bold fs-5" style="width: 44px; height: 44px;">
                 <i class="fa-solid fa-helmet-safety"></i>
             </div>
             <div>
-                <h6 class="fw-bold mb-0">Rahul Verma <span class="badge bg-secondary ms-1">ID: HM-DEL-984</span></h6>
-                <small class="text-muted"><i class="fa-solid fa-star text-warning"></i> 4.9 Rating &bull; Vaccinated Delivery Partner</small>
+                <h6 class="fw-bold mb-0" id="heroNameText" style="font-size: 0.95rem;">Rahul Verma <span class="badge bg-secondary ms-1" id="heroIdBadge" style="font-size: 0.65rem;">ID: HM-DEL-984</span></h6>
+                <small class="text-muted" style="font-size: 0.75rem;"><i class="fa-solid fa-star text-warning"></i> 4.9 &bull; Vaccinated Partner</small>
             </div>
         </div>
         <div>
-            <a href="tel:+919876543210" class="btn btn-outline-success rounded-pill px-3 fw-bold btn-sm">
-                <i class="fa-solid fa-phone me-1"></i> Call +91 98765 43210
+            <a id="heroCallLink" href="tel:+919876543210" class="btn btn-outline-success rounded-pill px-3 py-1 fw-bold btn-sm">
+                <i class="fa-solid fa-phone me-1"></i> Call <span id="heroPhoneText">+91 98765 43210</span>
             </a>
         </div>
     </div>
 
-    <!-- Chowmein / Maggi Multi-Curved Dynamic Route -->
     <div class="curved-track-container">
-        <svg viewBox="0 0 940 240" width="100%" height="100%">
-            <path id="routeCurve" d="M 40,190 C 130,40 210,240 310,80 C 420,240 500,30 620,180 C 730,240 820,30 900,120" fill="none" stroke="#cbd5e1" stroke-width="10" stroke-linecap="round" stroke-dasharray="10,8" />
-            
-            <circle cx="40" cy="190" r="7" fill="#fe424d" />
-            <circle cx="310" cy="80" r="7" fill="#f59e0b" />
-            <circle cx="620" cy="180" r="7" fill="#3b82f6" />
-            <circle cx="900" cy="120" r="7" fill="#10b981" />
+        <svg viewBox="0 0 940 240" preserveAspectRatio="none" width="100%" height="100%">
+            <path id="routeCurve" d="M 40,190 C 130,40 210,240 310,80 C 420,240 500,30 620,180 C 730,240 820,30 900,120" fill="none" stroke="#cbd5e1" stroke-width="12" stroke-linecap="round" stroke-dasharray="10,8" />
+            <circle cx="40" cy="190" r="9" fill="#fe424d" />
+            <circle cx="310" cy="80" r="9" fill="#f59e0b" />
+            <circle cx="620" cy="180" r="9" fill="#3b82f6" />
+            <circle cx="900" cy="120" r="9" fill="#10b981" />
         </svg>
         <i class="fa-solid fa-motorcycle" id="deliveryBikeElement"></i>
     </div>
 
-    <!-- 4 Dynamic Checkpoint Stations Based on Actual Address -->
-    <div class="row text-center fw-bold small g-2 mb-3">
-        <div class="col-3 text-danger" id="stnKitchen"><i class="fa-solid fa-kitchen-set me-1"></i> 1. Kitchen Prepared</div>
-        <div class="col-3 text-warning" id="stnTransit1"><i class="fa-solid fa-road me-1"></i> 2. Main Expressway</div>
-        <div class="col-3 text-primary" id="stnTransit2"><i class="fa-solid fa-map-pin me-1"></i> 3. Local Sector Checkpoint</div>
-        <div class="col-3 text-success" id="stnDoorstep"><i class="fa-solid fa-house-chimney me-1"></i> 4. Customer Doorstep</div>
+    <div class="row text-center fw-bold g-2 mb-3" style="font-size: 0.75rem;">
+        <div class="col-6 col-sm-3 text-danger text-truncate" id="stnKitchen"><i class="fa-solid fa-kitchen-set me-1"></i> 1. Kitchen</div>
+        <div class="col-6 col-sm-3 text-warning text-truncate" id="stnTransit1"><i class="fa-solid fa-road me-1"></i> 2. Expressway</div>
+        <div class="col-6 col-sm-3 text-primary text-truncate" id="stnTransit2"><i class="fa-solid fa-map-pin me-1"></i> 3. Local Sector</div>
+        <div class="col-6 col-sm-3 text-success text-truncate" id="stnDoorstep"><i class="fa-solid fa-house-chimney me-1"></i> 4. Doorstep</div>
     </div>
 
-    <div class="row mt-4 pt-3 border-top g-3">
-        <div class="col-md-6">
-            <h6 class="fw-bold mb-1 text-primary"><i class="fa-solid fa-location-arrow me-1"></i> Delivering To:</h6>
-            <p id="trackDestAddress" class="small mb-0">No active delivery in progress.</p>
+    <div class="row mt-3 pt-3 border-top g-2">
+        <div class="col-12 col-md-6">
+            <h6 class="fw-bold mb-1 text-primary small"><i class="fa-solid fa-location-arrow me-1"></i> Delivering To:</h6>
+            <p id="trackDestAddress" class="small mb-0 text-muted">No active delivery in progress.</p>
         </div>
-        <div class="col-md-6 text-md-end">
-            <h6 class="fw-bold mb-1 text-success"><i class="fa-solid fa-clock me-1"></i> Order Placed Time:</h6>
-            <p id="trackOrderTime" class="small mb-0">--:--:--</p>
+        <div class="col-12 col-md-6 text-md-end">
+            <h6 class="fw-bold mb-1 text-success small"><i class="fa-solid fa-clock me-1"></i> Order Placed Time:</h6>
+            <p id="trackOrderTime" class="small mb-0 text-muted">--:--:--</p>
         </div>
     </div>
 
-    <!-- User Account Order History & Receipts -->
-    <div class="mt-5 pt-4 border-top">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="fw-bold mb-0"><i class="fa-solid fa-clock-rotate-left text-danger me-2"></i>Past Order Receipts & History</h5>
-            <button class="btn btn-outline-warning btn-sm rounded-pill px-3 fw-bold text-dark" onclick="downloadCurrentReceiptPdf()">
-                <i class="fa-solid fa-receipt me-1"></i> Download Current Receipt
-            </button>
+    <div class="mt-4 pt-3 border-top">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="fw-bold mb-0"><i class="fa-solid fa-clock-rotate-left text-danger me-1"></i>Past Order Receipts & History</h6>
+            <small class="text-muted" style="font-size: 0.72rem;">Click 📄 for PDF</small>
         </div>
         <div class="table-responsive">
-            <table class="table table-hover align-middle">
+            <table class="table table-hover align-middle" style="font-size: 0.85rem;">
                 <thead class="table-light">
                     <tr>
-                        <th>Order ID</th>
-                        <th>Delivered Location</th>
-                        <th>Delivery Hero</th>
+                        <th>Order</th>
+                        <th>Location</th>
+                        <th>Agent</th>
+                        <th>Duration</th>
                         <th>Amount</th>
                         <th>Status</th>
                         <th>Action</th>
@@ -143,80 +190,131 @@
     </div>
 </div>
 
-<!-- Printable Cash Memo Invoice Layout -->
-<div id="invoiceContainer" style="display: none;">
-    <div id="invoicePrintSection">
-        <div class="d-flex justify-content-between border-bottom pb-3 mb-3">
-            <div>
-                <h2 style="color: #fe424d; font-weight: 800; margin: 0;">HUNGRYMATE</h2>
-                <small>Official Tax Invoice & Cash Memo</small>
-            </div>
-            <div class="text-end">
-                <h5 id="invOrderId" class="fw-bold mb-0">HM-998877</h5>
-                <small id="invOrderDate">Date: 2026</small>
-            </div>
-        </div>
-        <div class="row my-3">
-            <div class="col-6">
-                <strong>Customer Details:</strong>
-                <p id="invCustomerInfo" class="small text-muted mb-0"></p>
-                <p id="invCustomerAddress" class="small text-muted mb-0"></p>
-            </div>
-            <div class="col-6 text-end">
-                <strong>Delivery Partner:</strong>
-                <p id="invDeliveryPartner" class="small text-muted mb-0">Rahul Verma (+91 98765 43210)</p>
-                <p class="small text-muted mb-0">Partner ID: HM-DEL-984</p>
-            </div>
-        </div>
-        <table class="table table-bordered my-3">
-            <thead>
-                <tr class="table-light"><th>Item Description</th><th>Qty</th><th class="text-end">Price</th></tr>
-            </thead>
-            <tbody id="invItemsBody"></tbody>
-        </table>
-        <div class="text-end">
-            <p class="mb-1">Platform Fee: &#8377;9</p>
-            <p class="mb-1 text-success">Delivery & Handling: FREE (&#8377;0)</p>
-            <h4 class="fw-bold mt-2">Total Paid: &#8377;<span id="invTotalPaid">0</span></h4>
-        </div>
-    </div>
-</div>
-
 <script>
     let isDeliveredComplete = false;
+    let currentAnimInterval = null;
+    let selectedOrderIndex = 0;
+
+    const deliveryHeroes = [
+        { name: "Rahul Verma", id: "HM-DEL-984", phone: "+91 98765 43210" },
+        { name: "Amitabh Sen", id: "HM-DEL-412", phone: "+91 98301 22415" },
+        { name: "Subhash Mondal", id: "HM-DEL-773", phone: "+91 89104 55621" },
+        { name: "Rohan Mukherjee", id: "HM-DEL-291", phone: "+91 94331 88902" },
+        { name: "Vikram Das", id: "HM-DEL-658", phone: "+91 97482 11340" }
+    ];
 
     document.addEventListener("DOMContentLoaded", () => {
-        const order = JSON.parse(localStorage.getItem("hungrymate_active_order") || "null");
+        syncAllOrdersLifecycle();
+        setupActiveOrderTabs();
+        renderHistoryTable();
+    });
+
+    function syncAllOrdersLifecycle() {
+        let history = JSON.parse(localStorage.getItem("hungrymate_order_history") || "[]");
+        let updated = false;
+
+        history.forEach(ord => {
+            if (!ord.isDelivered && !ord.isCancelled) {
+                const totalMs = (ord.totalDurationMins || 25) * 60 * 1000;
+                const elapsed = Date.now() - (ord.timestampStart || Date.now());
+                if (elapsed >= totalMs) {
+                    ord.isDelivered = true;
+                    updated = true;
+                }
+            }
+        });
+
+        if (updated) {
+            localStorage.setItem("hungrymate_order_history", JSON.stringify(history));
+        }
+    }
+
+    function setupActiveOrderTabs() {
+        let history = JSON.parse(localStorage.getItem("hungrymate_order_history") || "[]");
+        const tabStrip = document.getElementById("multiOrdersTabStrip");
+        tabStrip.innerHTML = "";
+
+        if (history.length === 0) {
+            loadOrderToTrack(null);
+            return;
+        }
+
+        history.forEach((ord, idx) => {
+            const btn = document.createElement("button");
+            const isDeliv = ord.isDelivered;
+            const isCanc = ord.isCancelled;
+
+            let badgeClass = "btn-outline-secondary";
+            if (idx === selectedOrderIndex) badgeClass = "btn-danger";
+            else if (isDeliv) badgeClass = "btn-outline-success";
+
+            btn.className = `btn btn-sm rounded-pill fw-bold ${badgeClass}`;
+            btn.style.fontSize = "0.75rem";
+            btn.innerHTML = `<i class="fa-solid fa-motorcycle me-1"></i> #${ord.orderId} ${isDeliv ? '(Delivered)' : (isCanc ? '(Cancelled)' : '')}`;
+            btn.onclick = () => {
+                selectedOrderIndex = idx;
+                setupActiveOrderTabs();
+            };
+            tabStrip.appendChild(btn);
+        });
+
+        loadOrderToTrack(history[selectedOrderIndex] || history[0]);
+    }
+
+    function loadOrderToTrack(order) {
+        if (currentAnimInterval) clearInterval(currentAnimInterval);
+
         const bike = document.getElementById("deliveryBikeElement");
         const path = document.getElementById("routeCurve");
         const etaText = document.getElementById("etaCounter");
+        const cancelBtn = document.getElementById("cancelOrderBtn");
+        const compBanner = document.getElementById("deliveryCompletedBanner");
 
         if (order) {
             document.getElementById("trackOrderId").innerText = order.orderId;
             document.getElementById("trackDestAddress").innerText = order.address;
             document.getElementById("trackOrderTime").innerText = order.placedAt;
 
-            const city = (order.address || "").split(',')[0] || "Destination Area";
+            const hero = order.deliveryHeroData || deliveryHeroes[Math.abs(parseInt(order.orderId.replace(/\D/g,'')) || 0) % deliveryHeroes.length];
+            document.getElementById("heroNameText").innerText = hero.name + ` (${hero.id})`;
+            document.getElementById("heroPhoneText").innerText = hero.phone;
+            document.getElementById("heroCallLink").href = `tel:${hero.phone.replace(/\s+/g, '')}`;
+
+            const city = (order.address || "").split(',')[0] || "Destination";
             const rest = order.restaurantName || "Kitchen";
             document.getElementById("stnKitchen").innerHTML = `<i class="fa-solid fa-kitchen-set me-1"></i> 1. ${rest}`;
-            document.getElementById("stnTransit1").innerHTML = `<i class="fa-solid fa-road me-1"></i> 2. ${city} Expressway`;
-            document.getElementById("stnTransit2").innerHTML = `<i class="fa-solid fa-map-pin me-1"></i> 3. ${city} Sector`;
-            document.getElementById("stnDoorstep").innerHTML = `<i class="fa-solid fa-house-chimney me-1"></i> 4. ${order.customerName}'s Doorstep`;
+            document.getElementById("stnTransit1").innerHTML = `<i class="fa-solid fa-road me-1"></i> 2. ${city} Exp`;
+            document.getElementById("stnTransit2").innerHTML = `<i class="fa-solid fa-map-pin me-1"></i> 3. ${city} Sec`;
+            document.getElementById("stnDoorstep").innerHTML = `<i class="fa-solid fa-house-chimney me-1"></i> 4. ${order.customerName}`;
 
             const durationTotalMs = (order.totalDurationMins || 25) * 60 * 1000;
             const startTime = order.timestampStart || Date.now();
             const elapsed = Date.now() - startTime;
             const pathLength = path.getTotalLength();
 
+            if (order.isCancelled) {
+                etaText.innerText = "Cancelled";
+                cancelBtn.classList.add("d-none");
+                bike.style.display = "none";
+                compBanner.classList.add("d-none");
+                return;
+            }
+
             if (order.isDelivered || elapsed >= durationTotalMs) {
                 isDeliveredComplete = true;
                 const point = path.getPointAtLength(pathLength);
                 bike.style.left = ((point.x / 940) * 100) + "%";
                 bike.style.top = ((point.y / 240) * 100) + "%";
-                etaText.innerText = "Order Delivered!";
-                document.getElementById("deliveryCompletedBanner").classList.remove("d-none");
+                bike.style.display = "block";
+                etaText.innerText = "Delivered!";
+                cancelBtn.classList.add("d-none");
+                compBanner.classList.remove("d-none");
             } else {
-                const animInterval = setInterval(() => {
+                bike.style.display = "block";
+                cancelBtn.classList.remove("d-none");
+                compBanner.classList.add("d-none");
+
+                currentAnimInterval = setInterval(() => {
                     const currentElapsed = Date.now() - startTime;
                     const progress = Math.min(currentElapsed / durationTotalMs, 1);
                     
@@ -224,37 +322,62 @@
                     bike.style.left = ((point.x / 940) * 100) + "%";
                     bike.style.top = ((point.y / 240) * 100) + "%";
 
+                    if (progress > 0.85) {
+                        cancelBtn.classList.add("d-none");
+                    }
+
                     const remainingSecs = Math.max(Math.floor((durationTotalMs - currentElapsed) / 1000), 0);
                     const m = Math.floor(remainingSecs / 60);
                     const s = remainingSecs % 60;
                     etaText.innerText = `${m}:${s < 10 ? '0' : ''}${s} mins`;
 
                     if (progress >= 1) {
-                        etaText.innerText = "Order Delivered!";
-                        clearInterval(animInterval);
+                        etaText.innerText = "Delivered!";
+                        clearInterval(currentAnimInterval);
                         isDeliveredComplete = true;
 
                         order.isDelivered = true;
-                        localStorage.setItem("hungrymate_active_order", JSON.stringify(order));
+                        updateLocalOrderRecord(order);
 
-                        // Also update state in order history
-                        let hist = JSON.parse(localStorage.getItem("hungrymate_order_history") || "[]");
-                        if(hist.length > 0) { hist[0].isDelivered = true; localStorage.setItem("hungrymate_order_history", JSON.stringify(hist)); }
-
-                        document.getElementById("deliveryCompletedBanner").classList.remove("d-none");
+                        compBanner.classList.remove("d-none");
+                        cancelBtn.classList.add("d-none");
+                        setupActiveOrderTabs();
                         renderHistoryTable();
                         confetti({ particleCount: 160, spread: 85, origin: { y: 0.5 } });
                     }
                 }, 200);
             }
         } else {
-            document.getElementById("trackDestAddress").innerText = "No active order placed yet! Order food items from the menu.";
+            document.getElementById("trackDestAddress").innerText = "No active orders found!";
             etaText.innerText = "Idle";
             bike.style.display = "none";
+            cancelBtn.classList.add("d-none");
+            compBanner.classList.add("d-none");
         }
+    }
 
+    function cancelActiveOrder() {
+        let history = JSON.parse(localStorage.getItem("hungrymate_order_history") || "[]");
+        let currentOrder = history[selectedOrderIndex];
+
+        if (!currentOrder) return;
+        if (!confirm(`Are you sure you want to cancel Order #${currentOrder.orderId}?`)) return;
+
+        currentOrder.isCancelled = true;
+        updateLocalOrderRecord(currentOrder);
+        alert(`Order #${currentOrder.orderId} cancelled successfully!`);
+        setupActiveOrderTabs();
         renderHistoryTable();
-    });
+    }
+
+    function updateLocalOrderRecord(updatedOrder) {
+        let history = JSON.parse(localStorage.getItem("hungrymate_order_history") || "[]");
+        const idx = history.findIndex(o => o.orderId === updatedOrder.orderId);
+        if (idx !== -1) {
+            history[idx] = updatedOrder;
+            localStorage.setItem("hungrymate_order_history", JSON.stringify(history));
+        }
+    }
 
     function renderHistoryTable() {
         const history = JSON.parse(localStorage.getItem("hungrymate_order_history") || "[]");
@@ -262,20 +385,31 @@
         tbody.innerHTML = "";
 
         if (history.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">No completed orders found in this account!</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-3">No orders found in your account history!</td></tr>';
         } else {
             history.forEach((h, idx) => {
+                const hero = h.deliveryHeroData || deliveryHeroes[idx % deliveryHeroes.length];
+                let statusBadge = '<span class="badge bg-warning text-dark">In-Transit</span>';
+                if (h.isCancelled) statusBadge = '<span class="badge bg-danger">Cancelled</span>';
+                else if (h.isDelivered) statusBadge = '<span class="badge bg-success">Delivered</span>';
+
                 tbody.innerHTML += `
                     <tr>
-                        <td><strong>${h.orderId}</strong></td>
-                        <td class="text-truncate" style="max-width: 180px;">${h.address}</td>
-                        <td>${h.deliveryHero || 'Rahul Verma'} <small class="text-muted">(${h.deliveryHeroId || 'HM-DEL-984'})</small></td>
+                        <td><strong>#${h.orderId}</strong></td>
+                        <td class="text-truncate" style="max-width: 130px;">${h.address}</td>
+                        <td>${hero.name}</td>
+                        <td>${h.totalDurationMins || 25}m</td>
                         <td><strong class="text-danger">&#8377;${h.totalPaid}</strong></td>
-                        <td><span class="badge ${h.isDelivered ? 'bg-success' : 'bg-warning text-dark'}">${h.isDelivered ? 'Delivered' : 'In-Transit'}</span></td>
+                        <td>${statusBadge}</td>
                         <td>
-                            <button class="btn btn-sm btn-outline-danger fw-bold rounded-pill" onclick="downloadSpecificOrderReceipt(${idx})">
-                                <i class="fa-solid fa-download me-1"></i> Receipt
-                            </button>
+                            <div class="d-flex gap-1">
+                                <button class="btn btn-sm btn-outline-danger rounded-pill py-0 px-2" title="Download Excel PDF" onclick="downloadSpecificOrderReceipt(${idx})">
+                                    <i class="fa-solid fa-file-pdf"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-warning rounded-pill py-0 px-2 text-dark" title="Review" onclick="goToFeedbackPage('${h.orderId}', ${h.isDelivered ? 'true' : 'false'})">
+                                    <i class="fa-solid fa-star"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 `;
@@ -283,66 +417,131 @@
         }
     }
 
-    // Download past order receipt from history table
     function downloadSpecificOrderReceipt(index) {
         const history = JSON.parse(localStorage.getItem("hungrymate_order_history") || "[]");
         const targetOrder = history[index];
         if(!targetOrder) return;
 
-        if(!targetOrder.isDelivered && index === 0 && !isDeliveredComplete) {
-            alert("Current order delivery hone ke baad receipt download karein! (Food is currently in transit)");
+        if(!targetOrder.isDelivered && !targetOrder.isCancelled) {
+            alert(`Order #${targetOrder.orderId} is currently in-transit! Receipt will be unlocked once delivered.`);
             return;
         }
 
-        generatePdfFromOrderObject(targetOrder);
+        generateExcelPdf(targetOrder);
     }
 
-    // Download active order receipt
     function downloadCurrentReceiptPdf() {
-        const order = JSON.parse(localStorage.getItem("hungrymate_active_order") || "null");
-        if (!order) return alert("No order record found to download receipt!");
-
-        if (!order.isDelivered && !isDeliveredComplete) {
-            alert("Current order delivery hone ke baad receipt download karein! (Food is currently in transit)");
-            return;
-        }
-
-        generatePdfFromOrderObject(order);
+        let history = JSON.parse(localStorage.getItem("hungrymate_order_history") || "[]");
+        let target = history[selectedOrderIndex] || history[0];
+        if (!target) return alert("No order record found!");
+        generateExcelPdf(target);
     }
 
-    function generatePdfFromOrderObject(order) {
-        document.getElementById("invOrderId").innerText = order.orderId;
-        document.getElementById("invOrderDate").innerText = "Placed: " + order.placedAt;
-        document.getElementById("invCustomerInfo").innerText = `${order.customerName || 'Customer'} (${order.customerPhone || ''})`;
-        document.getElementById("invCustomerAddress").innerText = order.address;
-        document.getElementById("invDeliveryPartner").innerText = `${order.deliveryHero || 'Rahul Verma'} (ID: ${order.deliveryHeroId || 'HM-DEL-984'})`;
-        document.getElementById("invTotalPaid").innerText = order.totalPaid;
+    function generateExcelPdf(order) {
+        const hero = order.deliveryHeroData || deliveryHeroes[0];
+        const container = document.createElement("div");
+        container.className = "excel-pdf-container";
 
-        const tbody = document.getElementById("invItemsBody");
-        tbody.innerHTML = "";
-        order.items.forEach(it => {
-            tbody.innerHTML += `
+        let itemsHtml = "";
+        (order.items || []).forEach((it, i) => {
+            itemsHtml += `
                 <tr>
-                    <td>${it.title}</td>
-                    <td>${it.quantity}</td>
-                    <td class="text-end">&#8377;${it.price * it.quantity}</td>
+                    <td style="text-align: center;">${i + 1}</td>
+                    <td><strong>${it.title}</strong></td>
+                    <td style="text-align: center;">${it.quantity}</td>
+                    <td style="text-align: right;">₹${(it.price * it.quantity).toFixed(2)}</td>
                 </tr>
             `;
         });
 
-        const element = document.getElementById("invoicePrintSection");
-        document.getElementById("invoiceContainer").style.display = "block";
+        container.innerHTML = `
+            <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 12px;">
+                <h2 style="font-weight: 900; margin: 0; letter-spacing: 1px;">HUNGRYMATE FOOD LOGISTICS PVT LTD</h2>
+                <small style="font-size: 0.85rem; color: #475569;">Official Tax Invoice & Cash Memo Receipt</small>
+            </div>
+
+            <table class="excel-table">
+                <tr>
+                    <td style="width: 25%; font-weight: 800;">ORDER NUMBER:</td>
+                    <td style="width: 25%;">#${order.orderId}</td>
+                    <td style="width: 25%; font-weight: 800;">ORDER TIME:</td>
+                    <td style="width: 25%;">${order.placedAt}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: 800;">CUSTOMER NAME:</td>
+                    <td>${order.customerName || 'Customer'} (${order.customerPhone || 'N/A'})</td>
+                    <td style="font-weight: 800;">DELIVERY AGENT:</td>
+                    <td>${hero.name} (${hero.id}) - ${hero.phone}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: 800;">DELIVERY ADDRESS:</td>
+                    <td colspan="3">${order.address}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: 800;">PAYMENT MODE:</td>
+                    <td>${order.paymentMode || 'Cash on Delivery'}</td>
+                    <td style="font-weight: 800;">COUPON APPLIED:</td>
+                    <td>${order.couponApplied || 'NONE'}</td>
+                </tr>
+            </table>
+
+            <table class="excel-table">
+                <thead>
+                    <tr>
+                        <th style="width: 8%; text-align: center;">SL</th>
+                        <th style="width: 57%;">ITEM DESCRIPTION</th>
+                        <th style="width: 15%; text-align: center;">QUANTITY</th>
+                        <th style="width: 20%; text-align: right;">PRICE (INR)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${itemsHtml}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" style="text-align: right; font-weight: 800;">ITEMS SUBTOTAL:</td>
+                        <td style="text-align: right; font-weight: 800;">₹${order.subtotal || order.totalPaid}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" style="text-align: right; font-weight: 800;">COUPON DISCOUNT:</td>
+                        <td style="text-align: right; font-weight: 800; color: #16a34a;">-₹${order.discount || 0}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" style="text-align: right; font-weight: 800;">PLATFORM FEE:</td>
+                        <td style="text-align: right; font-weight: 800;">₹9.00</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" style="text-align: right; font-weight: 800;">DELIVERY CHARGES:</td>
+                        <td style="text-align: right; font-weight: 800; color: #16a34a;">FREE (₹0.00)</td>
+                    </tr>
+                    <tr style="background-color: #f8fafc;">
+                        <td colspan="3" style="text-align: right; font-weight: 900; font-size: 1.05rem;">NET TOTAL PAID:</td>
+                        <td style="text-align: right; font-weight: 900; font-size: 1.05rem; color: #fe424d;">₹${order.totalPaid}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        `;
+
+        document.body.appendChild(container);
 
         const opt = {
-            margin: 0.5,
-            filename: `${order.orderId}_Money_Receipt.pdf`,
+            margin: 0.4,
+            filename: `Hungrymate_CashMemo_${order.orderId}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
+            html2canvas: { scale: 2, useCORS: true },
             jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
         };
 
-        html2pdf().set(opt).from(element).save().then(() => {
-            document.getElementById("invoiceContainer").style.display = "none";
+        html2pdf().set(opt).from(container).save().then(() => {
+            document.body.removeChild(container);
         });
+    }
+
+    function goToFeedbackPage(orderId, isDelivered) {
+        if (!isDelivered) {
+            alert(`Order #${orderId} is currently under transit! Feedback unlocks after doorstep delivery.`);
+            return;
+        }
+        window.location.href = `/orders/${orderId}/feedback`;
     }
 </script>
