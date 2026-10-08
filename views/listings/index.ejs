@@ -1,21 +1,23 @@
 <% layout("/layouts/boilerplate") %>
 
 <style>
-    /* Top Category Horizontal Scroll */
+    /* Full Responsive Actions Bar */
     .top-action-bar {
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
         justify-content: space-between;
         width: 100%;
         max-width: 100%;
-        padding: 0.4rem 0;
-        gap: 0.5rem;
+        padding: 0.4rem 0.2rem;
+        gap: 0.6rem;
         box-sizing: border-box;
     }
+    
     .filter-wrapper {
         display: flex;
         align-items: center;
-        flex: 1 1 auto;
+        flex: 1 1 280px;
         min-width: 0;
         overflow: hidden;
     }
@@ -24,13 +26,14 @@
         flex-wrap: nowrap;
         overflow-x: auto;
         scroll-behavior: smooth;
-        gap: 1.1rem;
-        padding: 0.3rem 0.1rem;
+        gap: 1.25rem;
+        padding: 0.4rem 0.2rem;
         width: 100%;
         scrollbar-width: none;
         -webkit-overflow-scrolling: touch;
     }
     #filters::-webkit-scrollbar { display: none; }
+    
     .filter {
         text-align: center;
         opacity: 0.75;
@@ -42,7 +45,7 @@
         opacity: 1;
         transform: translateY(-2px) scale(1.05);
     }
-    .filter div i { font-size: 1.25rem; margin-bottom: 0.2rem; display: inline-block; }
+    .filter div i { font-size: 1.3rem; margin-bottom: 0.2rem; display: inline-block; }
     .filter p { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; margin: 0; color: #0f172a; }
     body.dark-mode .filter div i { color: #FFC107 !important; }
     body.dark-mode .filter p { color: #ffffff !important; }
@@ -51,7 +54,7 @@
         background-color: #ffffff;
         border: 1px solid #cbd5e1;
         border-radius: 50%;
-        width: 30px; height: 30px;
+        width: 32px; height: 32px;
         display: flex; align-items: center; justify-content: center;
         cursor: pointer; flex-shrink: 0;
     }
@@ -61,11 +64,19 @@
         color: #ffffff !important;
     }
 
+    /* Fixed Switches Bar: Veg AND Dark Mode Guaranteed Visible */
+    .controls-pills-bar {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        flex-shrink: 0;
+    }
+
     .clickable-toggle-box {
         background-color: #ffffff;
         border: 1.5px solid #cbd5e1;
         border-radius: 30px;
-        padding: 0.25rem 0.55rem;
+        padding: 0.28rem 0.6rem;
         display: inline-flex;
         align-items: center;
         gap: 0.35rem;
@@ -80,7 +91,7 @@
     }
     .toggle-label { font-size: 0.72rem; font-weight: 700; margin: 0; white-space: nowrap; }
 
-    /* Pure Responsive Grid Layout across All Devices */
+    /* Fluid Responsive Food Card Grid */
     .pure-food-grid {
         display: grid !important;
         width: 100% !important;
@@ -91,7 +102,7 @@
 
     .listing-card {
         border: none !important;
-        border-radius: 1.2rem !important;
+        border-radius: 1.25rem !important;
         overflow: hidden !important;
         box-shadow: 0 4px 18px rgba(15,23,42,0.06) !important;
         transition: transform 0.25s ease, box-shadow 0.25s ease !important;
@@ -139,12 +150,6 @@
         padding: 0.6rem 0.2rem 0.1rem 0.2rem;
         border-top: 1px solid #f1f5f9;
     }
-    .food-card-price {
-        font-weight: 800;
-        font-size: 1.25rem;
-        color: #fe424d;
-        letter-spacing: -0.5px;
-    }
     .btn-add-cart-pill {
         border: 2px solid #fe424d;
         color: #fe424d;
@@ -161,12 +166,8 @@
         transform: scale(1.03);
     }
 
-    body.dark-mode .card-action-footer {
-        border-top-color: #27272a !important;
-    }
-    body.dark-mode .food-card-price {
-        color: #FFC107 !important;
-    }
+    body.dark-mode .card-action-footer { border-top-color: #27272a !important; }
+    body.dark-mode .food-new-price { color: #FFC107 !important; }
     body.dark-mode .btn-add-cart-pill {
         background-color: #FFC107 !important;
         border-color: #FFC107 !important;
@@ -180,26 +181,32 @@
         <button class="scroll-btn me-1 d-none d-sm-flex" id="slideLeft"><i class="fa-solid fa-chevron-left"></i></button>
         <div id="filters">
             <div class="filter active-filter" data-category="all"><div><i class="fa-solid fa-utensils"></i></div><p>All</p></div>
+            <div class="filter" data-category="trending"><div><i class="fa-solid fa-fire text-danger"></i></div><p>Trending</p></div>
             <div class="filter" data-category="breakfast"><div><i class="fa-solid fa-egg text-warning"></i></div><p>Breakfast</p></div>
-            <div class="filter" data-category="biryani"><div><i class="fa-solid fa-bowl-rice"></i></div><p>Biryani</p></div>
-            <div class="filter" data-category="thali"><div><i class="fa-solid fa-plate-wheat"></i></div><p>Thali</p></div>
-            <div class="filter" data-category="fast food"><div><i class="fa-solid fa-pizza-slice"></i></div><p>Fast Food</p></div>
-            <div class="filter" data-category="burger"><div><i class="fa-solid fa-burger"></i></div><p>Burger</p></div>
+            <div class="filter" data-category="biryani"><div><i class="fa-solid fa-bowl-rice text-warning"></i></div><p>Biryani</p></div>
+            <div class="filter" data-category="thali"><div><i class="fa-solid fa-plate-wheat text-success"></i></div><p>Thali</p></div>
+            <div class="filter" data-category="fast food"><div><i class="fa-solid fa-pizza-slice text-danger"></i></div><p>Pizza/Burger</p></div>
+            <div class="filter" data-category="street food"><div><i class="fa-solid fa-hotdog text-warning"></i></div><p>Street Food</p></div>
+            <div class="filter" data-category="rolls"><div><i class="fa-solid fa-scroll text-primary"></i></div><p>Kathi Rolls</p></div>
+            <div class="filter" data-category="momos"><div><i class="fa-solid fa-cloud text-secondary"></i></div><p>Momos</p></div>
+            <div class="filter" data-category="chinese"><div><i class="fa-solid fa-bowl-food text-danger"></i></div><p>Chinese/Noodles</p></div>
+            <div class="filter" data-category="north indian"><div><i class="fa-solid fa-cubes-stacked text-warning"></i></div><p>Curries/Naan</p></div>
+            <div class="filter" data-category="south indian"><div><i class="fa-solid fa-circle-dot text-success"></i></div><p>South Indian</p></div>
             <div class="filter" data-category="veg"><div><i class="fa-solid fa-seedling text-success"></i></div><p>Pure Veg</p></div>
             <div class="filter" data-category="non veg"><div><i class="fa-solid fa-drumstick-bite text-danger"></i></div><p>Non Veg</p></div>
-            <div class="filter" data-category="ice-cream"><div><i class="fa-solid fa-ice-cream text-info"></i></div><p>Ice-cream</p></div>
-            <div class="filter" data-category="bakery"><div><i class="fa-solid fa-cake-candles text-danger"></i></div><p>Bakery</p></div>
-            <div class="filter" data-category="dessert"><div><i class="fa-solid fa-cookie"></i></div><p>Dessert</p></div>
+            <div class="filter" data-category="dessert"><div><i class="fa-solid fa-ice-cream text-info"></i></div><p>Ice-Cream</p></div>
+            <div class="filter" data-category="bakery"><div><i class="fa-solid fa-cake-candles text-danger"></i></div><p>Cakes/Bakery</p></div>
+            <div class="filter" data-category="beverages"><div><i class="fa-solid fa-mug-saucer text-primary"></i></div><p>Beverages/Shakes</p></div>
         </div>
         <button class="scroll-btn ms-1 d-none d-sm-flex" id="slideRight"><i class="fa-solid fa-chevron-right"></i></button>
     </div>
 
-    <div class="d-flex align-items-center gap-1 flex-shrink-0">
+    <div class="controls-pills-bar">
         <div class="clickable-toggle-box" id="vegPill">
             <span class="toggle-label">&#x1F7E2; Veg</span>
             <input class="form-check-input mt-0" type="checkbox" id="onlyVegToggle" role="switch">
         </div>
-        <div class="clickable-toggle-box d-none d-sm-inline-flex" id="darkPill">
+        <div class="clickable-toggle-box" id="darkPill">
             <span class="toggle-label" id="darkLabel"><i class="fa-solid fa-moon"></i> Dark</span>
             <input class="form-check-input mt-0" type="checkbox" id="darkModeToggle" role="switch">
         </div>
@@ -222,6 +229,11 @@
                 let charCodeSum = (listing.title || '').split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
                 avgRating = (4.3 + (charCodeSum % 7) * 0.1).toFixed(1);
             }
+
+            // Calculation for Original Cut-Off Strikethrough Price (e.g. 60% OFF higher base)
+            let currentPrice = listing.price || 199;
+            let originalCutPrice = Math.round(currentPrice * 2.5); // 60% off higher MRP
+            let isVegFood = (listing.isVeg === true || String(listing.isVeg) === 'true');
         %>
         <div class="food-card-box"
              data-title="<%= (listing.title || '').toLowerCase() %>"
@@ -244,7 +256,10 @@
                             <h6 class="card-title fw-bold text-truncate mb-0" style="max-width: 82%;">
                                 <%= listing.title %>
                             </h6>
-                            <span><%= (listing.isVeg === true || String(listing.isVeg) === 'true') ? '🟢' : '🔴' %></span>
+
+                            <div class="food-diet-symbol <%= isVegFood ? 'veg-badge' : 'nonveg-badge' %>" title="<%= isVegFood ? 'Pure Vegetarian' : 'Non-Vegetarian' %>">
+                                <span class="diet-circle"></span>
+                            </div>
                         </div>
                         <small class="text-muted d-block text-truncate mb-1">
                             <a href="javascript:void(0)" onclick="filterSpecificRestaurant('<%= listing.restaurant %>')" class="text-decoration-none text-muted" title="Click to view all dishes from this restaurant">
@@ -254,9 +269,10 @@
                     </div>
 
                     <div class="card-action-footer">
-                        <span class="food-card-price">
-                            &#8377;<%= listing.price ? listing.price.toLocaleString("en-IN") : '0' %>
-                        </span>
+                        <div class="food-price-wrap">
+                            <span class="food-old-price">&#8377;<%= originalCutPrice.toLocaleString("en-IN") %></span>
+                            <span class="food-new-price">&#8377;<%= currentPrice.toLocaleString("en-IN") %></span>
+                        </div>
                         
                         <button class="btn btn-add-cart-pill shadow-sm" onclick="addToCart('<%= listing._id %>', '<%= listing.title.replace(/'/g, '') %>', <%= listing.price %>, '<%= listing.image.url %>', <%= listing.preparationTime || 20 %>, '<%= (listing.restaurant || '').replace(/'/g, '') %>')">
                             + Add to Cart
@@ -376,17 +392,21 @@
             const matchVeg = !vegOnly || isVeg;
             const matchRestaurant = !activeRestaurantFilter || restaurant === activeRestaurantFilter || restaurant.includes(activeRestaurantFilter);
 
-            let matchCat = (activeCat === "all");
+            let matchCat = (activeCat === "all" || activeCat === "trending");
             if (activeCat === "veg") matchCat = isVeg;
             else if (activeCat === "non veg") matchCat = !isVeg;
-            else if (activeCat === "ice-cream") matchCat = category.includes("ice-cream") || title.includes("ice cream") || title.includes("sorbet") || title.includes("gelato") || title.includes("sundae");
-            else if (activeCat === "bakery") matchCat = category.includes("bakery") || category.includes("cake") || title.includes("cake") || title.includes("brownie") || title.includes("macaron");
-            else if (activeCat === "breakfast") matchCat = category.includes("breakfast") || title.includes("pancake") || title.includes("waffle") || title.includes("toast") || title.includes("paratha") || title.includes("croissant") || title.includes("dosa");
-            else if (activeCat === "thali") matchCat = category.includes("thali") || title.includes("thali") || title.includes("meals") || title.includes("bento") || title.includes("mezze");
+            else if (activeCat === "dessert") matchCat = category.includes("dessert") || category.includes("ice-cream") || title.includes("ice cream") || title.includes("sundae");
+            else if (activeCat === "bakery") matchCat = category.includes("bakery") || category.includes("cake") || title.includes("cake") || title.includes("pastry") || title.includes("brownie");
+            else if (activeCat === "breakfast") matchCat = category.includes("breakfast") || title.includes("pancake") || title.includes("waffle") || title.includes("toast") || title.includes("paratha") || title.includes("croissant") || title.includes("dosa") || title.includes("idli");
+            else if (activeCat === "thali") matchCat = category.includes("thali") || title.includes("thali") || title.includes("meals") || title.includes("bento") || title.includes("platter");
             else if (activeCat === "biryani") matchCat = category.includes("biryani") || title.includes("biryani") || title.includes("pulao") || title.includes("rice");
-            else if (activeCat === "fast food") matchCat = category.includes("fast food") || category.includes("pizza") || title.includes("pizza") || title.includes("pasta") || title.includes("fries") || title.includes("tacos") || title.includes("noodles") || title.includes("ramen");
-            else if (activeCat === "burger") matchCat = category.includes("burger") || title.includes("burger") || title.includes("hot dog");
-            else if (activeCat === "dessert") matchCat = category.includes("dessert") || title.includes("chocolate") || title.includes("cookie") || title.includes("truffle");
+            else if (activeCat === "fast food") matchCat = category.includes("fast food") || category.includes("pizza") || category.includes("burger") || title.includes("pizza") || title.includes("burger") || title.includes("fries") || title.includes("tacos");
+            else if (activeCat === "rolls") matchCat = title.includes("roll") || title.includes("shawarma") || title.includes("kathi") || title.includes("wrap");
+            else if (activeCat === "momos") matchCat = title.includes("momo") || title.includes("dumpling");
+            else if (activeCat === "chinese") matchCat = title.includes("noodles") || title.includes("chow mein") || title.includes("ramen") || title.includes("chinese");
+            else if (activeCat === "north indian") matchCat = title.includes("paneer") || title.includes("dal") || title.includes("naan") || title.includes("butter chicken") || title.includes("mutton");
+            else if (activeCat === "south indian") matchCat = title.includes("dosa") || title.includes("idli") || title.includes("sambar") || title.includes("south");
+            else if (activeCat === "beverages") matchCat = title.includes("shake") || title.includes("coffee") || title.includes("tea") || title.includes("chaas");
 
             if (matchSearch && matchVeg && matchCat && matchRestaurant) {
                 card.style.display = "block";

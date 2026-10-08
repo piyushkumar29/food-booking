@@ -1,11 +1,6 @@
 /* =========================================================
-   HUNGRYMATE DEVICE-SPECIFIC ADAPTIVE RESPONSIVE ENGINE
-   Baseline Dimensions:
-   - Small Phone: 360px x 800px
-   - Average Phone: 390px x 844px
-   - Large Phone: 414px - 440px
-   - Tablet: 768px - 1024px
-   - Laptop / Desktop: 1200px+
+   HUNGRYMATE CORE STYLES & FLIPKART MOBILE RESPONSIVE ENGINE
+   Baseline: 360px, 390px, 414px, 768px, 1200px+
    ========================================================= */
 
 :root {
@@ -39,7 +34,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  padding-bottom: 70px !important; /* Space for Flipkart mobile bottom bar */
+  padding-bottom: 72px !important;
 }
 
 @media (min-width: 992px) {
@@ -53,119 +48,96 @@ body {
   width: 100% !important;
   max-width: 100% !important;
   margin: 0 !important;
-  padding: 0 12px !important;
+  padding: 0 10px !important;
   overflow-x: hidden !important;
 }
 
-/* NAVBAR BASELINE */
+/* NAVBAR FLUID ENGINE */
 .navbar {
   min-height: 4.2rem !important;
   height: auto !important;
   background-color: #ffffff;
-  padding: 0.5rem 1rem !important;
+  padding: 0.5rem 0.8rem !important;
   width: 100% !important;
   max-width: 100% !important;
 }
 
-/* 1. CHHOTA PHONE (360px - 389px) */
+/* OFFICIAL FSSAI VEG / NON-VEG BADGE (AS IN SCREENSHOT) */
+.food-diet-symbol {
+  width: 18px;
+  height: 18px;
+  background-color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.food-diet-symbol.veg-badge {
+  border: 2px solid #0f8a3c;
+}
+.food-diet-symbol.veg-badge .diet-circle {
+  width: 9px;
+  height: 9px;
+  background-color: #0f8a3c;
+  border-radius: 50%;
+}
+
+.food-diet-symbol.nonveg-badge {
+  border: 2px solid #e11d48;
+}
+.food-diet-symbol.nonveg-badge .diet-circle {
+  width: 9px;
+  height: 9px;
+  background-color: #e11d48;
+  border-radius: 50%;
+}
+
+/* PRICING WITH STRIKETHROUGH */
+.food-price-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+.food-old-price {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  text-decoration: line-through;
+  font-weight: 600;
+}
+.food-new-price {
+  font-weight: 800;
+  font-size: 1.3rem;
+  color: #fe424d;
+  letter-spacing: -0.5px;
+}
+
+/* DEVICE SPECIFIC MEDIA QUERIES (NO CUT & BOTH TOGGLES VISIBLE) */
 @media (max-width: 389px) {
-  .main-body-container {
-    padding: 0 8px !important;
-  }
-  .pure-food-grid {
-    grid-template-columns: 1fr !important;
-    gap: 0.75rem !important;
-  }
-  .listing-card {
-    border-radius: 14px !important;
-  }
-  .listing-card img {
-    height: 13rem !important;
-  }
-  .food-card-price {
-    font-size: 1.15rem !important;
-  }
-  .btn-add-cart-pill {
-    padding: 0.35rem 0.85rem !important;
-    font-size: 0.78rem !important;
-  }
-  .track-card-box {
-    padding: 1rem 0.75rem !important;
-    border-radius: 16px !important;
-  }
+  .main-body-container { padding: 0 6px !important; }
+  .pure-food-grid { grid-template-columns: 1fr !important; gap: 0.75rem !important; }
+  .listing-card img { height: 13rem !important; }
+  .food-new-price { font-size: 1.15rem !important; }
 }
 
-/* 2. AVERAGE PHONE (390px - 413px) */
-@media (min-width: 390px) and (max-width: 413px) {
-  .main-body-container {
-    padding: 0 12px !important;
-  }
-  .pure-food-grid {
-    grid-template-columns: 1fr !important;
-    gap: 0.9rem !important;
-  }
-  .listing-card img {
-    height: 14rem !important;
-  }
-  .track-card-box {
-    padding: 1.25rem 1rem !important;
-    border-radius: 18px !important;
-  }
+@media (min-width: 390px) and (max-width: 575px) {
+  .main-body-container { padding: 0 10px !important; }
+  .pure-food-grid { grid-template-columns: 1fr !important; gap: 0.9rem !important; }
+  .listing-card img { height: 14rem !important; }
 }
 
-/* 3. BADA PHONE (414px - 575px) */
-@media (min-width: 414px) and (max-width: 575px) {
-  .main-body-container {
-    padding: 0 14px !important;
-  }
-  .pure-food-grid {
-    grid-template-columns: 1fr !important;
-    gap: 1rem !important;
-  }
-  .listing-card img {
-    height: 15rem !important;
-  }
-  .track-card-box {
-    padding: 1.5rem 1.2rem !important;
-    border-radius: 20px !important;
-  }
-}
-
-/* 4. TABLET (576px - 991px) */
 @media (min-width: 576px) and (max-width: 991px) {
-  .main-body-container {
-    padding: 0 18px !important;
-  }
-  .pure-food-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 1.25rem !important;
-  }
-  .listing-card img {
-    height: 15.5rem !important;
-  }
-  .track-card-box {
-    padding: 1.8rem 1.5rem !important;
-  }
+  .main-body-container { padding: 0 16px !important; }
+  .pure-food-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 1.25rem !important; }
 }
 
-/* 5. LAPTOP / DESKTOP (992px+) */
 @media (min-width: 992px) {
-  .main-body-container {
-    padding: 0 24px !important;
-  }
-  .pure-food-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    gap: 1.8rem !important;
-  }
-  .listing-card img {
-    height: 16.5rem !important;
-  }
-  .track-card-box {
-    padding: 2.2rem !important;
-  }
+  .main-body-container { padding: 0 24px !important; }
+  .pure-food-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 1.8rem !important; }
 }
 
-/* FOOTER (Restored Clean Light Background) */
+/* FOOTER ORIGINAL RESTORATION */
 .f-info {
   text-align: center;
   padding: 2rem 1rem;
@@ -175,34 +147,11 @@ body {
   margin-top: auto;
   width: 100% !important;
 }
-
-.f-info-brand {
-  font-weight: 800;
-  color: #0f172a !important;
-}
-
-.f-info-links a {
-  text-decoration: none;
-  color: #64748b !important;
-  margin: 0 0.5rem;
-  font-size: 0.85rem;
-}
-
-.f-info-links a:hover {
-  color: var(--hm-red) !important;
-}
-
-.f-info-socials i {
-  font-size: 1.25rem;
-  margin: 0 0.5rem;
-  color: #475569 !important;
-  transition: transform 0.2s ease, color 0.2s ease;
-}
-
-.f-info-socials i:hover {
-  color: var(--hm-red) !important;
-  transform: translateY(-2px);
-}
+.f-info-brand { font-weight: 800; color: #0f172a !important; }
+.f-info-links a { text-decoration: none; color: #64748b !important; margin: 0 0.5rem; font-size: 0.85rem; }
+.f-info-links a:hover { color: var(--hm-red) !important; }
+.f-info-socials i { font-size: 1.25rem; margin: 0 0.5rem; color: #475569 !important; transition: transform 0.2s ease, color 0.2s ease; }
+.f-info-socials i:hover { color: var(--hm-red) !important; transform: translateY(-2px); }
 
 body.dark-mode .f-info {
   background-color: #09090b !important;
