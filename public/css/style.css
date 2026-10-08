@@ -1,5 +1,5 @@
 /* =========================================================
-   HUNGRYMATE BULLETPROOF RESPONSIVE & UNIFORM GRID ENGINE
+   HUNGRYMATE CORE ENGINE & UNIFORM CARD STYLING
    ========================================================= */
 
 :root {
@@ -38,7 +38,7 @@ body {
   }
 }
 
-/* FLUID CONTAINER: No horizontal cut on 320px, 360px, 390px, 440px */
+/* CONTAINER */
 .main-body-container {
   flex: 1 0 auto;
   width: 100% !important;
@@ -47,7 +47,6 @@ body {
   margin-right: auto !important;
   padding-left: 12px !important;
   padding-right: 12px !important;
-  overflow-x: hidden !important;
   box-sizing: border-box !important;
 }
 
@@ -58,32 +57,29 @@ body {
   }
 }
 
-/* NAVBAR ENGINE */
+/* NAVBAR */
 .navbar {
   min-height: 4.2rem !important;
   height: auto !important;
   background-color: #ffffff;
   padding: 0.5rem 0.8rem !important;
   width: 100% !important;
-  max-width: 100% !important;
   box-sizing: border-box !important;
 }
 
 /* =========================================================
-   STRICT UNIFORM GRID (DESKTOP SAME LOOK + MOBILE NO CUT)
+   GRID & CARD ARCHITECTURE
    ========================================================= */
 
 .pure-food-grid {
   display: grid !important;
   width: 100% !important;
-  max-width: 100% !important;
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   gap: 1.6rem !important;
   margin-top: 1rem !important;
   margin-bottom: 2rem !important;
   padding: 0 !important;
   box-sizing: border-box !important;
-  align-items: stretch !important;
 }
 
 @media (max-width: 991px) and (min-width: 601px) {
@@ -103,13 +99,10 @@ body {
 
 .food-card-box {
   width: 100% !important;
-  max-width: 100% !important;
   display: flex !important;
   flex-direction: column !important;
-  box-sizing: border-box !important;
 }
 
-/* UNIFORM CARD CONTAINER */
 .listing-card {
   border: none !important;
   border-radius: 1.25rem !important;
@@ -122,7 +115,6 @@ body {
   width: 100% !important;
   height: 100% !important;
   margin: 0 !important;
-  box-sizing: border-box !important;
 }
 
 .listing-card:hover {
@@ -130,27 +122,27 @@ body {
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12) !important;
 }
 
-/* CARD IMAGE WRAPPER (GUARANTEED EQUAL PHOTO SIZES EVERYWHERE) */
+/* =========================================================
+   IMAGE & BADGES (FLAT DISCOUNT & RATING RESTORED)
+   ========================================================= */
+
 .card-img-wrapper {
   position: relative !important;
   width: 100% !important;
-  height: 17.5rem !important; /* Uniform Desktop Height */
+  height: 17.5rem !important;
   background-color: #f1f5f9;
   overflow: hidden !important;
   display: block !important;
-  margin: 0 !important;
-  padding: 0 !important;
 }
 
 .card-img-wrapper img,
 .listing-card img.card-img-top {
   width: 100% !important;
   height: 100% !important;
-  object-fit: cover !important; /* Never stretches, strictly fills container */
+  object-fit: cover !important;
   object-position: center !important;
   display: block !important;
   transition: transform 0.3s ease;
-  margin: 0 !important;
 }
 
 .listing-card:hover .card-img-wrapper img {
@@ -159,11 +151,58 @@ body {
 
 @media (max-width: 600px) {
   .card-img-wrapper {
-    height: 14.5rem !important; /* Uniform Mobile Height across 360px, 390px, 440px */
+    height: 14.5rem !important;
   }
 }
 
-/* CARD BODY */
+/* 1. FLAT DISCOUNT BADGE (Top-Left Pill) */
+.offer-tag-badge {
+  position: absolute !important;
+  top: 12px !important;
+  left: 12px !important;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: #ffffff !important;
+  font-size: 0.72rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.5px !important;
+  padding: 0.32rem 0.75rem !important;
+  border-radius: 50px !important;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25) !important;
+  z-index: 10 !important;
+  pointer-events: none !important;
+  text-transform: uppercase !important;
+}
+
+/* 2. RATING BADGE (Top-Right Glassmorphism Pill) */
+.rating-top-badge {
+  position: absolute !important;
+  top: 12px !important;
+  right: 12px !important;
+  background: rgba(15, 23, 42, 0.75) !important;
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+  color: #ffffff !important;
+  font-size: 0.78rem !important;
+  font-weight: 800 !important;
+  padding: 0.32rem 0.68rem !important;
+  border-radius: 50px !important;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25) !important;
+  z-index: 10 !important;
+  pointer-events: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.25rem !important;
+}
+
+.rating-top-badge i {
+  color: #facc15 !important; /* Gold Star */
+  font-size: 0.75rem !important;
+}
+
+/* =========================================================
+   CARD CONTENT & FOOTER
+   ========================================================= */
+
 .listing-card .card-body {
   padding: 0.95rem !important;
   display: flex !important;
@@ -171,10 +210,9 @@ body {
   justify-content: space-between !important;
   flex-grow: 1 !important;
   width: 100% !important;
-  box-sizing: border-box !important;
 }
 
-/* FSSAI CERTIFIED SQUARE-CIRCLE BADGE */
+/* FSSAI Veg / Non-Veg Indicator */
 .food-diet-symbol {
   width: 18px !important;
   height: 18px !important;
@@ -184,14 +222,13 @@ body {
   justify-content: center !important;
   border-radius: 3px !important;
   flex-shrink: 0 !important;
-  box-sizing: border-box !important;
 }
 .food-diet-symbol.veg-badge { border: 2px solid #0f8a3c !important; }
 .food-diet-symbol.veg-badge .diet-circle { width: 9px !important; height: 9px !important; background-color: #0f8a3c !important; border-radius: 50% !important; }
 .food-diet-symbol.nonveg-badge { border: 2px solid #e11d48 !important; }
 .food-diet-symbol.nonveg-badge .diet-circle { width: 9px !important; height: 9px !important; background-color: #e11d48 !important; border-radius: 50% !important; }
 
-/* PRICING */
+/* Pricing */
 .food-price-wrap {
   display: flex;
   align-items: baseline;
@@ -236,7 +273,7 @@ body {
   transform: scale(1.03);
 }
 
-/* FOOTER RESTORED */
+/* FOOTER */
 .f-info {
   text-align: center;
   padding: 2rem 1rem;
@@ -252,7 +289,7 @@ body {
 .f-info-socials i { font-size: 1.25rem; margin: 0 0.5rem; color: #475569 !important; transition: transform 0.2s ease, color 0.2s ease; }
 .f-info-socials i:hover { color: var(--hm-red) !important; transform: translateY(-2px); }
 
-/* Dark Mode Overrides */
+/* DARK MODE */
 body.dark-mode {
   background-color: #000000 !important;
   color: #ffffff !important;
