@@ -1,7 +1,7 @@
 <% layout("/layouts/boilerplate") %>
 
 <style>
-    /* Full Responsive Actions Bar */
+    /* Category Header & Controls Bar */
     .top-action-bar {
         display: flex;
         flex-wrap: wrap;
@@ -9,7 +9,7 @@
         justify-content: space-between;
         width: 100%;
         max-width: 100%;
-        padding: 0.4rem 0.1rem;
+        padding: 0.35rem 0;
         gap: 0.5rem;
         box-sizing: border-box;
     }
@@ -17,7 +17,7 @@
     .filter-wrapper {
         display: flex;
         align-items: center;
-        flex: 1 1 260px;
+        flex: 1 1 240px;
         min-width: 0;
         overflow: hidden;
     }
@@ -26,8 +26,8 @@
         flex-wrap: nowrap;
         overflow-x: auto;
         scroll-behavior: smooth;
-        gap: 1.25rem;
-        padding: 0.4rem 0.1rem;
+        gap: 1.15rem;
+        padding: 0.35rem 0.1rem;
         width: 100%;
         scrollbar-width: none;
         -webkit-overflow-scrolling: touch;
@@ -45,7 +45,7 @@
         opacity: 1;
         transform: translateY(-2px) scale(1.05);
     }
-    .filter div i { font-size: 1.3rem; margin-bottom: 0.2rem; display: inline-block; }
+    .filter div i { font-size: 1.25rem; margin-bottom: 0.2rem; display: inline-block; }
     .filter p { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; margin: 0; color: #0f172a; }
     body.dark-mode .filter div i { color: #FFC107 !important; }
     body.dark-mode .filter p { color: #ffffff !important; }
@@ -64,7 +64,7 @@
         color: #ffffff !important;
     }
 
-    /* Fixed Switches Bar: Veg AND Dark Mode Guaranteed Visible */
+    /* Fixed Switches Bar: Veg & Dark Mode always visible */
     .controls-pills-bar {
         display: flex;
         align-items: center;
@@ -157,13 +157,15 @@
              data-category="<%= (listing.category || '').toLowerCase() %>"
              data-isveg="<%= String(listing.isVeg) %>">
             
-            <div class="card listing-card shadow-sm position-relative">
-                <span class="offer-tag-badge">FLAT 60% OFF</span>
-                <span class="rating-top-badge"><i class="fa-solid fa-star me-1"></i><%= avgRating %></span>
+            <div class="listing-card">
+                <div class="card-img-wrapper">
+                    <span class="offer-tag-badge">FLAT 60% OFF</span>
+                    <span class="rating-top-badge"><i class="fa-solid fa-star me-1"></i><%= avgRating %></span>
 
-                <a href="/listings/<%= listing._id %>" class="text-decoration-none text-dark card-img-wrapper" onclick="saveActiveRestaurant('<%= listing.restaurant %>')">
-                    <img src="<%= listing.image.url %>" class="card-img-top" alt="<%= listing.title %>" loading="lazy">
-                </a>
+                    <a href="/listings/<%= listing._id %>" class="d-block w-100 h-100" onclick="saveActiveRestaurant('<%= listing.restaurant %>')">
+                        <img src="<%= listing.image.url %>" class="card-img-top" alt="<%= listing.title %>" loading="lazy">
+                    </a>
+                </div>
                 
                 <div class="card-body">
                     <div>
@@ -324,7 +326,7 @@
             else if (activeCat === "beverages") matchCat = title.includes("shake") || title.includes("coffee") || title.includes("tea") || title.includes("chaas");
 
             if (matchSearch && matchVeg && matchCat && matchRestaurant) {
-                card.style.display = "block";
+                card.style.display = "flex";
                 visibleCount++;
             } else {
                 card.style.display = "none";
