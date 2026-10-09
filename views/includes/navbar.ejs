@@ -1,7 +1,7 @@
 <nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top shadow-sm hm-main-navbar py-2 px-2 px-md-3">
   <div class="container-fluid d-flex align-items-center justify-content-between p-0 flex-nowrap">
     
-    <!-- Left: Logo & Desktop Navigation Links -->
+    <!-- Left Logo & Navigation Items -->
     <div class="d-flex align-items-center flex-shrink-0 gap-2 gap-lg-3">
       <a class="navbar-brand m-0 p-0 d-flex align-items-center" href="/listings">
         <img src="/mypic.png" alt="Hungrymate Logo" style="height: 46px; width: auto; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.12));" />
@@ -17,6 +17,7 @@
           <i class="fa-solid fa-store icon-item text-primary"></i> Same Restaurant Dishes
         </button>
 
+        <!-- Add new items: ONLY visible to Website Owner (Piyush Kumar) -->
         <% if (currUser && currUser.isOwner) { %>
           <a class="nav-pill-btn owner-highlight-btn" href="/listings/new">
             <i class="fa-solid fa-plus icon-item"></i> Add new items
@@ -32,7 +33,7 @@
       </div>
     </div>
 
-    <!-- Center (Desktop Single Line Fit): Responsive Food Search Bar -->
+    <!-- Center Search Bar (Desktop) -->
     <div class="position-relative mx-2 flex-grow-1 d-none d-md-block" style="max-width: 420px;">
       <form class="d-flex align-items-center m-0 w-100" id="foodSearchForm" onsubmit="return false;">
         <div class="input-group w-100 position-relative">
@@ -59,7 +60,7 @@
       </div>
     </div>
 
-    <!-- Right: Cart & User Account -->
+    <!-- Right Controls: Cart & Account -->
     <div class="d-flex align-items-center gap-2 flex-shrink-0">
       <a href="/cart" class="btn btn-light border position-relative rounded-pill px-3 py-1 d-flex align-items-center gap-1 text-decoration-none" title="View Cart">
         <i class="fa-solid fa-cart-shopping text-danger"></i>
@@ -91,11 +92,19 @@
               <div class="fw-bold text-dark user-card-name">
                 <span><%= currUser.username %></span>
                 <% if(currUser.isOwner) { %>
-                  <span class="badge bg-warning text-dark px-2 py-0" style="font-size: 0.65rem;">OWNER</span>
+                  <span class="badge bg-warning text-dark px-2 py-0 ms-1" style="font-size: 0.65rem;">OWNER</span>
                 <% } %>
               </div>
               <div class="text-muted small text-truncate"><%= currUser.email %></div>
             </li>
+            <% if(currUser.isOwner) { %>
+              <li class="d-lg-none">
+                <a class="dropdown-item py-2 rounded-2 d-flex align-items-center gap-2 text-danger fw-bold" href="/listings/new">
+                  <i class="fa-solid fa-plus text-danger"></i>
+                  <span>Add New Item</span>
+                </a>
+              </li>
+            <% } %>
             <li>
               <button type="button" class="dropdown-item py-2 rounded-2 d-flex align-items-center gap-2" onclick="promptEditName('<%= currUser.username %>')">
                 <i class="fa-solid fa-pen-to-square text-primary"></i>
@@ -123,7 +132,7 @@
 
   </div>
 
-  <!-- Mobile Search Bar (Only shown on small screens < 768px in its own clean row) -->
+  <!-- Mobile Search Bar (< 768px) -->
   <div class="d-md-none w-100 mt-2 position-relative">
     <div class="input-group w-100 position-relative">
       <input 
@@ -173,7 +182,7 @@
   <% } %>
 </div>
 
-<!-- Modal: Same Restaurant Search & Quick Picker (Existing All Items Fetcher) -->
+<!-- Modal: Same Restaurant Search & Quick Picker -->
 <div class="modal fade" id="sameRestaurantModal" tabindex="-1" aria-labelledby="sameRestaurantModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content rounded-4 border-0 shadow">
@@ -191,9 +200,7 @@
         </div>
 
         <h6 class="small fw-bold text-muted mb-2">ALL RESTAURANTS IN DATABASE:</h6>
-        <div id="restaurantChipsContainer" class="d-flex flex-wrap gap-2">
-          <!-- Populated from all existing items -->
-        </div>
+        <div id="restaurantChipsContainer" class="d-flex flex-wrap gap-2"></div>
       </div>
     </div>
   </div>
@@ -225,6 +232,11 @@
     .nav-all-food .icon-item { color: #fe424d; }
     .nav-track-order .icon-item { color: #10b981; }
     .nav-offers .icon-item { color: #f59e0b; }
+    .owner-highlight-btn {
+        background-color: #fef2f2 !important;
+        color: #fe424d !important;
+        border: 1.5px solid #fecaca !important;
+    }
     .owner-highlight-btn .icon-item { color: #fe424d; }
 
     .nav-pill-btn:hover {
@@ -337,7 +349,6 @@ function refreshNavCartBadge() {
 document.addEventListener("DOMContentLoaded", refreshNavCartBadge);
 window.addEventListener("storage", refreshNavCartBadge);
 
-// Read All Restaurants directly from page and build chips
 function populateRestaurantModal() {
     const container = document.getElementById("restaurantChipsContainer");
     if (!container) return;
@@ -359,9 +370,7 @@ function populateRestaurantModal() {
         btn.type = "button";
         btn.className = "btn btn-sm btn-outline-secondary rounded-pill rest-chip-btn";
         btn.innerHTML = `<i class="fa-solid fa-store me-1 text-danger"></i> ${r}`;
-        btn.onclick = () => {
-            selectRestaurantFilter(r);
-        };
+        btn.onclick = () => selectRestaurantFilter(r);
         container.appendChild(btn);
     });
 }
@@ -395,7 +404,6 @@ function selectRestaurantFilter(restName) {
 
 document.addEventListener("DOMContentLoaded", populateRestaurantModal);
 
-// Search Sync for both Mobile & Desktop Search Inputs
 const dInput = document.getElementById("foodSearchInput");
 const mInput = document.getElementById("mobileFoodSearchInput");
 
