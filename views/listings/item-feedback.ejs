@@ -1,0 +1,94 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+    .star-rating-box {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    .star-rating-box input {
+        display: none;
+    }
+    .star-rating-box label {
+        font-size: 2.2rem;
+        color: #cbd5e1;
+        cursor: pointer;
+        transition: color 0.2s ease, transform 0.2s ease;
+    }
+    .star-rating-box label:hover,
+    .star-rating-box label:hover ~ label,
+    .star-rating-box input:checked ~ label {
+        color: #facc15;
+        transform: scale(1.1);
+    }
+</style>
+
+<div class="row justify-content-center my-3 my-md-4">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="card shadow-sm border-0 rounded-4 p-3 p-md-4 bg-white">
+            
+            <div class="text-center mb-3">
+                <span class="badge bg-danger rounded-pill px-3 py-1 mb-2">Verified Feedback</span>
+                <h3 class="fw-bold mb-1">Rate <%= listing.title %></h3>
+                <p class="text-muted small mb-0"><i class="fa-solid fa-store text-danger me-1"></i><%= listing.restaurant || 'Hungrymate Hub' %></p>
+            </div>
+
+            <!-- Dish Thumbnail Preview -->
+            <div class="text-center mb-3">
+                <img src="<%= listing.image.url %>" alt="<%= listing.title %>" class="rounded-3 shadow-sm object-fit-cover" style="height: 120px; width: 180px;">
+            </div>
+
+            <form method="POST" action="/listings/<%= listing._id %>/reviews" enctype="multipart/form-data" novalidate class="needs-validation">
+                
+                <!-- Star Rating System (5 to 1 Stars) -->
+                <div class="mb-4 text-center">
+                    <label class="form-label fw-bold small text-dark d-block mb-1">Tap Stars to Rate:</label>
+                    <div class="star-rating-box">
+                        <input type="radio" id="star5" name="review[rating]" value="5" required />
+                        <label for="star5" title="5 Stars - Outstanding">&#9733;</label>
+
+                        <input type="radio" id="star4" name="review[rating]" value="4" />
+                        <label for="star4" title="4 Stars - Very Good">&#9733;</label>
+
+                        <input type="radio" id="star3" name="review[rating]" value="3" />
+                        <label for="star3" title="3 Stars - Good">&#9733;</label>
+
+                        <input type="radio" id="star2" name="review[rating]" value="2" />
+                        <label for="star2" title="2 Stars - Needs Improvement">&#9733;</label>
+
+                        <input type="radio" id="star1" name="review[rating]" value="1" />
+                        <label for="star1" title="1 Star - Poor">&#9733;</label>
+                    </div>
+                </div>
+
+                <!-- Reviewer Name (Auto filled from session) -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small">Your Name / Handle</label>
+                    <input type="text" class="form-control rounded-pill px-3" value="<%= currUser.username %>" readonly style="background-color: #f8fafc;" />
+                </div>
+
+                <!-- Feedback Description -->
+                <div class="mb-3">
+                    <label for="comment" class="form-label fw-semibold small">Describe Your Experience</label>
+                    <textarea name="review[comment]" id="comment" class="form-control rounded-4 p-3" rows="4" placeholder="How was the taste, packaging, freshness, and delivery?" required></textarea>
+                    <div class="invalid-feedback">Please share a few words about the dish.</div>
+                </div>
+
+                <!-- Photo Upload from Phone / Folder -->
+                <div class="mb-4">
+                    <label for="reviewImage" class="form-label fw-semibold small"><i class="fa-solid fa-camera text-danger me-1"></i>Attach Food Photo (Optional)</label>
+                    <input type="file" name="reviewImage" id="reviewImage" class="form-control rounded-pill" accept="image/*" />
+                    <small class="text-muted" style="font-size: 0.75rem;">Upload photo of your delivered food item.</small>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <a href="/listings/<%= listing._id %>" class="btn btn-outline-secondary rounded-pill px-4 py-2 w-50 fw-semibold">Cancel</a>
+                    <button class="btn btn-danger rounded-pill px-4 py-2 w-50 fw-bold shadow">
+                        <i class="fa-solid fa-paper-plane me-1"></i> Submit Review
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

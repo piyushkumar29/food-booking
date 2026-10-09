@@ -1,18 +1,36 @@
 const express = require("express");
-const router = express.Router({mergeParams: true});
+const router = express.Router({ mergeParams: true });
 const wrapAsync = require("../utils/wrapAsync.js");
-const ExpressError = require("../utils/ExpressError.js");
-const Review = require("../models/review.js");
-const Listing = require("../models/listing.js");
-const {validateReview, isLoggedIn, isReviewAuthor} = require("../middlewares.js");
-
 const reviewController = require("../controllers/reviews.js");
-// Reviews 
-// Post Route
-router.post("/", isLoggedIn , validateReview, wrapAsync(reviewController.createReview));
+const { isLoggedIn, isReviewAuthor } = require("../middlewares.js");
+const multer = require("multer");
+const { storage } = require("../cloudConfig.js");
+const upload = multer({ storage });
 
-// Delete Review Route
-router.delete("/:reviewId", isLoggedIn, isReviewAuthor , wrapAsync(reviewController.destroyReview)
+// Render Feedback Form page
+router.get("/feedback-form", isLoggedIn, wrapAsync(reviewController.renderFeedbackForm));
+
+// Submit Feedback with image
+router.post(
+    "/",
+    isLoggedIn,
+    upload.single("reviewImage"),
+    wrapAsync(reviewController.createReview)
 );
+
+// Edit review route
+router.get("/:reviewId/edit", isLoggedIn, isReviewAuthor, wrapAsync(reviewController.renderEditReviewForm));
+
+// Update review route
+router.put(
+    "/:reviewId",
+    isLoggedIn,
+    isReviewAuthor,
+    upload.single("reviewImage"),
+    wrapAsync(reviewController.updateReview)
+);
+
+// Delete review
+router.delete("/:reviewId", isLoggedIn, isReviewAuthor, wrapAsync(reviewController.destroyReview));
 
 module.exports = router;

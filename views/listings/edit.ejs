@@ -1,93 +1,110 @@
 <% layout("/layouts/boilerplate") %>
-<body>
-    <div class="row mt-3">
-        <div class="col-8 offset-2">
-            <br>
-            <h3>Edit your listing</h3>
-            <form method="POST" action="/listings/<%= listing._id %>?_method=PUT" novalidate class="needs-validation" enctype="multipart/form-data">
+
+<div class="row justify-content-center my-3 my-md-4">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="card shadow-sm border-0 rounded-4 p-3 p-md-4 bg-white">
+            <div class="text-center mb-3">
+                <h3 class="fw-bold text-warning mb-1"><i class="fa-solid fa-pen-to-square me-2"></i>Edit Food Item</h3>
+                <p class="text-muted small">Update food details, pricing, or change image</p>
+            </div>
+
+            <form method="POST" action="/listings/<%= listing._id %>?_method=PUT" enctype="multipart/form-data" novalidate class="needs-validation">
                 
                 <div class="mb-3">
-                    <label for="title" class="form-label">Dish Name:</label>
-                    <input name="listing[title]" value="<%= listing.title %>" type="text" class="form-control" required/>
-                    <div class="invalid-feedback">Please enter a dish name</div>
+                    <label for="title" class="form-label fw-semibold small">Dish Name</label>
+                    <input name="listing[title]" id="title" value="<%= listing.title %>" type="text" class="form-control rounded-pill px-3" required />
                 </div>
 
-                <div class="row">
-                    <div class="mb-3 col-md-6">
-                        <label for="restaurant" class="form-label">Restaurant Name:</label>
-                        <input name="listing[restaurant]" value="<%= listing.restaurant || '' %>" type="text" class="form-control" placeholder="e.g. Behrouz Biryani" required/>
-                        <div class="invalid-feedback">Please enter restaurant name</div>
+                <div class="mb-3">
+                    <label for="restaurant" class="form-label fw-semibold small">Restaurant Name</label>
+                    <input name="listing[restaurant]" id="restaurant" value="<%= listing.restaurant || '' %>" type="text" class="form-control rounded-pill px-3" required />
+                </div>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-12 col-sm-6">
+                        <label for="location" class="form-label fw-semibold small">Location</label>
+                        <input name="listing[location]" id="location" value="<%= listing.location %>" type="text" class="form-control rounded-pill px-3" required />
                     </div>
-                    <div class="mb-3 col-md-6">
-                        <label for="location" class="form-label">Restaurant Location / City:</label>
-                        <input name="listing[location]" value="<%= listing.location || '' %>" type="text" class="form-control" placeholder="e.g. Kalyani, West Bengal" required/>
-                        <div class="invalid-feedback">Please enter location</div>
+                    <div class="col-12 col-sm-6">
+                        <label for="country" class="form-label fw-semibold small">Country</label>
+                        <input name="listing[country]" id="country" value="<%= listing.country %>" type="text" class="form-control rounded-pill px-3" required />
                     </div>
                 </div>
 
                 <div class="mb-3">
-                    <label for="description" class="form-label">Description:</label><br>
-                    <textarea name="listing[description]" class="form-control" rows="3" required><%= listing.description %></textarea>
-                    <div class="invalid-feedback">Please enter a description</div>
+                    <label for="description" class="form-label fw-semibold small">Dish Description</label>
+                    <textarea name="listing[description]" id="description" class="form-control rounded-4 p-3" rows="3" required><%= listing.description %></textarea>
                 </div>
 
-                <div class="mb-3">
-                    Original food image <br>
-                    <img src="<%= originalImageUrl %>" alt="food image" style="width: 250px; height: 180px; object-fit: cover; border-radius: 8px;" />
+                <!-- Current Original Photo Preview -->
+                <div class="mb-3 text-center">
+                    <label class="form-label fw-semibold small d-block">Current Food Photo:</label>
+                    <img src="<%= listing.image.url %>" alt="Food Image" class="rounded-3 shadow-sm object-fit-cover" style="height: 140px; width: 220px;" />
                 </div>
 
-                <div class="mb-3">
-                    <label for="image" class="form-label">Upload new food Image (Optional)</label>
-                    <input name="listing[image]" type="file" class="form-control" />
+                <!-- DUAL IMAGE UPDATE: File OR URL Link -->
+                <div class="border rounded-4 p-3 mb-3 bg-light">
+                    <label class="form-label fw-bold text-dark small mb-2 d-flex align-items-center">
+                        <i class="fa-solid fa-camera text-danger me-2"></i>Change Food Photo (Optional - Choose Any One):
+                    </label>
+
+                    <!-- Option A: File from device -->
+                    <div class="mb-2">
+                        <label for="imageFile" class="form-label small text-muted mb-1">Option A: Choose new photo from folder</label>
+                        <input name="listing[image]" id="imageFile" type="file" class="form-control rounded-pill" accept="image/*" />
+                    </div>
+
+                    <div class="text-center text-muted small fw-bold my-1">--- OR ---</div>
+
+                    <!-- Option B: Direct URL -->
+                    <div class="mb-1">
+                        <label for="imageUrl" class="form-label small text-muted mb-1">Option B: Direct Online Image Link (URL)</label>
+                        <input name="imageUrl" id="imageUrl" type="url" placeholder="Paste direct image link e.g. https://images.unsplash.com/..." class="form-control rounded-pill px-3" />
+                    </div>
                 </div>
 
-                <div class="mb-3">
-                    <label for="price" class="form-label">Price (₹):</label><br>
-                    <input name="listing[price]" value="<%= listing.price %>" type="number" class="form-control" required/>
-                    <div class="invalid-feedback">Please enter a price</div>
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label for="price" class="form-label fw-semibold small">Price (₹)</label>
+                        <input name="listing[price]" id="price" value="<%= listing.price %>" type="number" class="form-control rounded-pill px-3" required />
+                    </div>
+                    <div class="col-6">
+                        <label for="prepTime" class="form-label fw-semibold small">Prep Time (Mins)</label>
+                        <input name="listing[preparationTime]" id="prepTime" value="<%= listing.preparationTime || 20 %>" type="number" class="form-control rounded-pill px-3" />
+                    </div>
                 </div>
 
-                <div class="mb-3">
-                    <label for="category" class="form-label">Category:</label><br>
-                    <select name="listing[category]" class="form-select" required>
-                        <option value="Starters" <%= listing.category === 'Starters' ? 'selected' : '' %>>Starters</option>
-                        <option value="Main Course" <%= listing.category === 'Main Course' ? 'selected' : '' %>>Main Course</option>
-                        <option value="Dessert" <%= listing.category === 'Dessert' ? 'selected' : '' %>>Dessert</option>
-                        <option value="Beverages" <%= listing.category === 'Beverages' ? 'selected' : '' %>>Beverages</option>
-                        <option value="Breakfast / Snacks" <%= listing.category === 'Breakfast / Snacks' ? 'selected' : '' %>>Breakfast / Snacks</option>
-                        <option value="Italian / Fast Food" <%= listing.category === 'Italian / Fast Food' ? 'selected' : '' %>>Italian / Fast Food</option>
-                    </select>
+                <div class="row g-2 mb-4">
+                    <div class="col-6">
+                        <label for="category" class="form-label fw-semibold small">Category</label>
+                        <select name="listing[category]" id="category" class="form-select rounded-pill px-3">
+                            <option value="Biryani / Rice" <%= listing.category === 'Biryani / Rice' ? 'selected' : '' %>>Biryani / Rice</option>
+                            <option value="Fast Food" <%= listing.category === 'Fast Food' ? 'selected' : '' %>>Fast Food (Pizza/Burger)</option>
+                            <option value="Breakfast" <%= listing.category === 'Breakfast' ? 'selected' : '' %>>Breakfast</option>
+                            <option value="Indian Thali" <%= listing.category === 'Indian Thali' ? 'selected' : '' %>>Indian Thali</option>
+                            <option value="Street Food" <%= listing.category === 'Street Food' ? 'selected' : '' %>>Street Food</option>
+                            <option value="Kathi Rolls" <%= listing.category === 'Kathi Rolls' ? 'selected' : '' %>>Kathi Rolls</option>
+                            <option value="Momos" <%= listing.category === 'Momos' ? 'selected' : '' %>>Momos</option>
+                            <option value="Chinese / Noodles" <%= listing.category === 'Chinese / Noodles' ? 'selected' : '' %>>Chinese / Noodles</option>
+                            <option value="Dessert" <%= listing.category === 'Dessert' ? 'selected' : '' %>>Ice-cream / Dessert</option>
+                            <option value="Bakery" <%= listing.category === 'Bakery' ? 'selected' : '' %>>Cake / Bakery</option>
+                            <option value="Beverages" <%= listing.category === 'Beverages' ? 'selected' : '' %>>Beverages / Shakes</option>
+                        </select>
+                    </div>
+
+                    <div class="col-6">
+                        <label for="isVeg" class="form-label fw-semibold small">Food Diet</label>
+                        <select name="listing[isVeg]" id="isVeg" class="form-select rounded-pill px-3">
+                            <option value="true" <%= (listing.isVeg === true || String(listing.isVeg) === 'true') ? 'selected' : '' %>>🟢 Pure Veg</option>
+                            <option value="false" <%= (listing.isVeg === false || String(listing.isVeg) === 'false') ? 'selected' : '' %>>🔴 Non-Veg</option>
+                        </select>
+                    </div>
                 </div>
 
-                <div class="mb-3">
-                    <label for="food-type" class="form-label">Food Type:</label><br>
-                    <select name="listing[isVeg]" class="form-select" required>
-                        <option value="true" <%= listing.isVeg ? 'selected' : '' %>>🟢 Veg</option>
-                        <option value="false" <%= !listing.isVeg ? 'selected' : '' %>>🔴 Non-veg</option>
-                    </select>
-                </div>
-
-                <div class="mb-3">
-                    <label for="preparationTime" class="form-label">Preparation Time (mins):</label><br>
-                    <input name="listing[preparationTime]" value="<%= listing.preparationTime %>" type="number" class="form-control" required/>
-                    <div class="invalid-feedback">Please enter preparation time</div>
-                </div>
-
-                <div class="mb-3">
-                    <label for="spiciness" class="form-label">Spiciness Level:</label><br>
-                    <select name="listing[spiciness]" class="form-select" required>
-                        <option value="Mild" <%= listing.spiciness === 'Mild' ? 'selected' : '' %>>Mild</option>
-                        <option value="Medium" <%= listing.spiciness === 'Medium' ? 'selected' : '' %>>Medium</option>
-                        <option value="Spicy" <%= listing.spiciness === 'Spicy' ? 'selected' : '' %>>Spicy</option>
-                        <option value="Sweet" <%= listing.spiciness === 'Sweet' ? 'selected' : '' %>>Sweet</option>
-                        <option value="None" <%= listing.spiciness === 'None' ? 'selected' : '' %>>None</option>
-                    </select>
-                </div>
-
-                <br>
-                <button class="btn btn-dark edit-btn">Update Listing</button>
-                <br><br>
+                <button class="btn btn-warning w-100 rounded-pill py-2 fw-bold text-dark shadow">
+                    <i class="fa-solid fa-check me-1"></i> Save Changes to Cloud Database
+                </button>
             </form>
         </div>
     </div>
-</body>
+</div>

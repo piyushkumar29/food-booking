@@ -1,121 +1,105 @@
 <% layout("/layouts/boilerplate") %>
 
-<style>
-    .new-listing-card {
-        background: #ffffff;
-        border-radius: 24px;
-        padding: 2.2rem;
-        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
-        border: 1.5px solid #e2e8f0;
-        margin-top: 1.5rem;
-        margin-bottom: 3rem;
-    }
-    .form-control-custom, .form-select-custom {
-        background-color: #f8fafc !important;
-        border: 1.5px solid #cbd5e1 !important;
-        color: #0f172a !important;
-        border-radius: 12px;
-        padding: 0.68rem 1rem;
-        font-size: 0.94rem;
-        transition: all 0.2s ease;
-    }
-    .form-control-custom:focus, .form-select-custom:focus {
-        background-color: #ffffff !important;
-        border-color: #fe424d !important;
-        box-shadow: 0 0 0 3px rgba(254, 66, 77, 0.15) !important;
-    }
-    body.dark-mode .new-listing-card {
-        background: #0f172a !important;
-        border-color: #1e293b !important;
-        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.5) !important;
-    }
-    body.dark-mode .form-control-custom, body.dark-mode .form-select-custom {
-        background-color: #1e293b !important;
-        border-color: #334155 !important;
-        color: #f8fafc !important;
-    }
-    body.dark-mode .form-control-custom:focus {
-        background-color: #243048 !important;
-        border-color: #f59e0b !important;
-    }
-</style>
+<div class="row justify-content-center my-3 my-md-4">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="card shadow-sm border-0 rounded-4 p-3 p-md-4 bg-white">
+            <div class="text-center mb-3">
+                <h3 class="fw-bold text-danger mb-1"><i class="fa-solid fa-utensils me-2"></i>Add New Food Dish</h3>
+                <p class="text-muted small">Post a new delicious item directly to Hungrymate menu</p>
+            </div>
 
-<div class="row justify-content-center">
-    <div class="col-12 col-md-8 col-lg-7">
-        <div class="new-listing-card">
-            <h3 class="fw-bold mb-1 text-center" style="color: #fe424d;"><i class="fa-solid fa-utensils me-2"></i>Add New Food Dish</h3>
-            <p class="text-muted small text-center mb-4">Post a new delicious item directly to Hungrymate menu</p>
-
-            <form method="POST" action="/listings" novalidate class="needs-validation" enctype="multipart/form-data">
+            <form method="POST" action="/listings" enctype="multipart/form-data" novalidate class="needs-validation">
+                
                 <div class="mb-3">
                     <label for="title" class="form-label fw-semibold small">Dish Name</label>
-                    <input name="listing[title]" id="title" placeholder="e.g. Special Hyderabadi Biryani" type="text" class="form-control form-control-custom" required />
-                    <div class="invalid-feedback">Dish title is required.</div>
+                    <input name="listing[title]" id="title" placeholder="e.g. Special Hyderabadi Biryani" type="text" class="form-control rounded-pill px-3" required />
+                    <div class="invalid-feedback">Please enter dish name</div>
                 </div>
 
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="restaurant" class="form-label fw-semibold small">Restaurant Name</label>
-                        <input name="listing[restaurant]" id="restaurant" placeholder="e.g. Behrouz Biryani" type="text" class="form-control form-control-custom" required />
+                <div class="mb-3">
+                    <label for="restaurant" class="form-label fw-semibold small">Restaurant Name</label>
+                    <input name="listing[restaurant]" id="restaurant" placeholder="e.g. Behrouz Biryani, Aminia" type="text" class="form-control rounded-pill px-3" required />
+                    <div class="invalid-feedback">Please enter restaurant name</div>
+                </div>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-12 col-sm-6">
+                        <label for="location" class="form-label fw-semibold small">Location / City Area</label>
+                        <input name="listing[location]" id="location" placeholder="e.g. Sector V, Salt Lake" type="text" class="form-control rounded-pill px-3" required />
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="location" class="form-label fw-semibold small">Exact Location (City / Area)</label>
-                        <input name="listing[location]" id="location" placeholder="e.g. Sector V, Salt Lake, Kolkata" type="text" class="form-control form-control-custom" required />
+                    <div class="col-12 col-sm-6">
+                        <label for="country" class="form-label fw-semibold small">Country</label>
+                        <input name="listing[country]" id="country" value="India" type="text" class="form-control rounded-pill px-3" required />
                     </div>
                 </div>
 
                 <div class="mb-3">
                     <label for="description" class="form-label fw-semibold small">Dish Description</label>
-                    <textarea name="listing[description]" id="description" rows="3" placeholder="Describe the ingredients, spice, and freshness..." class="form-control form-control-custom" required></textarea>
+                    <textarea name="listing[description]" id="description" class="form-control rounded-4 p-3" rows="3" placeholder="Describe the ingredients, taste, spices and freshness..." required></textarea>
                 </div>
 
-                <div class="mb-3">
-                    <label for="image" class="form-label fw-semibold small">Food Image</label>
-                    <input name="listing[image]" id="image" type="file" class="form-control form-control-custom" required />
-                </div>
+                <!-- DUAL IMAGE UPLOAD SYSTEM: File OR URL Link -->
+                <div class="border rounded-4 p-3 mb-3 bg-light">
+                    <label class="form-label fw-bold text-dark small mb-2 d-flex align-items-center">
+                        <i class="fa-solid fa-image text-danger me-2"></i>Food Dish Photo (Choose Any One Option):
+                    </label>
 
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label for="price" class="form-label fw-semibold small">Price (&#8377;)</label>
-                        <input name="listing[price]" id="price" type="number" placeholder="299" class="form-control form-control-custom" required />
+                    <!-- Option A: File from device -->
+                    <div class="mb-2">
+                        <label for="imageFile" class="form-label small text-muted mb-1">Option A: Choose photo from computer / phone folder</label>
+                        <input name="listing[image]" id="imageFile" type="file" class="form-control rounded-pill" accept="image/*" />
                     </div>
-                    <div class="col-md-4 mb-3">
+
+                    <div class="text-center text-muted small fw-bold my-1">--- OR ---</div>
+
+                    <!-- Option B: Direct Internet Link -->
+                    <div class="mb-1">
+                        <label for="imageUrl" class="form-label small text-muted mb-1">Option B: Direct Online Image Link (URL)</label>
+                        <input name="imageUrl" id="imageUrl" type="url" placeholder="Paste direct image link e.g. https://images.unsplash.com/..." class="form-control rounded-pill px-3" />
+                    </div>
+                </div>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label for="price" class="form-label fw-semibold small">Price (₹)</label>
+                        <input name="listing[price]" id="price" placeholder="260" type="number" class="form-control rounded-pill px-3" required />
+                    </div>
+                    <div class="col-6">
+                        <label for="prepTime" class="form-label fw-semibold small">Prep Time (Mins)</label>
+                        <input name="listing[preparationTime]" id="prepTime" value="20" type="number" class="form-control rounded-pill px-3" />
+                    </div>
+                </div>
+
+                <div class="row g-2 mb-4">
+                    <div class="col-6">
                         <label for="category" class="form-label fw-semibold small">Category</label>
-                        <select name="listing[category]" id="category" class="form-select form-select-custom" required>
-                            <option value="Biryani / Rice">Biryani / Rice</option>
-                            <option value="Pizza / Fast Food">Pizza / Fast Food</option>
-                            <option value="Burger">Burger</option>
-                            <option value="Starters">Starters</option>
+                        <select name="listing[category]" id="category" class="form-select rounded-pill px-3">
+                            <option value="Biryani / Rice" selected>Biryani / Rice</option>
+                            <option value="Fast Food">Fast Food (Pizza/Burger)</option>
+                            <option value="Breakfast">Breakfast</option>
                             <option value="Indian Thali">Indian Thali</option>
-                            <option value="Dessert">Dessert</option>
-                            <option value="Beverages">Beverages</option>
+                            <option value="Street Food">Street Food</option>
+                            <option value="Kathi Rolls">Kathi Rolls</option>
+                            <option value="Momos">Momos</option>
+                            <option value="Chinese / Noodles">Chinese / Noodles</option>
+                            <option value="Dessert">Ice-cream / Dessert</option>
+                            <option value="Bakery">Cake / Bakery</option>
+                            <option value="Beverages">Beverages / Shakes</option>
                         </select>
                     </div>
-                    <div class="col-md-4 mb-3">
+
+                    <div class="col-6">
                         <label for="isVeg" class="form-label fw-semibold small">Food Diet</label>
-                        <select name="listing[isVeg]" id="isVeg" class="form-select form-select-custom" required>
-                            <option value="true">&#x1F7E2; Pure Veg</option>
-                            <option value="false">&#x1F534; Non-Veg</option>
+                        <select name="listing[isVeg]" id="isVeg" class="form-select rounded-pill px-3">
+                            <option value="true">🟢 Pure Veg</option>
+                            <option value="false" selected>🔴 Non-Veg</option>
                         </select>
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="prepTime" class="form-label fw-semibold small">Preparation Time (Mins)</label>
-                        <input name="listing[preparationTime]" id="prepTime" placeholder="25" type="number" class="form-control form-control-custom" required />
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="spiciness" class="form-label fw-semibold small">Spiciness Level</label>
-                        <select name="listing[spiciness]" id="spiciness" class="form-select form-select-custom" required>
-                            <option value="Mild">Mild</option>
-                            <option value="Medium" selected>Medium</option>
-                            <option value="Spicy">Spicy</option>
-                        </select>
-                    </div>
-                </div>
-
-                <button class="btn btn-dark w-100 py-2 fw-bold rounded-3 mt-2 shadow" style="background: linear-gradient(135deg, #fe424d 0%, #ec4899 100%); border: none;">Publish Food Listing</button>
+                <button class="btn btn-danger w-100 rounded-pill py-2 fw-bold shadow">
+                    <i class="fa-solid fa-plus me-1"></i> Add Dish to Menu
+                </button>
             </form>
         </div>
     </div>
