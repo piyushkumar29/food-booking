@@ -38,7 +38,6 @@ body {
   }
 }
 
-/* CONTAINER */
 .main-body-container {
   flex: 1 0 auto;
   width: 100% !important;
@@ -71,7 +70,7 @@ body {
 .brand-navbar-logo {
   height: 64px !important;
   width: 64px !important;
-  border-radius: 50% !important; /* Point 3: Strict Circular Clip removes square frame */
+  border-radius: 50% !important;
   object-fit: cover !important;
   display: block !important;
   transition: transform 0.2s ease;
@@ -80,12 +79,12 @@ body {
 
 @media (max-width: 575px) {
   .brand-navbar-logo {
-    height: 50px !important;
-    width: 50px !important;
+    height: 52px !important;
+    width: 52px !important;
   }
 }
 
-/* Capsule Nav Buttons (Default Light Mode) */
+/* Capsule Nav Buttons */
 .nav-pill-btn {
   display: inline-flex !important;
   align-items: center !important;
@@ -150,7 +149,7 @@ body {
   overflow: hidden;
 }
 
-/* Flipkart Style Bottom Bar */
+/* Flipkart Bottom Bar */
 .flipkart-bottom-bar {
   position: fixed;
   bottom: 0;
@@ -396,67 +395,103 @@ body {
 .f-info-socials i:hover { color: var(--hm-red) !important; transform: translateY(-2px); }
 
 /* =========================================================
-   DARK MODE STRICT OVERRIDES (POINTS 1, 2, 3)
+   DARK MODE COMPREHENSIVE FIX (POINTS 1, 2, 3)
    ========================================================= */
 
 body.dark-mode {
-  background-color: #000000 !important;
-  color: #ffffff !important;
+  background-color: #09090b !important;
+  color: #f8fafc !important;
 }
 
-/* 1. Header Pure Deep Black (Override Bootstrap .bg-white specificity) */
+/* 1. Header/Navbar in Dark Mode */
 body.dark-mode .navbar,
 body.dark-mode .hm-main-navbar,
 body.dark-mode nav.navbar,
 body.dark-mode .navbar.bg-white,
 body.dark-mode .bg-white {
-  background-color: #000000 !important;
-  background: #000000 !important;
+  background-color: #09090b !important;
+  background: #09090b !important;
   border-bottom: 1.5px solid #27272a !important;
 }
 
-/* Point 3: Dark Mode Logo Square Border Clean Up */
+/* Logo Circular Trim */
 body.dark-mode .brand-navbar-logo {
   border: 2px solid #ffffff !important;
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.2) !important;
 }
 
-/* 2. Capsule Nav Buttons in Dark Mode: Black bg, White border, White text, Golden icons */
+/* Capsule Nav Buttons in Dark Mode */
 body.dark-mode .nav-pill-btn {
-  background-color: #000000 !important;
-  background: #000000 !important;
+  background-color: #121215 !important;
+  background: #121215 !important;
   color: #ffffff !important;
-  border: 1.5px solid #ffffff !important;
-  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1) !important;
+  border: 1.5px solid #3f3f46 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
 }
-
 body.dark-mode .nav-pill-btn .icon-item {
   color: #facc15 !important;
 }
-
 body.dark-mode .nav-pill-btn:hover {
-  background-color: #18181b !important;
+  background-color: #1f1f23 !important;
   border-color: #facc15 !important;
   color: #facc15 !important;
-  transform: translateY(-2px) scale(1.02);
   box-shadow: 0 4px 14px rgba(250, 204, 21, 0.3) !important;
 }
 
-body.dark-mode .nav-pill-btn:hover .icon-item {
-  color: #facc15 !important;
-}
-
-/* Search Input in Dark Mode */
-body.dark-mode #foodSearchInput,
-body.dark-mode #mobileFoodSearchInput {
-  background-color: #18181b !important;
-  border: 1.5px solid #ffffff !important;
+/* Inputs & Forms in Dark Mode (Contrast Balancing) */
+body.dark-mode .card,
+body.dark-mode .card.bg-white {
+  background-color: #121215 !important;
+  border: 1px solid #27272a !important;
   color: #ffffff !important;
 }
 
-body.dark-mode #foodSearchInput::placeholder,
-body.dark-mode #mobileFoodSearchInput::placeholder {
-  color: #a1a1aa !important;
+body.dark-mode .form-label,
+body.dark-mode label,
+body.dark-mode .text-dark {
+  color: #f8fafc !important;
+}
+
+body.dark-mode .form-control,
+body.dark-mode .form-select,
+body.dark-mode textarea {
+  background-color: #18181b !important;
+  border: 1.5px solid #3f3f46 !important;
+  color: #ffffff !important;
+}
+
+body.dark-mode .form-control:focus,
+body.dark-mode .form-select:focus,
+body.dark-mode textarea:focus {
+  background-color: #18181b !important;
+  border-color: #facc15 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 0.25rem rgba(250, 204, 21, 0.15) !important;
+}
+
+body.dark-mode .form-control::placeholder,
+body.dark-mode textarea::placeholder {
+  color: #71717a !important;
+}
+
+body.dark-mode .bg-light {
+  background-color: #18181b !important;
+  border-color: #27272a !important;
+  color: #ffffff !important;
+}
+
+body.dark-mode #searchHistoryBox {
+  background-color: #18181b !important;
+  border-color: #3f3f46 !important;
+  color: #ffffff !important;
+}
+body.dark-mode #searchHistoryBox li {
+  color: #ffffff !important;
+  border-bottom: 1px solid #27272a;
+}
+body.dark-mode #searchHistoryBox li:hover {
+  background-color: #27272a !important;
+  color: #facc15 !important;
 }
 
 body.dark-mode .btn.text-secondary {
@@ -464,13 +499,14 @@ body.dark-mode .btn.text-secondary {
 }
 
 body.dark-mode .btn-light.border {
-  background-color: #000000 !important;
-  border: 1.5px solid #ffffff !important;
+  background-color: #18181b !important;
+  border: 1.5px solid #3f3f46 !important;
   color: #ffffff !important;
 }
 
+/* Card in Dark Mode */
 body.dark-mode .listing-card {
-  background-color: #121212 !important;
+  background-color: #121215 !important;
   border: 1px solid #27272a !important;
 }
 body.dark-mode .card-action-footer { border-top-color: #27272a !important; }
@@ -482,13 +518,12 @@ body.dark-mode .btn-add-cart-pill {
   font-weight: 800 !important;
 }
 
-/* Footer in Dark Mode: Crisp White Text */
+/* Footer Dark Mode */
 body.dark-mode .f-info {
   background-color: #050505 !important;
   border-top: 1.5px solid #27272a !important;
   color: #ffffff !important;
 }
-
 body.dark-mode .f-info-brand,
 body.dark-mode .f-info-brand span,
 body.dark-mode .f-info small,
@@ -499,14 +534,13 @@ body.dark-mode .f-info-socials i {
   color: #ffffff !important;
   opacity: 1 !important;
 }
-
 body.dark-mode .f-info strong.text-danger,
 body.dark-mode .f-info small strong {
   color: #facc15 !important;
 }
 
 body.dark-mode .flipkart-bottom-bar {
-  background-color: #000000 !important;
+  background-color: #09090b !important;
   border-top-color: #27272a !important;
 }
 body.dark-mode .fk-bar-item {

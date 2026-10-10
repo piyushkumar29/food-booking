@@ -14,9 +14,18 @@
             <!-- Cart Items Listing -->
             <div id="cartItemsContainer" class="mb-4"></div>
 
-            <!-- User Delivery Details Form -->
+            <!-- Delivery Details & Live Location Integration (Point 4) -->
             <div class="border rounded-4 p-3 mb-4 bg-light">
-                <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-location-dot text-danger me-1"></i>Delivery Details</h6>
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-location-dot text-danger me-1"></i>Delivery Details</h6>
+                    
+                    <!-- Live GPS Auto-Detect Button -->
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill fw-bold d-flex align-items-center gap-1 shadow-sm" id="detectLocationBtn" onclick="fetchLiveUserLocation()">
+                        <i class="fa-solid fa-crosshairs text-danger"></i>
+                        <span id="locationBtnText">Use My Live Location</span>
+                    </button>
+                </div>
+
                 <div class="row g-2">
                     <div class="col-12 col-sm-6">
                         <label class="form-label small fw-semibold">Customer Name <span class="text-danger">*</span></label>
@@ -29,11 +38,12 @@
                     <div class="col-12">
                         <label class="form-label small fw-semibold">Delivery Address <span class="text-danger">*</span></label>
                         <textarea id="custAddress" class="form-control rounded-4 p-3" rows="2" placeholder="House/Flat No, Landmark, Area, City & Pincode..." required></textarea>
+                        <small id="locationStatusHint" class="text-muted d-block mt-1" style="font-size: 0.75rem;">Click 'Use My Live Location' to fill your address automatically.</small>
                     </div>
                 </div>
             </div>
 
-            <!-- Point 5: Offers Redirection in Same Tab (No target='_blank') -->
+            <!-- Coupon Code Section -->
             <div class="border rounded-4 p-3 mb-4 bg-light">
                 <div class="d-flex justify-content-between align-items-center mb-1">
                     <label class="form-label fw-bold small text-dark mb-0"><i class="fa-solid fa-tag text-warning me-1"></i>Apply Promo / Coupon Code</label>
@@ -93,6 +103,70 @@
         if (savedCheckout.phone) document.getElementById("custPhone").value = savedCheckout.phone;
         if (savedCheckout.address) document.getElementById("custAddress").value = savedCheckout.address;
     });
+
+    // Real Live Location Extraction Function (Point 4)
+    function fetchLiveUserLocation() {
+        const btn = document.getElementById("detectLocationBtn");
+        const btnText = document.getElementById("locationBtnText");
+        const statusHint = document.getElementById("locationStatusHint");
+        const addressBox = document.getElementById("custAddress");
+
+        if (!navigator.geolocation) {
+            alert("Geolocation is not supported by your browser!");
+            return;
+        }
+
+        btnText.innerText = "Detecting GPS...";
+        btn.disabled = true;
+        statusHint.innerText = "Connecting to device GPS satellites...";
+
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                statusHint.innerText = `GPS coordinates acquired (${lat.toFixed(3)}, ${lon.toFixed(3)}). Fetching street address...`;
+
+                try {
+                    // OpenStreetMap Nominatim Reverse Geocoding API
+                    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`);
+                    const data = await response.json();
+
+                    if (data && data.display_name) {
+                        addressBox.value = data.display_name;
+                        statusHint.innerHTML = `<span class="text-success fw-bold"><i class="fa-solid fa-check me-1"></i>Live location fetched successfully!</span>`;
+                    } else {
+                        addressBox.value = `Latitude: ${lat}, Longitude: ${lon} (Nearby Sector)`;
+                        statusHint.innerText = "Approximate coordinates filled. You may refine your flat or house number.";
+                    }
+                } catch (error) {
+                    addressBox.value = `Location: Lat ${lat.toFixed(4)}, Lon ${lon.toFixed(4)}`;
+                    statusHint.innerText = "GPS coordinates added. Please enter your complete street name.";
+                } finally {
+                    btnText.innerText = "Live Location Detected";
+                    btn.disabled = false;
+                }
+            },
+            (error) => {
+                btnText.innerText = "Use My Live Location";
+                btn.disabled = false;
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        alert("Location permission denied! Please allow location access in your browser settings.");
+                        statusHint.innerText = "Permission denied. Please type your address manually.";
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        alert("Location information is currently unavailable.");
+                        break;
+                    case error.TIMEOUT:
+                        alert("The request to get user location timed out.");
+                        break;
+                    default:
+                        alert("An unknown error occurred while fetching location.");
+                }
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+    }
 
     function renderCart() {
         const cart = JSON.parse(localStorage.getItem("hungrymate_cart") || "[]");

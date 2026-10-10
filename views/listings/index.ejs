@@ -58,7 +58,7 @@
         cursor: pointer; flex-shrink: 0;
     }
     body.dark-mode .scroll-btn {
-        background-color: #121212 !important;
+        background-color: #121215 !important;
         border-color: #27272a !important;
         color: #ffffff !important;
     }
@@ -83,14 +83,14 @@
         flex-shrink: 0;
     }
     body.dark-mode .clickable-toggle-box {
-        background-color: #000000 !important;
-        border: 1.5px solid #ffffff !important;
+        background-color: #121215 !important;
+        border: 1.5px solid #3f3f46 !important;
         color: #ffffff !important;
     }
     .toggle-label { font-size: 0.72rem; font-weight: 700; margin: 0; white-space: nowrap; }
 </style>
 
-<!-- Categories & Controls (Point 4: 100% Exact Category Matching) -->
+<!-- Categories & Controls (Points 2 & 3: Extraction Engine) -->
 <div class="top-action-bar">
     <div class="filter-wrapper">
         <button class="scroll-btn me-1 d-none d-sm-flex" id="slideLeft"><i class="fa-solid fa-chevron-left"></i></button>
@@ -100,8 +100,7 @@
             <div class="filter" data-category="breakfast"><div><i class="fa-solid fa-egg text-warning"></i></div><p>Breakfast</p></div>
             <div class="filter" data-category="biryani"><div><i class="fa-solid fa-bowl-rice text-warning"></i></div><p>Biryani</p></div>
             <div class="filter" data-category="thali"><div><i class="fa-solid fa-plate-wheat text-success"></i></div><p>Thali</p></div>
-            <div class="filter" data-category="pizza"><div><i class="fa-solid fa-pizza-slice text-danger"></i></div><p>Pizza/Fast Food</p></div>
-            <div class="filter" data-category="burger"><div><i class="fa-solid fa-burger text-warning"></i></div><p>Burger</p></div>
+            <div class="filter" data-category="pizza"><div><i class="fa-solid fa-pizza-slice text-danger"></i></div><p>Pizza/Burger</p></div>
             <div class="filter" data-category="street food"><div><i class="fa-solid fa-hotdog text-warning"></i></div><p>Street Food</p></div>
             <div class="filter" data-category="rolls"><div><i class="fa-solid fa-scroll text-primary"></i></div><p>Kathi Rolls</p></div>
             <div class="filter" data-category="momos"><div><i class="fa-solid fa-cloud text-secondary"></i></div><p>Momos</p></div>
@@ -205,12 +204,12 @@
     <% } %>
 </div>
 
-<!-- Point 5: Friendly No Match Card with Alternatives -->
+<!-- Friendly No Match Card with Alternatives -->
 <div id="noMatchMessage" class="text-center py-5 d-none">
-    <div class="p-4 rounded-4 bg-white shadow-sm d-inline-block" style="max-width: 480px; border: 1.5px solid #cbd5e1;">
+    <div class="p-4 rounded-4 shadow-sm d-inline-block border" style="max-width: 480px;">
         <i class="fa-solid fa-bowl-food fs-1 text-danger mb-3"></i>
-        <h5 class="fw-bold text-dark">No Food Items Found!</h5>
-        <p class="text-muted small mb-3">We couldn't find any dish matching your exact keywords. Try searching for popular items like <strong>Biryani, Pizza, Burger, Tacos, Rolls, or Cakes</strong>.</p>
+        <h5 class="fw-bold">No Food Items Found!</h5>
+        <p class="text-muted small mb-3">We couldn't find any dish matching your search keyword. Try searching for popular food items like <strong>Biryani, Pizza, Burger, Tacos, Rolls, or Cakes</strong>.</p>
         <button class="btn btn-danger rounded-pill px-4 btn-sm fw-bold shadow-sm" onclick="resetAllSearchAndFilters()">
             Explore All Food Items
         </button>
@@ -313,7 +312,7 @@
     const categoryFilters = document.querySelectorAll(".filter");
     const noMatchMsg = document.getElementById("noMatchMessage");
 
-    // Point 4: Strict Exact Category Matching Engine for Predefined & Upcoming Dishes
+    // Exact Category Match Function (Point 2)
     function checkCategoryMatch(activeCat, title, category, description, isVeg) {
         if (activeCat === "all" || activeCat === "trending") return true;
         if (activeCat === "veg") return isVeg;
@@ -336,9 +335,8 @@
         if (activeCat === "biryani") {
             return fullContent.includes("biryani") || fullContent.includes("pulao") || fullContent.includes("rice");
         }
-        if (activeCat === "pizza" || activeCat === "fast food") {
-            // Strict pizza/burger check: exclude tacos or unrelated items if searching specifically
-            return fullContent.includes("pizza") || fullContent.includes("burger");
+        if (activeCat === "pizza") {
+            return fullContent.includes("pizza") || fullContent.includes("burger") || fullContent.includes("tacos") || fullContent.includes("nachos") || fullContent.includes("fries") || fullContent.includes("fast food");
         }
         if (activeCat === "burger") {
             return fullContent.includes("burger") || fullContent.includes("hot dog");
@@ -364,7 +362,7 @@
         return fullContent.includes(activeCat);
     }
 
-    // Points 4 & 5: Live Search & Execution Filter
+    // Live Search Extraction (Point 3)
     function applyAllFilters() {
         const query = ((searchInput ? searchInput.value : "") || (mobileSearchInput ? mobileSearchInput.value : "")).trim().toLowerCase();
         const vegOnly = onlyVegToggle.checked;
@@ -402,7 +400,6 @@
         applyAllFilters();
     };
 
-    // Point 5: Real-time Alphabet-by-Alphabet Autocomplete
     function buildLiveRecommendations(inputEl) {
         if (!inputEl) return;
         const box = document.getElementById("searchHistoryBox");
@@ -467,7 +464,6 @@
         });
     });
 
-    // Auto-extract all unique restaurants from Predefined + Upcoming DOM items
     document.addEventListener("DOMContentLoaded", () => {
         const container = document.getElementById("restaurantChipsContainer");
         if (container) {
