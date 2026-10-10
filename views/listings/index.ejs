@@ -90,7 +90,7 @@
     .toggle-label { font-size: 0.72rem; font-weight: 700; margin: 0; white-space: nowrap; }
 </style>
 
-<!-- Categories & Controls (Point 4: 100% Exact Functional Category Matching) -->
+<!-- Categories & Controls (Point 4: 100% Exact Category Matching) -->
 <div class="top-action-bar">
     <div class="filter-wrapper">
         <button class="scroll-btn me-1 d-none d-sm-flex" id="slideLeft"><i class="fa-solid fa-chevron-left"></i></button>
@@ -100,7 +100,8 @@
             <div class="filter" data-category="breakfast"><div><i class="fa-solid fa-egg text-warning"></i></div><p>Breakfast</p></div>
             <div class="filter" data-category="biryani"><div><i class="fa-solid fa-bowl-rice text-warning"></i></div><p>Biryani</p></div>
             <div class="filter" data-category="thali"><div><i class="fa-solid fa-plate-wheat text-success"></i></div><p>Thali</p></div>
-            <div class="filter" data-category="pizza"><div><i class="fa-solid fa-pizza-slice text-danger"></i></div><p>Pizza/Burger</p></div>
+            <div class="filter" data-category="pizza"><div><i class="fa-solid fa-pizza-slice text-danger"></i></div><p>Pizza/Fast Food</p></div>
+            <div class="filter" data-category="burger"><div><i class="fa-solid fa-burger text-warning"></i></div><p>Burger</p></div>
             <div class="filter" data-category="street food"><div><i class="fa-solid fa-hotdog text-warning"></i></div><p>Street Food</p></div>
             <div class="filter" data-category="rolls"><div><i class="fa-solid fa-scroll text-primary"></i></div><p>Kathi Rolls</p></div>
             <div class="filter" data-category="momos"><div><i class="fa-solid fa-cloud text-secondary"></i></div><p>Momos</p></div>
@@ -204,7 +205,7 @@
     <% } %>
 </div>
 
-<!-- Friendly No Match Card with Alternatives (Point 6) -->
+<!-- Point 5: Friendly No Match Card with Alternatives -->
 <div id="noMatchMessage" class="text-center py-5 d-none">
     <div class="p-4 rounded-4 bg-white shadow-sm d-inline-block" style="max-width: 480px; border: 1.5px solid #cbd5e1;">
         <i class="fa-solid fa-bowl-food fs-1 text-danger mb-3"></i>
@@ -312,7 +313,7 @@
     const categoryFilters = document.querySelectorAll(".filter");
     const noMatchMsg = document.getElementById("noMatchMessage");
 
-    // Point 4: Strict Exact Category Matching Engine
+    // Point 4: Strict Exact Category Matching Engine for Predefined & Upcoming Dishes
     function checkCategoryMatch(activeCat, title, category, description, isVeg) {
         if (activeCat === "all" || activeCat === "trending") return true;
         if (activeCat === "veg") return isVeg;
@@ -336,7 +337,11 @@
             return fullContent.includes("biryani") || fullContent.includes("pulao") || fullContent.includes("rice");
         }
         if (activeCat === "pizza" || activeCat === "fast food") {
-            return fullContent.includes("pizza") || fullContent.includes("burger") || fullContent.includes("tacos") || fullContent.includes("nachos") || fullContent.includes("fries") || fullContent.includes("fast food");
+            // Strict pizza/burger check: exclude tacos or unrelated items if searching specifically
+            return fullContent.includes("pizza") || fullContent.includes("burger");
+        }
+        if (activeCat === "burger") {
+            return fullContent.includes("burger") || fullContent.includes("hot dog");
         }
         if (activeCat === "rolls") {
             return fullContent.includes("roll") || fullContent.includes("shawarma") || fullContent.includes("kathi") || fullContent.includes("wrap");
@@ -359,7 +364,7 @@
         return fullContent.includes(activeCat);
     }
 
-    // Points 5 & 6: Live Search & Execution Filter
+    // Points 4 & 5: Live Search & Execution Filter
     function applyAllFilters() {
         const query = ((searchInput ? searchInput.value : "") || (mobileSearchInput ? mobileSearchInput.value : "")).trim().toLowerCase();
         const vegOnly = onlyVegToggle.checked;

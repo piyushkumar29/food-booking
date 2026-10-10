@@ -1,19 +1,18 @@
 <nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top shadow-sm hm-main-navbar py-2 px-2 px-md-3">
   <div class="container-fluid d-flex align-items-center justify-content-between p-0 flex-nowrap">
     
-    <!-- Left Logo & Navigation Items -->
+    <!-- Left Logo & Desktop Navigation Items -->
     <div class="d-flex align-items-center flex-shrink-0 gap-2 gap-lg-3">
-      <!-- Natural Big Sized Brand Logo -->
       <a class="navbar-brand m-0 p-0 d-flex align-items-center" href="/listings">
         <img src="/myimg.png" alt="Hungrymate Logo" class="brand-navbar-logo" />
       </a>
 
+      <!-- Desktop Navigation Links (Hidden on Mobile) -->
       <div class="d-none d-lg-flex align-items-center gap-2">
         <a class="nav-pill-btn nav-all-food" href="/listings">
           <i class="fa-solid fa-utensils icon-item"></i> All food items
         </a>
 
-        <!-- Same Restaurant Option Modal Trigger -->
         <button type="button" class="nav-pill-btn nav-same-rest-btn" data-bs-toggle="modal" data-bs-target="#sameRestaurantModal">
           <i class="fa-solid fa-store icon-item"></i> Same Restaurant Dishes
         </button>
@@ -54,36 +53,48 @@
       <!-- Autocomplete Dropdown List -->
       <div id="searchHistoryBox" class="position-absolute border rounded-3 shadow-lg w-100 mt-1 d-none" style="z-index: 1060; max-height: 250px; overflow-y: auto; left: 0;">
         <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom" style="font-size: 0.78rem; opacity: 0.85;">
-          <span class="fw-bold" id="searchDropdownHeader"><i class="fa-solid fa-utensils text-danger me-1"></i> MATCHING DISHES & RESTAURANTS</span>
+          <span class="fw-bold" id="searchDropdownHeader"><i class="fa-solid fa-utensils text-danger me-1"></i> SUGGESTIONS</span>
           <span role="button" id="clearHistoryBtn" class="text-danger fw-semibold" style="cursor: pointer;" onclick="document.getElementById('searchHistoryBox').classList.add('d-none')">Close</span>
         </div>
         <ul id="historyList" class="list-unstyled m-0 p-0"></ul>
       </div>
     </div>
 
-    <!-- Right Controls: Cart & Account -->
+    <!-- Right Controls: Desktop Cart & User Dropdown -->
     <div class="d-flex align-items-center gap-2 flex-shrink-0">
-      <a href="/cart" class="btn btn-light border position-relative rounded-pill px-3 py-1 d-flex align-items-center gap-1 text-decoration-none" title="View Cart">
+      <a href="/cart" class="btn btn-light border position-relative rounded-pill px-3 py-1 d-flex align-items-center gap-1 text-decoration-none d-none d-md-inline-flex" title="View Cart">
         <i class="fa-solid fa-cart-shopping text-danger"></i>
         <span class="d-none d-sm-inline fw-semibold" style="font-size: 0.85rem;">Cart</span>
         <span id="navCartCountBadge" class="badge rounded-pill bg-danger" style="font-size: 0.7rem;">0</span>
       </a>
 
       <% if(!currUser) { %>
-        <div class="d-flex gap-1">
-          <a class="btn nav-auth-signup-btn rounded-pill px-2 px-sm-3 py-1 fw-bold btn-sm" href="/signup">Sign up</a>
-          <a class="btn nav-auth-login-btn rounded-pill px-2 px-sm-3 py-1 fw-bold btn-sm" href="/login">Log in</a>
+        <div class="d-none d-md-flex gap-1">
+          <a class="btn nav-auth-signup-btn rounded-pill px-3 py-1 fw-bold btn-sm" href="/signup">Sign up</a>
+          <a class="btn nav-auth-login-btn rounded-pill px-3 py-1 fw-bold btn-sm" href="/login">Log in</a>
         </div>
       <% } %>
 
       <% if(currUser) { %>
-        <div class="dropdown text-center">
+        <%
+          let userInitials = "U";
+          if (currUser.username) {
+            const parts = currUser.username.trim().split(/\s+/);
+            if (parts.length >= 2) {
+              userInitials = (parts[0][0] + parts[1][0]).toUpperCase();
+            } else {
+              userInitials = parts[0].substring(0, 2).toUpperCase();
+            }
+          }
+        %>
+        <!-- Desktop User Dropdown -->
+        <div class="dropdown text-center d-none d-md-block">
           <div role="button" class="d-flex flex-column align-items-center dropdown-toggle user-avatar-wrap" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
-            <div id="navAvatarBox" class="profile-avatar-circle shadow-sm">
+            <div class="profile-avatar-circle shadow-sm">
               <% if(currUser.avatar && currUser.avatar.trim() !== '') { %>
                 <img src="<%= currUser.avatar %>" alt="avatar" class="w-100 h-100 rounded-circle object-fit-cover" />
               <% } else { %>
-                <span class="avatar-letter"><%= currUser.username.charAt(0).toUpperCase() %></span>
+                <span class="avatar-letter"><%= userInitials %></span>
               <% } %>
             </div>
           </div>
@@ -98,14 +109,6 @@
               </div>
               <div class="text-muted small text-truncate"><%= currUser.email %></div>
             </li>
-            <% if(currUser.isOwner) { %>
-              <li class="d-lg-none">
-                <a class="dropdown-item py-2 rounded-2 d-flex align-items-center gap-2 text-danger fw-bold" href="/listings/new">
-                  <i class="fa-solid fa-plus text-danger"></i>
-                  <span>Add New Item</span>
-                </a>
-              </li>
-            <% } %>
             <li>
               <button type="button" class="dropdown-item py-2 rounded-2 d-flex align-items-center gap-2" onclick="promptEditName('<%= currUser.username %>')">
                 <i class="fa-solid fa-pen-to-square text-primary"></i>
@@ -133,17 +136,16 @@
 
   </div>
 
-  <!-- Mobile Search Bar (< 768px) with Auto Recommendations -->
+  <!-- Mobile Clean Search Bar (Full Width, No messy blue links underneath) -->
   <div class="d-md-none w-100 mt-2 position-relative">
     <div class="input-group w-100 position-relative">
       <input 
         class="form-control rounded-pill pe-5 py-2 shadow-none" 
         type="search" 
         id="mobileFoodSearchInput" 
-        placeholder="Search food or restaurants..." 
+        placeholder="Search food, dishes or restaurants..." 
         autocomplete="off"
         style="border: 1.5px solid #cbd5e1; font-size: 0.85rem;"
-        onkeydown="if(event.key === 'Enter'){ event.preventDefault(); if(typeof executeSearchNow === 'function') executeSearchNow(); }"
       />
       <button class="btn position-absolute end-0 top-50 translate-middle-y me-2 border-0 bg-transparent text-secondary p-0" type="button" onclick="if(typeof executeSearchNow === 'function') executeSearchNow();">
         <i class="fa-solid fa-magnifying-glass fs-6"></i>
@@ -152,7 +154,7 @@
   </div>
 </nav>
 
-<!-- Flipkart Style Mobile Bottom Navigation Bar (< 992px) -->
+<!-- Point 1 & 2: Flipkart Style Bottom Bar Navigation (Mobile Only < 992px) -->
 <div class="flipkart-bottom-bar d-lg-none border-top">
   <a href="/listings" class="fk-bar-item active">
     <i class="fa-solid fa-house"></i>
@@ -160,7 +162,7 @@
   </a>
   <a href="javascript:void(0)" class="fk-bar-item" data-bs-toggle="modal" data-bs-target="#sameRestaurantModal">
     <i class="fa-solid fa-store"></i>
-    <span>Restaurants</span>
+    <span>Same Rest.</span>
   </a>
   <a href="/cart" class="fk-bar-item position-relative">
     <i class="fa-solid fa-cart-shopping"></i>
@@ -171,10 +173,33 @@
     <i class="fa-solid fa-motorcycle"></i>
     <span>Track</span>
   </a>
+  <a href="/offers" class="fk-bar-item">
+    <i class="fa-solid fa-tags"></i>
+    <span>Offers</span>
+  </a>
+
   <% if(currUser) { %>
-    <a href="/logout" class="fk-bar-item text-danger">
-      <i class="fa-solid fa-arrow-right-from-bracket"></i>
-      <span>Exit</span>
+    <%
+      let mobileInitials = "U";
+      if (currUser.username) {
+        const p = currUser.username.trim().split(/\s+/);
+        if (p.length >= 2) {
+          mobileInitials = (p[0][0] + p[1][0]).toUpperCase();
+        } else {
+          mobileInitials = p[0].substring(0, 2).toUpperCase();
+        }
+      }
+    %>
+    <!-- Mobile User Avatar at Bottom Bar -->
+    <a href="javascript:void(0)" class="fk-bar-item" data-bs-toggle="modal" data-bs-target="#mobileAccountModal">
+      <div class="mobile-bottom-avatar-circle">
+        <% if(currUser.avatar && currUser.avatar.trim() !== '') { %>
+          <img src="<%= currUser.avatar %>" alt="avatar" class="w-100 h-100 rounded-circle object-fit-cover" />
+        <% } else { %>
+          <span><%= mobileInitials %></span>
+        <% } %>
+      </div>
+      <span>Profile</span>
     </a>
   <% } else { %>
     <a href="/login" class="fk-bar-item">
@@ -184,14 +209,43 @@
   <% } %>
 </div>
 
-<!-- Modal: Same Restaurant Search & Quick Picker (Point 8) -->
+<!-- Mobile Account Bottom Sheet Modal -->
+<% if(currUser) { %>
+<div class="modal fade" id="mobileAccountModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content rounded-4 border-0 p-3 shadow-lg">
+      <div class="text-center pb-2 border-bottom mb-2">
+        <h6 class="fw-bold mb-0 text-dark"><%= currUser.username %></h6>
+        <small class="text-muted"><%= currUser.email %></small>
+      </div>
+      <% if(currUser.isOwner) { %>
+        <a class="btn btn-outline-danger btn-sm rounded-pill mb-2 fw-bold" href="/listings/new">
+          <i class="fa-solid fa-plus me-1"></i> Add New Item (Owner)
+        </a>
+      <% } %>
+      <button type="button" class="btn btn-light btn-sm rounded-pill mb-2 text-start px-3" onclick="promptEditName('<%= currUser.username %>')">
+        <i class="fa-solid fa-pen-to-square text-primary me-2"></i> Edit Profile Name
+      </button>
+      <label for="avatarFileInputMobile" class="btn btn-light btn-sm rounded-pill mb-2 text-start px-3" style="cursor: pointer;">
+        <i class="fa-solid fa-camera text-danger me-2"></i> Change Profile Photo
+      </label>
+      <input type="file" id="avatarFileInputMobile" accept="image/*" class="d-none" onchange="uploadPermanentAvatar(event)" />
+      <a class="btn btn-danger btn-sm rounded-pill fw-bold" href="/logout">
+        <i class="fa-solid fa-arrow-right-from-bracket me-1"></i> Log out
+      </a>
+    </div>
+  </div>
+</div>
+<% } %>
+
+<!-- Modal: Same Restaurant Search & Quick Picker -->
 <div class="modal fade" id="sameRestaurantModal" tabindex="-1" aria-labelledby="sameRestaurantModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content rounded-4 border-0 shadow">
       <div class="modal-header border-bottom pb-2">
         <div>
           <h5 class="modal-title fw-bold" id="sameRestaurantModalLabel"><i class="fa-solid fa-store text-danger me-2"></i>Filter by Restaurant</h5>
-          <p class="text-muted small mb-0">Search or select any restaurant to see all dishes from it</p>
+          <p class="text-muted small mb-0">Search or pick any restaurant to see all dishes from it</p>
         </div>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
