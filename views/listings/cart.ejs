@@ -11,37 +11,41 @@
                 </button>
             </div>
 
-            <div id="cartItemsContainer" class="mb-4">
-                <!-- Dynamically Populated by Cart Items -->
-            </div>
+            <!-- Cart Items Listing -->
+            <div id="cartItemsContainer" class="mb-4"></div>
 
-            <!-- Coupon Code Section -->
-            <div class="border rounded-4 p-3 mb-4 bg-light">
-                <label class="form-label fw-bold small text-dark mb-1"><i class="fa-solid fa-tag text-warning me-1"></i>Apply Promo / Coupon Code</label>
-                <div class="input-group">
-                    <input type="text" id="couponInput" class="form-control rounded-pill-start shadow-none" placeholder="Try HUNGRY60, WELCOME, or PIYUSH" style="text-transform: uppercase;">
-                    <button class="btn btn-danger rounded-pill-end px-4 fw-bold" type="button" onclick="applyCoupon()">Apply</button>
-                </div>
-                <div id="couponStatusMessage" class="small mt-1"></div>
-            </div>
-
-            <!-- Delivery Address & Contact Form -->
+            <!-- User Delivery Details Form (Required Before Moving to Payment) -->
             <div class="border rounded-4 p-3 mb-4 bg-light">
                 <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-location-dot text-danger me-1"></i>Delivery Details</h6>
                 <div class="row g-2">
                     <div class="col-12 col-sm-6">
-                        <label class="form-label small fw-semibold">Customer Name</label>
-                        <input type="text" id="custName" class="form-control rounded-pill" value="<%= currUser ? currUser.username : '' %>" placeholder="Your Full Name" required>
+                        <label class="form-label small fw-semibold">Customer Name <span class="text-danger">*</span></label>
+                        <input type="text" id="custName" class="form-control rounded-pill px-3" value="<%= currUser ? currUser.username : '' %>" placeholder="Enter Full Name" required>
                     </div>
                     <div class="col-12 col-sm-6">
-                        <label class="form-label small fw-semibold">Mobile Number</label>
-                        <input type="tel" id="custPhone" class="form-control rounded-pill" placeholder="e.g. 9876543210" required>
+                        <label class="form-label small fw-semibold">Mobile Number <span class="text-danger">*</span></label>
+                        <input type="tel" id="custPhone" class="form-control rounded-pill px-3" placeholder="e.g. 9876543210" required>
                     </div>
                     <div class="col-12">
-                        <label class="form-label small fw-semibold">Delivery Address</label>
-                        <textarea id="custAddress" class="form-control rounded-3" rows="2" placeholder="Street, Flat No, Landmark, City Area..." required></textarea>
+                        <label class="form-label small fw-semibold">Delivery Address <span class="text-danger">*</span></label>
+                        <textarea id="custAddress" class="form-control rounded-4 p-3" rows="2" placeholder="House/Flat No, Landmark, Area, City & Pincode..." required></textarea>
                     </div>
                 </div>
+            </div>
+
+            <!-- Point 2 & 4: Exact Coupon Codes from Offers Page Before Price Calculation -->
+            <div class="border rounded-4 p-3 mb-4 bg-light">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <label class="form-label fw-bold small text-dark mb-0"><i class="fa-solid fa-tag text-warning me-1"></i>Apply Promo / Coupon Code</label>
+                    <a href="/offers" target="_blank" class="small text-danger fw-bold text-decoration-none">View All Offers &rarr;</a>
+                </div>
+                <small class="text-muted d-block mb-2">Available Coupons: <strong>1STUSERFREE</strong> (100% Off), <strong>FLAT60%</strong> (60% Off), <strong>HUNGRY20</strong> (20% Off)</small>
+                
+                <div class="input-group">
+                    <input type="text" id="couponInput" class="form-control rounded-start-pill px-3 shadow-none" placeholder="Enter coupon code here..." style="text-transform: uppercase;">
+                    <button class="btn btn-danger rounded-end-pill px-4 fw-bold" type="button" onclick="applyOffersCoupon()">Apply</button>
+                </div>
+                <div id="couponStatusMessage" class="small mt-1"></div>
             </div>
 
             <!-- Bill Breakdown Summary -->
@@ -64,13 +68,14 @@
                     <strong class="text-success">FREE</strong>
                 </div>
                 <div class="d-flex justify-content-between fs-5 fw-bold text-danger border-top pt-2">
-                    <span>To Pay:</span>
+                    <span>Final Amount:</span>
                     <span id="grandTotalText">&#8377;0</span>
                 </div>
             </div>
 
-            <button class="btn btn-danger w-100 rounded-pill py-3 fw-bold fs-6 shadow" onclick="placeFinalFoodOrder()">
-                <i class="fa-solid fa-bolt me-1"></i> Place Order Now (Cash on Delivery / UPI)
+            <!-- Point 3: Proceed to Dedicated Payment Page (No direct COD placed here) -->
+            <button class="btn btn-danger w-100 rounded-pill py-3 fw-bold fs-6 shadow" onclick="proceedToPaymentPage()">
+                <i class="fa-solid fa-shield-halved me-1"></i> Proceed to Payment &rarr;
             </button>
 
         </div>
@@ -81,18 +86,14 @@
     let appliedCoupon = null;
     let discountAmount = 0;
 
-    // Delivery Heroes Pool (Randomized per new order)
-    const heroPool = [
-        { name: "Rahul Verma", id: "HM-DEL-984", phone: "+91 98765 43210" },
-        { name: "Amitabh Sen", id: "HM-DEL-412", phone: "+91 98301 22415" },
-        { name: "Subhash Mondal", id: "HM-DEL-773", phone: "+91 89104 55621" },
-        { name: "Rohan Mukherjee", id: "HM-DEL-291", phone: "+91 94331 88902" },
-        { name: "Vikram Das", id: "HM-DEL-658", phone: "+91 97482 11340" },
-        { name: "Santosh Yadav", id: "HM-DEL-319", phone: "+91 91234 77881" },
-        { name: "Ankit Sharma", id: "HM-DEL-552", phone: "+91 98322 41098" }
-    ];
-
-    document.addEventListener("DOMContentLoaded", renderCart);
+    document.addEventListener("DOMContentLoaded", () => {
+        renderCart();
+        // Load stored details if user visited previously
+        const savedCheckout = JSON.parse(localStorage.getItem("hungrymate_checkout_draft") || "{}");
+        if (savedCheckout.name) document.getElementById("custName").value = savedCheckout.name;
+        if (savedCheckout.phone) document.getElementById("custPhone").value = savedCheckout.phone;
+        if (savedCheckout.address) document.getElementById("custAddress").value = savedCheckout.address;
+    });
 
     function renderCart() {
         const cart = JSON.parse(localStorage.getItem("hungrymate_cart") || "[]");
@@ -169,26 +170,31 @@
         if (typeof refreshNavCartBadge === "function") refreshNavCartBadge();
     }
 
-    function applyCoupon() {
+    // Exact Offer Page Coupons Validation (Point 2)
+    function applyOffersCoupon() {
         const input = document.getElementById("couponInput").value.trim().toUpperCase();
         const status = document.getElementById("couponStatusMessage");
         const cart = JSON.parse(localStorage.getItem("hungrymate_cart") || "[]");
-        if (cart.length === 0) return alert("Add items to your cart first!");
+        if (cart.length === 0) return alert("Add food items to your cart first!");
 
         const subtotal = cart.reduce((acc, it) => acc + (it.price * it.quantity), 0);
 
-        if (input === "HUNGRY60" || input === "PIYUSH") {
-            discountAmount = Math.round(subtotal * 0.6);
-            appliedCoupon = input;
-            status.innerHTML = `<span class="text-success fw-bold"><i class="fa-solid fa-check me-1"></i>Hurray! 60% flat coupon applied (-₹${discountAmount})</span>`;
-        } else if (input === "WELCOME") {
-            discountAmount = Math.min(100, Math.round(subtotal * 0.3));
-            appliedCoupon = input;
-            status.innerHTML = `<span class="text-success fw-bold"><i class="fa-solid fa-check me-1"></i>Welcome discount applied (-₹${discountAmount})</span>`;
+        if (input === "1STUSERFREE") {
+            discountAmount = subtotal; // 100% Free
+            appliedCoupon = "1STUSERFREE";
+            status.innerHTML = `<span class="text-success fw-bold"><i class="fa-solid fa-check me-1"></i>1STUSERFREE applied! Items are 100% Free (-₹${discountAmount})</span>`;
+        } else if (input === "FLAT60%" || input === "FLAT60") {
+            discountAmount = Math.round(subtotal * 0.6); // 60% Off
+            appliedCoupon = "FLAT60%";
+            status.innerHTML = `<span class="text-success fw-bold"><i class="fa-solid fa-check me-1"></i>FLAT60% coupon applied (-₹${discountAmount})</span>`;
+        } else if (input === "HUNGRY20") {
+            discountAmount = Math.round(subtotal * 0.2); // 20% Off
+            appliedCoupon = "HUNGRY20";
+            status.innerHTML = `<span class="text-success fw-bold"><i class="fa-solid fa-check me-1"></i>HUNGRY20 coupon applied (-₹${discountAmount})</span>`;
         } else {
             discountAmount = 0;
             appliedCoupon = null;
-            status.innerHTML = `<span class="text-danger fw-bold"><i class="fa-solid fa-xmark me-1"></i>Invalid coupon code! Try HUNGRY60 or PIYUSH</span>`;
+            status.innerHTML = `<span class="text-danger fw-bold"><i class="fa-solid fa-xmark me-1"></i>Invalid coupon! Check the Offers page for valid codes.</span>`;
         }
         updateBillSummary(subtotal);
     }
@@ -200,63 +206,34 @@
         document.getElementById("grandTotalText").innerHTML = `&#8377;${finalTotal}`;
     }
 
-    // Place Order: Assigns unique random 15-30 min duration & random delivery hero
-    function placeFinalFoodOrder() {
+    // Step to Payment Page (Point 3)
+    function proceedToPaymentPage() {
         const cart = JSON.parse(localStorage.getItem("hungrymate_cart") || "[]");
-        if (cart.length === 0) return alert("Your cart is empty! Add food items first.");
+        if (cart.length === 0) return alert("Your cart is empty! Add items from menu first.");
 
         const name = document.getElementById("custName").value.trim();
         const phone = document.getElementById("custPhone").value.trim();
         const address = document.getElementById("custAddress").value.trim();
 
         if (!name || !phone || !address) {
-            return alert("Please enter Customer Name, Mobile Number and Delivery Address!");
+            return alert("Please fill Customer Name, Mobile Number, and Delivery Address before proceeding!");
         }
 
         const subtotal = cart.reduce((acc, it) => acc + (it.price * it.quantity), 0);
-        const grandTotal = Math.max(subtotal - discountAmount + 9, 0);
+        const finalTotal = Math.max(subtotal - discountAmount + 9, 0);
 
-        // Generate Random Duration between 15 and 30 Minutes
-        const randomDurationMins = Math.floor(Math.random() * (30 - 15 + 1)) + 15;
-
-        // Generate Unique Order ID (e.g. HM-78214)
-        const orderId = "HM-" + Math.floor(10000 + Math.random() * 90000);
-
-        // Pick Random Delivery Partner
-        const randomHero = heroPool[Math.floor(Math.random() * heroPool.length)];
-
-        const now = new Date();
-        const placedAtStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ", " + now.toLocaleDateString("en-IN", { day: 'numeric', month: 'short' });
-
-        const newOrder = {
-            orderId: orderId,
-            customerName: name,
-            customerPhone: phone,
+        const checkoutDraft = {
+            name: name,
+            phone: phone,
             address: address,
-            items: cart,
+            cart: cart,
             subtotal: subtotal,
             discount: discountAmount,
             couponApplied: appliedCoupon || "NONE",
-            totalPaid: grandTotal,
-            totalDurationMins: randomDurationMins, // Fixed random 15-30 min timer
-            timestampStart: Date.now(), // Real time anchor (prevents reset on page reload)
-            placedAt: placedAtStr,
-            deliveryHeroData: randomHero, // Random delivery partner & phone
-            restaurantName: cart[0].restaurant || "Chef Kitchen",
-            firstFoodItemId: cart[0].id || "", // For review feedback reference
-            isDelivered: false,
-            isCancelled: false
+            finalTotal: finalTotal
         };
 
-        let history = JSON.parse(localStorage.getItem("hungrymate_order_history") || "[]");
-        history.unshift(newOrder); // New order on top
-        localStorage.setItem("hungrymate_order_history", JSON.stringify(history));
-
-        // Clear active cart
-        localStorage.removeItem("hungrymate_cart");
-        if (typeof refreshNavCartBadge === "function") refreshNavCartBadge();
-
-        alert(`Order #${orderId} placed successfully! Delivery ETA: ${randomDurationMins} Mins.`);
-        window.location.href = "/orders/track";
+        localStorage.setItem("hungrymate_checkout_draft", JSON.stringify(checkoutDraft));
+        window.location.href = "/checkout/payment";
     }
 </script>

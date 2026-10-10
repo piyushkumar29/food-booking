@@ -1,0 +1,235 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="row justify-content-center my-3 my-md-4">
+    <div class="col-12 col-md-10 col-lg-8">
+        <div class="card shadow-sm border-0 rounded-4 p-3 p-md-4 bg-white mb-4">
+            
+            <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                <div>
+                    <span class="badge bg-danger rounded-pill px-3 py-1 mb-1">Step 2 of 2: Payment</span>
+                    <h4 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-credit-card me-2 text-danger"></i>Choose Payment Method</h4>
+                </div>
+                <div class="text-end">
+                    <small class="text-muted d-block">Amount to Pay</small>
+                    <span class="fs-4 fw-bold text-danger" id="payAmountDisplay">&#8377;0</span>
+                </div>
+            </div>
+
+            <!-- Customer Details Summary -->
+            <div class="p-3 bg-light rounded-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <strong id="summaryCustomerName" class="text-dark">--</strong>
+                    <span id="summaryCustomerPhone" class="small text-muted">--</span>
+                </div>
+                <small id="summaryCustomerAddress" class="text-secondary d-block text-truncate">--</small>
+            </div>
+
+            <!-- Payment Options Tabs/Accordion -->
+            <div class="accordion" id="paymentOptionsAccordion">
+                
+                <!-- 1. DYNAMIC QR CODE -->
+                <div class="accordion-item border rounded-3 mb-3 overflow-hidden">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button fw-bold text-dark shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapseQR">
+                            <i class="fa-solid fa-qrcode fs-5 text-primary me-2"></i> Instant UPI QR Code (Scan with Any App)
+                        </button>
+                    </h2>
+                    <div id="collapseQR" class="accordion-collapse collapse show" data-bs-parent="#paymentOptionsAccordion">
+                        <div class="accordion-body text-center bg-light">
+                            <p class="small text-muted mb-2">Scan using PhonePe, Google Pay, Paytm, or BHIM</p>
+                            <div class="p-2 bg-white d-inline-block rounded-3 shadow-sm border mb-2">
+                                <img id="dynamicQrImage" src="" alt="Payment QR Code" style="width: 190px; height: 190px; object-fit: contain;">
+                            </div>
+                            <div class="small fw-semibold text-dark">Hungrymate Official Merchant UPI: <code class="text-danger">hungrymate.pay@upi</code></div>
+                            <button class="btn btn-primary rounded-pill px-4 mt-3 fw-bold" onclick="finalizePayment('UPI QR Code')">
+                                <i class="fa-solid fa-check me-1"></i> I Have Completed QR Payment
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. REAL UPI ID ENTRY & NAME FETCH -->
+                <div class="accordion-item border rounded-3 mb-3 overflow-hidden">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-bold text-dark shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUPI">
+                            <i class="fa-brands fa-google-pay fs-5 text-warning me-2"></i> Enter UPI ID / VPA
+                        </button>
+                    </h2>
+                    <div id="collapseUPI" class="accordion-collapse collapse" data-bs-parent="#paymentOptionsAccordion">
+                        <div class="accordion-body bg-light">
+                            <label class="form-label small fw-semibold">Virtual Payment Address (VPA)</label>
+                            <div class="input-group mb-2">
+                                <input type="text" id="upiIdInput" class="form-control rounded-start-pill px-3 shadow-none" placeholder="e.g. mobile@okhdfcbank or user@paytm">
+                                <button class="btn btn-outline-secondary rounded-end-pill px-3 fw-bold" type="button" onclick="verifyUpiId()">Verify ID</button>
+                            </div>
+                            <div id="upiVerifiedBadge" class="small text-success fw-bold d-none mb-3">
+                                <i class="fa-solid fa-circle-check me-1"></i> Verified User: <span id="upiHolderName" class="text-dark">Piyush Kumar</span>
+                            </div>
+                            <button class="btn btn-warning text-dark rounded-pill px-4 fw-bold" onclick="finalizePayment('UPI App (Verified)')">
+                                Pay via UPI
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. CREDIT & DEBIT CARD WITH INSTANT HOLDER NAME -->
+                <div class="accordion-item border rounded-3 mb-3 overflow-hidden">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-bold text-dark shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCard">
+                            <i class="fa-regular fa-credit-card fs-5 text-info me-2"></i> Credit / Debit Card
+                        </button>
+                    </h2>
+                    <div id="collapseCard" class="accordion-collapse collapse" data-bs-parent="#paymentOptionsAccordion">
+                        <div class="accordion-body bg-light">
+                            <div class="row g-2 mb-2">
+                                <div class="col-12">
+                                    <label class="form-label small fw-semibold">Card Number</label>
+                                    <input type="text" id="cardNumberInput" class="form-control rounded-pill px-3" placeholder="XXXX XXXX XXXX XXXX" maxlength="19" oninput="detectCardBrand(this.value)">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label small fw-semibold">Cardholder Name</label>
+                                    <input type="text" id="cardHolderInput" class="form-control rounded-pill px-3" placeholder="Name printed on card" oninput="reflectCardName(this.value)">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small fw-semibold">Expiry Date</label>
+                                    <input type="text" class="form-control rounded-pill px-3" placeholder="MM/YY" maxlength="5">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small fw-semibold">CVV</label>
+                                    <input type="password" class="form-control rounded-pill px-3" placeholder="3 digits" maxlength="4">
+                                </div>
+                            </div>
+                            <div id="cardVerifiedBadge" class="small text-success fw-bold d-none mb-3">
+                                <i class="fa-solid fa-circle-check me-1"></i> Cardholder Verified: <span id="verifiedCardHolder">--</span>
+                            </div>
+                            <button class="btn btn-info text-white rounded-pill px-4 fw-bold" onclick="finalizePayment('Credit/Debit Card')">
+                                Pay with Card
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. CASH ON DELIVERY (COD) -->
+                <div class="accordion-item border rounded-3 overflow-hidden">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-bold text-dark shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCOD">
+                            <i class="fa-solid fa-money-bill-wave fs-5 text-success me-2"></i> Cash on Delivery (COD)
+                        </button>
+                    </h2>
+                    <div id="collapseCOD" class="accordion-collapse collapse" data-bs-parent="#paymentOptionsAccordion">
+                        <div class="accordion-body bg-light">
+                            <p class="small text-muted mb-3">Pay cash or scan QR using UPI directly to delivery hero at your doorstep.</p>
+                            <button class="btn btn-success rounded-pill px-4 fw-bold shadow-sm" onclick="finalizePayment('Cash on Delivery')">
+                                Confirm Order with COD
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    let checkoutData = null;
+
+    // Delivery Partner Pool
+    const heroPool = [
+        { name: "Rahul Verma", id: "HM-DEL-984", phone: "+91 98765 43210" },
+        { name: "Amitabh Sen", id: "HM-DEL-412", phone: "+91 98301 22415" },
+        { name: "Subhash Mondal", id: "HM-DEL-773", phone: "+91 89104 55621" },
+        { name: "Rohan Mukherjee", id: "HM-DEL-291", phone: "+91 94331 88902" },
+        { name: "Vikram Das", id: "HM-DEL-658", phone: "+91 97482 11340" }
+    ];
+
+    document.addEventListener("DOMContentLoaded", () => {
+        checkoutData = JSON.parse(localStorage.getItem("hungrymate_checkout_draft") || "null");
+        if (!checkoutData || !checkoutData.cart || checkoutData.cart.length === 0) {
+            alert("No checkout session found! Please start from cart.");
+            window.location.href = "/cart";
+            return;
+        }
+
+        document.getElementById("payAmountDisplay").innerHTML = `&#8377;${checkoutData.finalTotal}`;
+        document.getElementById("summaryCustomerName").innerText = checkoutData.name;
+        document.getElementById("summaryCustomerPhone").innerText = checkoutData.phone;
+        document.getElementById("summaryCustomerAddress").innerText = checkoutData.address;
+
+        // Dynamic QR code API generator
+        const qrAmount = checkoutData.finalTotal;
+        const randomRef = "HM" + Math.floor(1000 + Math.random() * 9000);
+        const upiString = encodeURIComponent(`upi://pay?pa=hungrymate.pay@upi&pn=HungrymateFood&am=${qrAmount}&tr=${randomRef}&cu=INR`);
+        document.getElementById("dynamicQrImage").src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${upiString}`;
+    });
+
+    // Real-like UPI ID verification with holder name display
+    function verifyUpiId() {
+        const val = document.getElementById("upiIdInput").value.trim();
+        if (!val || !val.includes("@")) {
+            return alert("Please enter a valid UPI address (e.g. yourname@upi)!");
+        }
+        const namePart = val.split("@")[0].replace(/[^a-zA-Z]/g, " ").trim();
+        const holderName = namePart ? namePart.toUpperCase() : (checkoutData ? checkoutData.name : "Verified Customer");
+
+        document.getElementById("upiHolderName").innerText = holderName;
+        document.getElementById("upiVerifiedBadge").classList.remove("d-none");
+    }
+
+    function reflectCardName(val) {
+        if (val.trim().length > 2) {
+            document.getElementById("verifiedCardHolder").innerText = val.trim().toUpperCase();
+            document.getElementById("cardVerifiedBadge").classList.remove("d-none");
+        }
+    }
+
+    function detectCardBrand(val) {
+        // Formatter space every 4 digits
+        const formatted = val.replace(/\D/g, "").replace(/(.{4})/g, "$1 ").trim();
+        document.getElementById("cardNumberInput").value = formatted;
+    }
+
+    // Finalize order and create history record
+    function finalizePayment(paymentMode) {
+        const randomDurationMins = Math.floor(Math.random() * (30 - 15 + 1)) + 15;
+        const orderId = "HM-" + Math.floor(10000 + Math.random() * 90000);
+        const randomHero = heroPool[Math.floor(Math.random() * heroPool.length)];
+
+        const now = new Date();
+        const placedAtStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ", " + now.toLocaleDateString("en-IN", { day: 'numeric', month: 'short' });
+
+        const finalizedOrder = {
+            orderId: orderId,
+            customerName: checkoutData.name,
+            customerPhone: checkoutData.phone,
+            address: checkoutData.address,
+            items: checkoutData.cart,
+            subtotal: checkoutData.subtotal,
+            discount: checkoutData.discount,
+            couponApplied: checkoutData.couponApplied,
+            totalPaid: checkoutData.finalTotal,
+            paymentMode: paymentMode,
+            totalDurationMins: randomDurationMins,
+            timestampStart: Date.now(),
+            placedAt: placedAtStr,
+            deliveryHeroData: randomHero,
+            restaurantName: checkoutData.cart[0].restaurant || "Kitchen",
+            firstFoodItemId: checkoutData.cart[0].id || "",
+            isDelivered: false,
+            isCancelled: false
+        };
+
+        let history = JSON.parse(localStorage.getItem("hungrymate_order_history") || "[]");
+        history.unshift(finalizedOrder);
+        localStorage.setItem("hungrymate_order_history", JSON.stringify(history));
+
+        // Clear cart & temporary draft
+        localStorage.removeItem("hungrymate_cart");
+        localStorage.removeItem("hungrymate_checkout_draft");
+        if (typeof refreshNavCartBadge === "function") refreshNavCartBadge();
+
+        alert(`Order #${orderId} Placed Successfully using ${paymentMode}!`);
+        window.location.href = "/orders/track";
+    }
+</script>

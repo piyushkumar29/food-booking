@@ -65,7 +65,7 @@ app.use(async (req, res, next) => {
         await connectDB();
         next();
     } catch (error) {
-        console.error("MongoDB connection failed:", error.message);
+        console.error("Database connection failed:", error.message);
         if (req.path.startsWith("/api/") || req.path.includes("/orders/api/")) {
             return res.status(503).json({ ok: false, error: "Database temporarily unavailable." });
         }
@@ -240,7 +240,12 @@ app.get("/cart", (req, res) => res.render("listings/cart.ejs"));
 app.get("/offers", (req, res) => res.render("listings/offers.ejs"));
 app.get("/orders/track", (req, res) => res.render("listings/track.ejs"));
 
-// Specific Order Detail Page Route (Point 8)
+// Dedicated Checkout Payment Page Route (Point 3)
+app.get("/checkout/payment", (req, res) => {
+    res.render("listings/payment.ejs");
+});
+
+// Specific Order Detail Page Route
 app.get("/orders/:orderId/detail", (req, res) => {
     const { orderId } = req.params;
     res.render("listings/order-detail.ejs", { orderId });

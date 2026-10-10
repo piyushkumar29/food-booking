@@ -3,9 +3,9 @@
     
     <!-- Left Logo & Navigation Items -->
     <div class="d-flex align-items-center flex-shrink-0 gap-2 gap-lg-3">
-      <!-- New Circular Brand Logo -->
+      <!-- Natural Big Sized Brand Logo -->
       <a class="navbar-brand m-0 p-0 d-flex align-items-center" href="/listings">
-        <img src="/myimg.png" alt="Hungrymate Logo" class="brand-circular-logo shadow-sm" />
+        <img src="/myimg.png" alt="Hungrymate Logo" class="brand-navbar-logo" />
       </a>
 
       <div class="d-none d-lg-flex align-items-center gap-1">
@@ -17,7 +17,6 @@
           <i class="fa-solid fa-store icon-item text-primary"></i> Same Restaurant Dishes
         </button>
 
-        <!-- Only Owner (Piyush Kumar) can Add New Items -->
         <% if (currUser && currUser.isOwner) { %>
           <a class="nav-pill-btn owner-highlight-btn" href="/listings/new">
             <i class="fa-solid fa-plus icon-item"></i> Add new items
@@ -214,19 +213,23 @@
 </form>
 
 <style>
-    /* Circular Brand Logo Styling */
-    .brand-circular-logo {
-        height: 46px !important;
-        width: 46px !important;
-        border-radius: 50% !important;
-        object-fit: cover !important;
-        border: 2px solid #fe424d !important;
-        background-color: #000000 !important;
-        padding: 1px !important;
-        transition: transform 0.25s ease;
+    /* Natural Size Brand Logo (No Circle Enclosure) */
+    .brand-navbar-logo {
+        height: 54px !important;
+        width: auto !important;
+        max-width: 170px !important;
+        object-fit: contain !important;
+        display: block !important;
+        transition: transform 0.2s ease;
     }
-    .brand-circular-logo:hover {
-        transform: scale(1.05);
+    .brand-navbar-logo:hover {
+        transform: scale(1.03);
+    }
+    @media (max-width: 575px) {
+        .brand-navbar-logo {
+            height: 46px !important;
+            max-width: 140px !important;
+        }
     }
 
     .nav-pill-btn {
