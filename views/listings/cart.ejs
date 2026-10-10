@@ -14,7 +14,7 @@
             <!-- Cart Items Listing -->
             <div id="cartItemsContainer" class="mb-4"></div>
 
-            <!-- User Delivery Details Form (Required Before Moving to Payment) -->
+            <!-- User Delivery Details Form -->
             <div class="border rounded-4 p-3 mb-4 bg-light">
                 <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-location-dot text-danger me-1"></i>Delivery Details</h6>
                 <div class="row g-2">
@@ -33,13 +33,13 @@
                 </div>
             </div>
 
-            <!-- Point 2 & 4: Exact Coupon Codes from Offers Page Before Price Calculation -->
+            <!-- Point 5: Offers Redirection in Same Tab (No target='_blank') -->
             <div class="border rounded-4 p-3 mb-4 bg-light">
                 <div class="d-flex justify-content-between align-items-center mb-1">
                     <label class="form-label fw-bold small text-dark mb-0"><i class="fa-solid fa-tag text-warning me-1"></i>Apply Promo / Coupon Code</label>
-                    <a href="/offers" target="_blank" class="small text-danger fw-bold text-decoration-none">View All Offers &rarr;</a>
+                    <a href="/offers" class="small text-danger fw-bold text-decoration-none">Explore Coupon Codes &rarr;</a>
                 </div>
-                <small class="text-muted d-block mb-2">Available Coupons: <strong>1STUSERFREE</strong> (100% Off), <strong>FLAT60%</strong> (60% Off), <strong>HUNGRY20</strong> (20% Off)</small>
+                <small class="text-muted d-block mb-2">Available: <strong>1STUSERFREE</strong> (100% Off), <strong>FLAT60%</strong> (60% Off), <strong>HUNGRY20</strong> (20% Off)</small>
                 
                 <div class="input-group">
                     <input type="text" id="couponInput" class="form-control rounded-start-pill px-3 shadow-none" placeholder="Enter coupon code here..." style="text-transform: uppercase;">
@@ -73,7 +73,7 @@
                 </div>
             </div>
 
-            <!-- Point 3: Proceed to Dedicated Payment Page (No direct COD placed here) -->
+            <!-- Proceed to Payment Button -->
             <button class="btn btn-danger w-100 rounded-pill py-3 fw-bold fs-6 shadow" onclick="proceedToPaymentPage()">
                 <i class="fa-solid fa-shield-halved me-1"></i> Proceed to Payment &rarr;
             </button>
@@ -88,7 +88,6 @@
 
     document.addEventListener("DOMContentLoaded", () => {
         renderCart();
-        // Load stored details if user visited previously
         const savedCheckout = JSON.parse(localStorage.getItem("hungrymate_checkout_draft") || "{}");
         if (savedCheckout.name) document.getElementById("custName").value = savedCheckout.name;
         if (savedCheckout.phone) document.getElementById("custPhone").value = savedCheckout.phone;
@@ -113,7 +112,6 @@
         }
 
         let subtotal = 0;
-
         cart.forEach((item, index) => {
             const itemTotal = (item.price || 0) * (item.quantity || 1);
             subtotal += itemTotal;
@@ -170,7 +168,6 @@
         if (typeof refreshNavCartBadge === "function") refreshNavCartBadge();
     }
 
-    // Exact Offer Page Coupons Validation (Point 2)
     function applyOffersCoupon() {
         const input = document.getElementById("couponInput").value.trim().toUpperCase();
         const status = document.getElementById("couponStatusMessage");
@@ -180,15 +177,15 @@
         const subtotal = cart.reduce((acc, it) => acc + (it.price * it.quantity), 0);
 
         if (input === "1STUSERFREE") {
-            discountAmount = subtotal; // 100% Free
+            discountAmount = subtotal;
             appliedCoupon = "1STUSERFREE";
             status.innerHTML = `<span class="text-success fw-bold"><i class="fa-solid fa-check me-1"></i>1STUSERFREE applied! Items are 100% Free (-₹${discountAmount})</span>`;
         } else if (input === "FLAT60%" || input === "FLAT60") {
-            discountAmount = Math.round(subtotal * 0.6); // 60% Off
+            discountAmount = Math.round(subtotal * 0.6);
             appliedCoupon = "FLAT60%";
             status.innerHTML = `<span class="text-success fw-bold"><i class="fa-solid fa-check me-1"></i>FLAT60% coupon applied (-₹${discountAmount})</span>`;
         } else if (input === "HUNGRY20") {
-            discountAmount = Math.round(subtotal * 0.2); // 20% Off
+            discountAmount = Math.round(subtotal * 0.2);
             appliedCoupon = "HUNGRY20";
             status.innerHTML = `<span class="text-success fw-bold"><i class="fa-solid fa-check me-1"></i>HUNGRY20 coupon applied (-₹${discountAmount})</span>`;
         } else {
@@ -206,7 +203,6 @@
         document.getElementById("grandTotalText").innerHTML = `&#8377;${finalTotal}`;
     }
 
-    // Step to Payment Page (Point 3)
     function proceedToPaymentPage() {
         const cart = JSON.parse(localStorage.getItem("hungrymate_cart") || "[]");
         if (cart.length === 0) return alert("Your cart is empty! Add items from menu first.");

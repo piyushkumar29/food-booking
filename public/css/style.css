@@ -1,5 +1,5 @@
 /* =========================================================
-   HUNGRYMATE CORE ENGINE & UNIFORM CARD STYLING
+   HUNGRYMATE CORE ENGINE & ADVANCED THEME STYLING
    ========================================================= */
 
 :root {
@@ -57,18 +57,35 @@ body {
   }
 }
 
-/* NAVBAR */
-.navbar {
-  min-height: 4.2rem !important;
+/* NAVBAR & BIG LOGO */
+.navbar, .hm-main-navbar {
+  min-height: 4.6rem !important;
   height: auto !important;
-  background-color: #ffffff;
+  background-color: #ffffff !important;
   padding: 0.5rem 0.8rem !important;
   width: 100% !important;
   box-sizing: border-box !important;
+  transition: background-color 0.25s ease;
+}
+
+.brand-navbar-logo {
+  height: 64px !important;
+  width: auto !important;
+  max-width: 220px !important;
+  object-fit: contain !important;
+  display: block !important;
+  transition: transform 0.2s ease;
+}
+
+@media (max-width: 575px) {
+  .brand-navbar-logo {
+    height: 52px !important;
+    max-width: 170px !important;
+  }
 }
 
 /* =========================================================
-   GRID & CARD ARCHITECTURE
+   GRID & UNIFORM CARD ARCHITECTURE
    ========================================================= */
 
 .pure-food-grid {
@@ -122,10 +139,6 @@ body {
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12) !important;
 }
 
-/* =========================================================
-   IMAGE & BADGES (PINKISH GRADIENT & RATING RESTORED)
-   ========================================================= */
-
 .card-img-wrapper {
   position: relative !important;
   width: 100% !important;
@@ -155,7 +168,7 @@ body {
   }
 }
 
-/* 1. PINKISH RED GRADIENT FLAT 60% OFF BADGE */
+/* BADGES */
 .offer-tag-badge {
   position: absolute !important;
   top: 12px !important;
@@ -173,7 +186,6 @@ body {
   text-transform: uppercase !important;
 }
 
-/* 2. RATING BADGE (Dark Pill with Star) */
 .rating-top-badge {
   position: absolute !important;
   top: 12px !important;
@@ -199,10 +211,6 @@ body {
   font-size: 0.75rem !important;
 }
 
-/* =========================================================
-   CARD CONTENT & FOOTER
-   ========================================================= */
-
 .listing-card .card-body {
   padding: 0.95rem !important;
   display: flex !important;
@@ -212,7 +220,6 @@ body {
   width: 100% !important;
 }
 
-/* FSSAI Veg / Non-Veg Indicator */
 .food-diet-symbol {
   width: 18px !important;
   height: 18px !important;
@@ -228,7 +235,6 @@ body {
 .food-diet-symbol.nonveg-badge { border: 2px solid #e11d48 !important; }
 .food-diet-symbol.nonveg-badge .diet-circle { width: 9px !important; height: 9px !important; background-color: #e11d48 !important; border-radius: 50% !important; }
 
-/* Pricing */
 .food-price-wrap {
   display: flex;
   align-items: baseline;
@@ -273,7 +279,7 @@ body {
   transform: scale(1.03);
 }
 
-/* FOOTER */
+/* FOOTER BASE */
 .f-info {
   text-align: center;
   padding: 2rem 1rem;
@@ -289,11 +295,44 @@ body {
 .f-info-socials i { font-size: 1.25rem; margin: 0 0.5rem; color: #475569 !important; transition: transform 0.2s ease, color 0.2s ease; }
 .f-info-socials i:hover { color: var(--hm-red) !important; transform: translateY(-2px); }
 
-/* DARK MODE */
+/* =========================================================
+   DARK MODE COMPLETE OVERRIDES (HEADER & FOOTER WHITE FIX)
+   ========================================================= */
+
 body.dark-mode {
   background-color: #000000 !important;
   color: #ffffff !important;
 }
+
+/* Header & Navbar Pure Deep Black */
+body.dark-mode .navbar,
+body.dark-mode .hm-main-navbar,
+body.dark-mode nav.navbar {
+  background-color: #000000 !important;
+  border-bottom: 1px solid #27272a !important;
+}
+
+body.dark-mode #foodSearchInput,
+body.dark-mode #mobileFoodSearchInput {
+  background-color: #18181b !important;
+  border-color: #3f3f46 !important;
+  color: #ffffff !important;
+}
+
+body.dark-mode #foodSearchInput::placeholder,
+body.dark-mode #mobileFoodSearchInput::placeholder {
+  color: #a1a1aa !important;
+}
+
+body.dark-mode .nav-pill-btn {
+  background-color: #1e293b !important;
+  color: #ffffff !important;
+  border-color: #334155 !important;
+}
+body.dark-mode .nav-pill-btn .icon-item {
+  color: #facc15 !important;
+}
+
 body.dark-mode .listing-card {
   background-color: #121212 !important;
   border: 1px solid #27272a !important;
@@ -306,13 +345,22 @@ body.dark-mode .btn-add-cart-pill {
   color: #000000 !important;
   font-weight: 800 !important;
 }
+
+/* Footer Dark Mode - Pure White Text Fix */
 body.dark-mode .f-info {
-  background-color: #09090b !important;
+  background-color: #050505 !important;
   border-top-color: #27272a !important;
   color: #ffffff !important;
 }
 body.dark-mode .f-info-brand,
+body.dark-mode .f-info-brand span,
+body.dark-mode .f-info small,
+body.dark-mode .f-info .text-muted,
 body.dark-mode .f-info-links a,
 body.dark-mode .f-info-socials i {
   color: #ffffff !important;
+}
+body.dark-mode .f-info-brand strong,
+body.dark-mode .f-info small strong {
+  color: #facc15 !important;
 }
