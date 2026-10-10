@@ -1,0 +1,310 @@
+<% layout("/layouts/boilerplate") %>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<style>
+    .star-rating-box {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    .star-rating-box input { display: none; }
+    .star-rating-box label {
+        font-size: 2.2rem;
+        color: #cbd5e1;
+        cursor: pointer;
+        transition: color 0.2s ease, transform 0.2s ease;
+    }
+    .star-rating-box label:hover,
+    .star-rating-box label:hover ~ label,
+    .star-rating-box input:checked ~ label {
+        color: #facc15;
+        transform: scale(1.1);
+    }
+</style>
+
+<div class="row justify-content-center my-3 my-md-4">
+    <div class="col-12 col-md-10 col-lg-8">
+        
+        <!-- Detailed Order Summary Card -->
+        <div class="card shadow-sm border-0 rounded-4 p-3 p-md-4 bg-white mb-4">
+            <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                <div>
+                    <span class="badge bg-danger rounded-pill px-3 py-1 mb-1">Order Details</span>
+                    <h4 class="fw-bold mb-0">Order #<span id="detailOrderIdDisplay"><%= orderId %></span></h4>
+                </div>
+                <a href="/orders/track" class="btn btn-outline-secondary rounded-pill btn-sm fw-semibold">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Back to Tracking
+                </a>
+            </div>
+
+            <!-- Order Basic Metadata -->
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-sm-3">
+                    <small class="text-muted d-block">Status</small>
+                    <span id="detailStatusBadge" class="badge bg-success">Delivered</span>
+                </div>
+                <div class="col-6 col-sm-3">
+                    <small class="text-muted d-block">Placed Time</small>
+                    <strong id="detailPlacedTime" class="small text-dark">--</strong>
+                </div>
+                <div class="col-6 col-sm-3">
+                    <small class="text-muted d-block">Delivery Hero</small>
+                    <strong id="detailHeroName" class="small text-dark">--</strong>
+                </div>
+                <div class="col-6 col-sm-3">
+                    <small class="text-muted d-block">Hero Contact</small>
+                    <strong id="detailHeroPhone" class="small text-danger">--</strong>
+                </div>
+            </div>
+
+            <!-- Address and Coupon -->
+            <div class="p-3 bg-light rounded-3 mb-4">
+                <div class="mb-2">
+                    <small class="text-muted fw-bold d-block">DELIVERY ADDRESS:</small>
+                    <span id="detailAddress" class="small text-dark">--</span>
+                </div>
+                <div>
+                    <small class="text-muted fw-bold d-block">COUPON APPLIED:</small>
+                    <span id="detailCoupon" class="badge bg-success">NONE</span>
+                </div>
+            </div>
+
+            <!-- Items Ordered Table -->
+            <h6 class="fw-bold mb-2">Items in this Order</h6>
+            <div class="table-responsive mb-4">
+                <table class="table table-bordered align-middle" style="font-size: 0.85rem;">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Dish</th>
+                            <th>Restaurant</th>
+                            <th class="text-center">Qty</th>
+                            <th class="text-end">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="detailItemsTableBody"></tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" class="text-end fw-bold">Total Paid:</td>
+                            <td class="text-end fw-bold text-danger fs-6" id="detailTotalPaid">&#8377;0</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <!-- PDF Receipt Download Button -->
+            <button class="btn btn-outline-danger rounded-pill w-100 fw-bold py-2" onclick="downloadDetailReceiptPdf()">
+                <i class="fa-solid fa-file-invoice-dollar me-1"></i> Download Excel-Theme Tax Invoice (PDF)
+            </button>
+        </div>
+
+        <!-- Integrated Rating & Feedback Form for this Order (Point 8) -->
+        <div class="card shadow-sm border-0 rounded-4 p-3 p-md-4 bg-white mb-4">
+            <div class="text-center mb-3">
+                <h5 class="fw-bold mb-1"><i class="fa-solid fa-star text-warning me-2"></i>Rate & Review this Order</h5>
+                <p class="text-muted small">Your rating updates the average stars of food cards across Hungrymate</p>
+            </div>
+
+            <form id="orderReviewForm" method="POST" action="/listings" enctype="multipart/form-data" novalidate class="needs-validation">
+                
+                <!-- Star Rating -->
+                <div class="mb-4 text-center">
+                    <label class="form-label fw-bold small text-dark d-block mb-1">Tap Stars to Rate:</label>
+                    <div class="star-rating-box">
+                        <input type="radio" id="star5" name="review[rating]" value="5" required />
+                        <label for="star5" title="5 Stars - Outstanding">&#9733;</label>
+
+                        <input type="radio" id="star4" name="review[rating]" value="4" />
+                        <label for="star4" title="4 Stars - Very Good">&#9733;</label>
+
+                        <input type="radio" id="star3" name="review[rating]" value="3" />
+                        <label for="star3" title="3 Stars - Good">&#9733;</label>
+
+                        <input type="radio" id="star2" name="review[rating]" value="2" />
+                        <label for="star2" title="2 Stars - Needs Improvement">&#9733;</label>
+
+                        <input type="radio" id="star1" name="review[rating]" value="1" />
+                        <label for="star1" title="1 Star - Poor">&#9733;</label>
+                    </div>
+                </div>
+
+                <!-- Username Display -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small">Reviewer Name</label>
+                    <input type="text" class="form-control rounded-pill px-3" value="<%= currUser ? currUser.username : 'Customer' %>" readonly style="background-color: #f8fafc;" />
+                </div>
+
+                <!-- Food Description / Experience -->
+                <div class="mb-3">
+                    <label for="comment" class="form-label fw-semibold small">Food Experience & Taste Description</label>
+                    <textarea name="review[comment]" id="comment" class="form-control rounded-4 p-3" rows="4" placeholder="How was the food quality, temperature, hygiene and taste?" required></textarea>
+                </div>
+
+                <!-- Photo Upload from Phone / Folder -->
+                <div class="mb-4">
+                    <label for="reviewImage" class="form-label fw-semibold small"><i class="fa-solid fa-camera text-danger me-1"></i>Attach Food Photo from Folder</label>
+                    <input type="file" name="reviewImage" id="reviewImage" class="form-control rounded-pill" accept="image/*" />
+                </div>
+
+                <button class="btn btn-danger w-100 rounded-pill py-2 fw-bold shadow">
+                    <i class="fa-solid fa-check me-1"></i> Save & Submit Rating to Cloud Database
+                </button>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const currentOrderId = "<%= orderId %>";
+    let loadedOrderRecord = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const history = JSON.parse(localStorage.getItem("hungrymate_order_history") || "[]");
+        loadedOrderRecord = history.find(o => o.orderId === currentOrderId) || history[0];
+
+        if (loadedOrderRecord) {
+            document.getElementById("detailOrderIdDisplay").innerText = loadedOrderRecord.orderId;
+            document.getElementById("detailPlacedTime").innerText = loadedOrderRecord.placedAt;
+            document.getElementById("detailAddress").innerText = loadedOrderRecord.address;
+            document.getElementById("detailCoupon").innerText = loadedOrderRecord.couponApplied || "NONE";
+            document.getElementById("detailTotalPaid").innerText = "₹" + loadedOrderRecord.totalPaid;
+
+            const hero = loadedOrderRecord.deliveryHeroData || { name: "Rahul Verma", phone: "+91 98765 43210" };
+            document.getElementById("detailHeroName").innerText = hero.name;
+            document.getElementById("detailHeroPhone").innerText = hero.phone;
+
+            if (loadedOrderRecord.isCancelled) {
+                document.getElementById("detailStatusBadge").className = "badge bg-danger";
+                document.getElementById("detailStatusBadge").innerText = "Cancelled";
+            } else if (loadedOrderRecord.isDelivered) {
+                document.getElementById("detailStatusBadge").className = "badge bg-success";
+                document.getElementById("detailStatusBadge").innerText = "Delivered";
+            } else {
+                document.getElementById("detailStatusBadge").className = "badge bg-warning text-dark";
+                document.getElementById("detailStatusBadge").innerText = "In-Transit";
+            }
+
+            const tbody = document.getElementById("detailItemsTableBody");
+            tbody.innerHTML = "";
+            (loadedOrderRecord.items || []).forEach(it => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${it.title}</strong></td>
+                        <td>${it.restaurant || 'Kitchen'}</td>
+                        <td class="text-center">${it.quantity}</td>
+                        <td class="text-end">₹${it.price * it.quantity}</td>
+                    </tr>
+                `;
+            });
+
+            // Set Form Action to the first item's review endpoint
+            const targetFoodId = loadedOrderRecord.firstFoodItemId || (loadedOrderRecord.items && loadedOrderRecord.items[0] ? loadedOrderRecord.items[0].id : "");
+            if (targetFoodId) {
+                document.getElementById("orderReviewForm").action = `/listings/${targetFoodId}/reviews`;
+            }
+        }
+    });
+
+    function downloadDetailReceiptPdf() {
+        if (!loadedOrderRecord) return alert("Order details not loaded!");
+        const hero = loadedOrderRecord.deliveryHeroData || { name: "Rahul Verma", id: "HM-DEL-984", phone: "+91 98765 43210" };
+
+        const container = document.createElement("div");
+        container.style.padding = "25px";
+        container.style.background = "#fff";
+        container.style.color = "#000";
+        container.style.fontFamily = "'Plus Jakarta Sans', Arial, sans-serif";
+
+        let itemsHtml = "";
+        (loadedOrderRecord.items || []).forEach((it, i) => {
+            itemsHtml += `
+                <tr>
+                    <td style="border: 1px solid #000; padding: 7px; text-align: center;">${i + 1}</td>
+                    <td style="border: 1px solid #000; padding: 7px;"><strong>${it.title}</strong> (${it.restaurant || 'Kitchen'})</td>
+                    <td style="border: 1px solid #000; padding: 7px; text-align: center;">${it.quantity}</td>
+                    <td style="border: 1px solid #000; padding: 7px; text-align: right;">₹${it.price.toFixed(2)}</td>
+                    <td style="border: 1px solid #000; padding: 7px; text-align: right;">₹${(it.price * it.quantity).toFixed(2)}</td>
+                </tr>
+            `;
+        });
+
+        container.innerHTML = `
+            <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 12px;">
+                <h2 style="font-weight: 900; margin: 0;">HUNGRYMATE FOOD LOGISTICS PVT LTD</h2>
+                <small style="font-size: 0.85rem; color: #475569;">Official Tax Invoice & Cash Memo Receipt (Excel Format)</small>
+            </div>
+
+            <table style="width: 100%; border-collapse: collapse; border: 2px solid #000; margin-bottom: 15px; font-size: 0.85rem;">
+                <tr>
+                    <td style="border: 1px solid #000; padding: 7px; font-weight: 800; background-color: #f1f5f9; width: 25%;">ORDER ID:</td>
+                    <td style="border: 1px solid #000; padding: 7px; width: 25%;">#${loadedOrderRecord.orderId}</td>
+                    <td style="border: 1px solid #000; padding: 7px; font-weight: 800; background-color: #f1f5f9; width: 25%;">ORDER DATE:</td>
+                    <td style="border: 1px solid #000; padding: 7px; width: 25%;">${loadedOrderRecord.placedAt}</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #000; padding: 7px; font-weight: 800; background-color: #f1f5f9;">CUSTOMER:</td>
+                    <td style="border: 1px solid #000; padding: 7px;">${loadedOrderRecord.customerName || 'Customer'} (${loadedOrderRecord.customerPhone || 'N/A'})</td>
+                    <td style="border: 1px solid #000; padding: 7px; font-weight: 800; background-color: #f1f5f9;">DELIVERY HERO:</td>
+                    <td style="border: 1px solid #000; padding: 7px;">${hero.name} (${hero.id}) - ${hero.phone}</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #000; padding: 7px; font-weight: 800; background-color: #f1f5f9;">ADDRESS:</td>
+                    <td colspan="3" style="border: 1px solid #000; padding: 7px;">${loadedOrderRecord.address}</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #000; padding: 7px; font-weight: 800; background-color: #f1f5f9;">PAYMENT:</td>
+                    <td style="border: 1px solid #000; padding: 7px;">Cash on Delivery / UPI</td>
+                    <td style="border: 1px solid #000; padding: 7px; font-weight: 800; background-color: #f1f5f9;">COUPON:</td>
+                    <td style="border: 1px solid #000; padding: 7px; color: #16a34a; font-weight: 700;">${loadedOrderRecord.couponApplied || 'NONE'}</td>
+                </tr>
+            </table>
+
+            <table style="width: 100%; border-collapse: collapse; border: 2px solid #000; margin-bottom: 15px; font-size: 0.85rem;">
+                <thead>
+                    <tr style="background-color: #e2e8f0;">
+                        <th style="border: 1px solid #000; padding: 7px; text-align: center; width: 8%;">SL</th>
+                        <th style="border: 1px solid #000; padding: 7px; width: 50%;">ITEM DESCRIPTION</th>
+                        <th style="border: 1px solid #000; padding: 7px; text-align: center; width: 12%;">QTY</th>
+                        <th style="border: 1px solid #000; padding: 7px; text-align: right; width: 15%;">RATE (INR)</th>
+                        <th style="border: 1px solid #000; padding: 7px; text-align: right; width: 15%;">AMOUNT (INR)</th>
+                    </tr>
+                </thead>
+                <tbody>${itemsHtml}</tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4" style="border: 1px solid #000; padding: 7px; text-align: right; font-weight: 800;">SUBTOTAL:</td>
+                        <td style="border: 1px solid #000; padding: 7px; text-align: right; font-weight: 800;">₹${loadedOrderRecord.subtotal || loadedOrderRecord.totalPaid}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" style="border: 1px solid #000; padding: 7px; text-align: right; font-weight: 800;">DISCOUNT:</td>
+                        <td style="border: 1px solid #000; padding: 7px; text-align: right; font-weight: 800; color: #16a34a;">-₹${loadedOrderRecord.discount || 0}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" style="border: 1px solid #000; padding: 7px; text-align: right; font-weight: 800;">PLATFORM FEE:</td>
+                        <td style="border: 1px solid #000; padding: 7px; text-align: right; font-weight: 800;">₹9.00</td>
+                    </tr>
+                    <tr style="background-color: #f8fafc;">
+                        <td colspan="4" style="border: 1px solid #000; padding: 7px; text-align: right; font-weight: 900; font-size: 1.05rem;">TOTAL PAID:</td>
+                        <td style="border: 1px solid #000; padding: 7px; text-align: right; font-weight: 900; font-size: 1.05rem; color: #fe424d;">₹${loadedOrderRecord.totalPaid}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        `;
+
+        document.body.appendChild(container);
+
+        const opt = {
+            margin: 0.35,
+            filename: `Hungrymate_Invoice_${loadedOrderRecord.orderId}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+        };
+
+        html2pdf().set(opt).from(container).save().then(() => {
+            document.body.removeChild(container);
+        });
+    }
+</script>

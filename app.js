@@ -37,7 +37,6 @@ const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
 
 const IS_PRODUCTION = process.env.NODE_ENV === "production" || !!process.env.VERCEL;
-
 const BASE_URL = (process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
 
 const MONGO_URL =
@@ -76,7 +75,7 @@ app.use(async (req, res, next) => {
     }
 });
 
-// Universal MongoStore Init (Safely handles connect-mongo v3, v4, v5, v6)
+// Universal MongoStore Init
 let mongoSessionStore = undefined;
 if (MONGO_URL) {
     if (typeof MongoStore.create === "function") {
@@ -119,7 +118,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
 
-// Owner Authorization
+// Owner Authorization Credentials
 const OWNER_EMAIL = (process.env.OWNER_EMAIL || "piyushkumarg292007@gmail.com").toLowerCase().trim();
 const OWNER_USERNAMES = (process.env.OWNER_USERNAMES || "piyush,piyush kumar,piyushkumar")
     .split(",")
@@ -235,14 +234,16 @@ app.use(async (req, res, next) => {
     }
 });
 
-// Root & Static Redirects
+// Root & Static Page Routes
 app.get("/", (req, res) => res.redirect("/listings"));
 app.get("/cart", (req, res) => res.render("listings/cart.ejs"));
 app.get("/offers", (req, res) => res.render("listings/offers.ejs"));
 app.get("/orders/track", (req, res) => res.render("listings/track.ejs"));
-app.get("/orders/:orderId/feedback", (req, res) => {
+
+// Specific Order Detail Page Route (Point 8)
+app.get("/orders/:orderId/detail", (req, res) => {
     const { orderId } = req.params;
-    res.render("listings/feedback.ejs", { orderId });
+    res.render("listings/order-detail.ejs", { orderId });
 });
 
 // Profile Updates
@@ -274,7 +275,7 @@ app.post("/user/update-avatar", async (req, res, next) => {
     } catch (error) { next(error); }
 });
 
-// OAuth Routes
+// Auth Routes
 app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"], prompt: "select_account" }));
 app.get("/auth/google/callback", passport.authenticate("google", { failureRedirect: "/login", failureFlash: true }), (req, res) => {
     req.flash("success", `Welcome ${req.user.username}!`);
@@ -286,7 +287,7 @@ app.get("/auth/github/callback", passport.authenticate("github", { failureRedire
     res.redirect("/listings");
 });
 
-// Server IP for QR Code
+// Server IP for QR
 app.get("/api/get-server-ip", (req, res) => {
     if (IS_PRODUCTION) {
         return res.json({ ip: new URL(BASE_URL).hostname, local: false, baseUrl: BASE_URL });
@@ -319,7 +320,7 @@ app.use((err, req, res, next) => {
     res.status(statusCode).render("error.ejs", { message });
 });
 
-// Run Server
+// Server Run
 if (require.main === module) {
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, "0.0.0.0", () => {

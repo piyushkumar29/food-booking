@@ -53,9 +53,6 @@
         border-color: #3f3f46 !important;
         color: #ffffff !important;
     }
-    body.dark-mode #trackDestAddress, body.dark-mode #trackOrderTime {
-        color: #ffffff !important;
-    }
 
     #deliveryCompletedBanner {
         background: linear-gradient(135deg, #10b981 0%, #059669 100%);
@@ -66,6 +63,7 @@
         margin-bottom: 1.5rem;
     }
 
+    /* EXCEL SHEET THEME TAX INVOICE */
     .excel-pdf-container {
         padding: 25px;
         background: #ffffff;
@@ -76,32 +74,34 @@
         width: 100%;
         border-collapse: collapse;
         border: 2px solid #000000;
-        margin-top: 12px;
+        margin-top: 10px;
         margin-bottom: 15px;
     }
     .excel-table th, .excel-table td {
         border: 1px solid #000000;
-        padding: 8px 10px;
+        padding: 7px 10px;
         font-size: 0.85rem;
     }
     .excel-table th {
-        background-color: #f1f5f9;
+        background-color: #e2e8f0;
         font-weight: 800;
     }
 </style>
 
 <div class="track-card-box">
     
+    <!-- Multi-Order Active Tabs Strip -->
     <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
         <span class="small fw-bold text-muted"><i class="fa-solid fa-list-check me-1"></i> ACTIVE ORDERS:</span>
         <div id="multiOrdersTabStrip" class="d-flex gap-2 flex-wrap"></div>
     </div>
 
+    <!-- Delivered Banner with Real PDF Receipt Download -->
     <div id="deliveryCompletedBanner" class="d-none shadow-sm">
         <h4 class="fw-bold mb-1"><i class="fa-solid fa-circle-check me-1"></i>Hurray! Food Delivered Successfully</h4>
         <p class="small mb-2">Your meal was handed over hot & fresh. Enjoy your food!</p>
         <button class="btn btn-light rounded-pill px-3 py-1 fw-bold text-success shadow-sm btn-sm" onclick="downloadCurrentReceiptPdf()">
-            <i class="fa-solid fa-file-invoice-dollar me-1"></i>Download Cash Memo Receipt (PDF)
+            <i class="fa-solid fa-file-invoice-dollar me-1"></i>Download Cash Memo Receipt (Excel Theme PDF)
         </button>
     </div>
 
@@ -111,8 +111,9 @@
             <span class="small text-muted">Order ID: <strong id="trackOrderId" class="text-warning">HM-NONE</strong></span>
         </div>
         <div class="d-flex align-items-center gap-2">
+            <!-- Cancel Button: Disabled once Bike reaches Doorstep Station -->
             <button id="cancelOrderBtn" class="btn btn-sm btn-outline-danger rounded-pill fw-bold" onclick="cancelActiveOrder()">
-                <i class="fa-solid fa-ban me-1"></i> Cancel
+                <i class="fa-solid fa-ban me-1"></i> Cancel Order
             </button>
             <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold">
                 ETA: <strong id="etaCounter">-- mins</strong>
@@ -120,6 +121,7 @@
         </div>
     </div>
 
+    <!-- Delivery Hero Partner Details (Randomized per order) -->
     <div class="delivery-partner-badge">
         <div class="d-flex align-items-center gap-2">
             <div class="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center fw-bold fs-5" style="width: 44px; height: 44px;">
@@ -127,7 +129,7 @@
             </div>
             <div>
                 <h6 class="fw-bold mb-0" id="heroNameText" style="font-size: 0.95rem;">Rahul Verma <span class="badge bg-secondary ms-1" id="heroIdBadge" style="font-size: 0.65rem;">ID: HM-DEL-984</span></h6>
-                <small class="text-muted" style="font-size: 0.75rem;"><i class="fa-solid fa-star text-warning"></i> 4.9 &bull; Vaccinated Partner</small>
+                <small class="text-muted" style="font-size: 0.75rem;"><i class="fa-solid fa-star text-warning"></i> 4.9 &bull; Vaccinated Delivery Partner</small>
             </div>
         </div>
         <div>
@@ -137,6 +139,7 @@
         </div>
     </div>
 
+    <!-- Responsive Curve SVG Route -->
     <div class="curved-track-container">
         <svg viewBox="0 0 940 240" preserveAspectRatio="none" width="100%" height="100%">
             <path id="routeCurve" d="M 40,190 C 130,40 210,240 310,80 C 420,240 500,30 620,180 C 730,240 820,30 900,120" fill="none" stroke="#cbd5e1" stroke-width="12" stroke-linecap="round" stroke-dasharray="10,8" />
@@ -148,6 +151,7 @@
         <i class="fa-solid fa-motorcycle" id="deliveryBikeElement"></i>
     </div>
 
+    <!-- Stations Strip -->
     <div class="row text-center fw-bold g-2 mb-3" style="font-size: 0.75rem;">
         <div class="col-6 col-sm-3 text-danger text-truncate" id="stnKitchen"><i class="fa-solid fa-kitchen-set me-1"></i> 1. Kitchen</div>
         <div class="col-6 col-sm-3 text-warning text-truncate" id="stnTransit1"><i class="fa-solid fa-road me-1"></i> 2. Expressway</div>
@@ -166,18 +170,19 @@
         </div>
     </div>
 
+    <!-- Past Order Receipts Table (Points 7 & 8: Clickable Order Link to Details Route) -->
     <div class="mt-4 pt-3 border-top">
         <div class="d-flex justify-content-between align-items-center mb-2">
             <h6 class="fw-bold mb-0"><i class="fa-solid fa-clock-rotate-left text-danger me-1"></i>Past Order Receipts & History</h6>
-            <small class="text-muted" style="font-size: 0.72rem;">Click 📄 for PDF</small>
+            <small class="text-muted" style="font-size: 0.72rem;">Click Order # for Details & Review</small>
         </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle" style="font-size: 0.85rem;">
                 <thead class="table-light">
                     <tr>
-                        <th>Order</th>
+                        <th>Order ID</th>
                         <th>Location</th>
-                        <th>Agent</th>
+                        <th>Delivery Hero</th>
                         <th>Duration</th>
                         <th>Amount</th>
                         <th>Status</th>
@@ -191,17 +196,8 @@
 </div>
 
 <script>
-    let isDeliveredComplete = false;
     let currentAnimInterval = null;
     let selectedOrderIndex = 0;
-
-    const deliveryHeroes = [
-        { name: "Rahul Verma", id: "HM-DEL-984", phone: "+91 98765 43210" },
-        { name: "Amitabh Sen", id: "HM-DEL-412", phone: "+91 98301 22415" },
-        { name: "Subhash Mondal", id: "HM-DEL-773", phone: "+91 89104 55621" },
-        { name: "Rohan Mukherjee", id: "HM-DEL-291", phone: "+91 94331 88902" },
-        { name: "Vikram Das", id: "HM-DEL-658", phone: "+91 97482 11340" }
-    ];
 
     document.addEventListener("DOMContentLoaded", () => {
         syncAllOrdersLifecycle();
@@ -209,6 +205,7 @@
         renderHistoryTable();
     });
 
+    // Real-Time Anchor: Re-calculates elapsed time so refresh NEVER restarts timer
     function syncAllOrdersLifecycle() {
         let history = JSON.parse(localStorage.getItem("hungrymate_order_history") || "[]");
         let updated = false;
@@ -275,7 +272,7 @@
             document.getElementById("trackDestAddress").innerText = order.address;
             document.getElementById("trackOrderTime").innerText = order.placedAt;
 
-            const hero = order.deliveryHeroData || deliveryHeroes[Math.abs(parseInt(order.orderId.replace(/\D/g,'')) || 0) % deliveryHeroes.length];
+            const hero = order.deliveryHeroData || { name: "Rahul Verma", id: "HM-DEL-984", phone: "+91 98765 43210" };
             document.getElementById("heroNameText").innerText = hero.name + ` (${hero.id})`;
             document.getElementById("heroPhoneText").innerText = hero.phone;
             document.getElementById("heroCallLink").href = `tel:${hero.phone.replace(/\s+/g, '')}`;
@@ -285,7 +282,7 @@
             document.getElementById("stnKitchen").innerHTML = `<i class="fa-solid fa-kitchen-set me-1"></i> 1. ${rest}`;
             document.getElementById("stnTransit1").innerHTML = `<i class="fa-solid fa-road me-1"></i> 2. ${city} Exp`;
             document.getElementById("stnTransit2").innerHTML = `<i class="fa-solid fa-map-pin me-1"></i> 3. ${city} Sec`;
-            document.getElementById("stnDoorstep").innerHTML = `<i class="fa-solid fa-house-chimney me-1"></i> 4. ${order.customerName}`;
+            document.getElementById("stnDoorstep").innerHTML = `<i class="fa-solid fa-house-chimney me-1"></i> 4. Doorstep`;
 
             const durationTotalMs = (order.totalDurationMins || 25) * 60 * 1000;
             const startTime = order.timestampStart || Date.now();
@@ -301,7 +298,6 @@
             }
 
             if (order.isDelivered || elapsed >= durationTotalMs) {
-                isDeliveredComplete = true;
                 const point = path.getPointAtLength(pathLength);
                 bike.style.left = ((point.x / 940) * 100) + "%";
                 bike.style.top = ((point.y / 240) * 100) + "%";
@@ -311,7 +307,6 @@
                 compBanner.classList.remove("d-none");
             } else {
                 bike.style.display = "block";
-                cancelBtn.classList.remove("d-none");
                 compBanner.classList.add("d-none");
 
                 currentAnimInterval = setInterval(() => {
@@ -322,8 +317,11 @@
                     bike.style.left = ((point.x / 940) * 100) + "%";
                     bike.style.top = ((point.y / 240) * 100) + "%";
 
-                    if (progress > 0.85) {
+                    // Doorstep restriction: If progress > 80% (Near Doorstep), Hide Cancel
+                    if (progress >= 0.80) {
                         cancelBtn.classList.add("d-none");
+                    } else {
+                        cancelBtn.classList.remove("d-none");
                     }
 
                     const remainingSecs = Math.max(Math.floor((durationTotalMs - currentElapsed) / 1000), 0);
@@ -334,7 +332,6 @@
                     if (progress >= 1) {
                         etaText.innerText = "Delivered!";
                         clearInterval(currentAnimInterval);
-                        isDeliveredComplete = true;
 
                         order.isDelivered = true;
                         updateLocalOrderRecord(order);
@@ -345,7 +342,7 @@
                         renderHistoryTable();
                         confetti({ particleCount: 160, spread: 85, origin: { y: 0.5 } });
                     }
-                }, 200);
+                }, 500);
             }
         } else {
             document.getElementById("trackDestAddress").innerText = "No active orders found!";
@@ -379,6 +376,7 @@
         }
     }
 
+    // Render Past Order History (Clickable Order ID route to /orders/:orderId/detail)
     function renderHistoryTable() {
         const history = JSON.parse(localStorage.getItem("hungrymate_order_history") || "[]");
         const tbody = document.getElementById("pastOrdersTableBody");
@@ -388,27 +386,31 @@
             tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-3">No orders found in your account history!</td></tr>';
         } else {
             history.forEach((h, idx) => {
-                const hero = h.deliveryHeroData || deliveryHeroes[idx % deliveryHeroes.length];
+                const hero = h.deliveryHeroData || { name: "Rahul Verma", phone: "+91 98765 43210" };
                 let statusBadge = '<span class="badge bg-warning text-dark">In-Transit</span>';
                 if (h.isCancelled) statusBadge = '<span class="badge bg-danger">Cancelled</span>';
                 else if (h.isDelivered) statusBadge = '<span class="badge bg-success">Delivered</span>';
 
                 tbody.innerHTML += `
                     <tr>
-                        <td><strong>#${h.orderId}</strong></td>
+                        <td>
+                            <a href="/orders/${h.orderId}/detail" class="fw-bold text-danger text-decoration-none" title="View Detailed Order & Rate">
+                                #${h.orderId} <i class="fa-solid fa-arrow-up-right-from-square small ms-1"></i>
+                            </a>
+                        </td>
                         <td class="text-truncate" style="max-width: 130px;">${h.address}</td>
-                        <td>${hero.name}</td>
+                        <td>${hero.name} <br><small class="text-muted">${hero.phone}</small></td>
                         <td>${h.totalDurationMins || 25}m</td>
                         <td><strong class="text-danger">&#8377;${h.totalPaid}</strong></td>
                         <td>${statusBadge}</td>
                         <td>
                             <div class="d-flex gap-1">
-                                <button class="btn btn-sm btn-outline-danger rounded-pill py-0 px-2" title="Download Excel PDF" onclick="downloadSpecificOrderReceipt(${idx})">
+                                <button class="btn btn-sm btn-outline-danger rounded-pill py-0 px-2" title="Download Excel-Theme PDF" onclick="downloadSpecificOrderReceipt(${idx})">
                                     <i class="fa-solid fa-file-pdf"></i>
                                 </button>
-                                <button class="btn btn-sm btn-outline-warning rounded-pill py-0 px-2 text-dark" title="Review" onclick="goToFeedbackPage('${h.orderId}', ${h.isDelivered ? 'true' : 'false'})">
+                                <a href="/orders/${h.orderId}/detail" class="btn btn-sm btn-outline-warning rounded-pill py-0 px-2 text-dark" title="Review & Feedback">
                                     <i class="fa-solid fa-star"></i>
-                                </button>
+                                </a>
                             </div>
                         </td>
                     </tr>
@@ -423,7 +425,7 @@
         if(!targetOrder) return;
 
         if(!targetOrder.isDelivered && !targetOrder.isCancelled) {
-            alert(`Order #${targetOrder.orderId} is currently in-transit! Receipt will be unlocked once delivered.`);
+            alert(`Order #${targetOrder.orderId} is currently under transit! Full receipt unlocks once delivered.`);
             return;
         }
 
@@ -437,8 +439,9 @@
         generateExcelPdf(target);
     }
 
+    // EXCEL SHEET THEME TAX INVOICE GENERATOR (Real Data Filled)
     function generateExcelPdf(order) {
-        const hero = order.deliveryHeroData || deliveryHeroes[0];
+        const hero = order.deliveryHeroData || { name: "Rahul Verma", id: "HM-DEL-984", phone: "+91 98765 43210" };
         const container = document.createElement("div");
         container.className = "excel-pdf-container";
 
@@ -447,8 +450,9 @@
             itemsHtml += `
                 <tr>
                     <td style="text-align: center;">${i + 1}</td>
-                    <td><strong>${it.title}</strong></td>
+                    <td><strong>${it.title}</strong> (${it.restaurant || 'Kitchen'})</td>
                     <td style="text-align: center;">${it.quantity}</td>
+                    <td style="text-align: right;">₹${it.price.toFixed(2)}</td>
                     <td style="text-align: right;">₹${(it.price * it.quantity).toFixed(2)}</td>
                 </tr>
             `;
@@ -457,31 +461,31 @@
         container.innerHTML = `
             <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 12px;">
                 <h2 style="font-weight: 900; margin: 0; letter-spacing: 1px;">HUNGRYMATE FOOD LOGISTICS PVT LTD</h2>
-                <small style="font-size: 0.85rem; color: #475569;">Official Tax Invoice & Cash Memo Receipt</small>
+                <small style="font-size: 0.85rem; color: #475569;">Official Tax Invoice & Cash Memo Receipt (Excel Format)</small>
             </div>
 
             <table class="excel-table">
                 <tr>
-                    <td style="width: 25%; font-weight: 800;">ORDER NUMBER:</td>
+                    <td style="width: 25%; font-weight: 800; background-color: #f1f5f9;">ORDER ID:</td>
                     <td style="width: 25%;">#${order.orderId}</td>
-                    <td style="width: 25%; font-weight: 800;">ORDER TIME:</td>
+                    <td style="width: 25%; font-weight: 800; background-color: #f1f5f9;">ORDER DATE:</td>
                     <td style="width: 25%;">${order.placedAt}</td>
                 </tr>
                 <tr>
-                    <td style="font-weight: 800;">CUSTOMER NAME:</td>
+                    <td style="font-weight: 800; background-color: #f1f5f9;">CUSTOMER:</td>
                     <td>${order.customerName || 'Customer'} (${order.customerPhone || 'N/A'})</td>
-                    <td style="font-weight: 800;">DELIVERY AGENT:</td>
+                    <td style="font-weight: 800; background-color: #f1f5f9;">DELIVERY HERO:</td>
                     <td>${hero.name} (${hero.id}) - ${hero.phone}</td>
                 </tr>
                 <tr>
-                    <td style="font-weight: 800;">DELIVERY ADDRESS:</td>
+                    <td style="font-weight: 800; background-color: #f1f5f9;">DELIVERY ADDRESS:</td>
                     <td colspan="3">${order.address}</td>
                 </tr>
                 <tr>
-                    <td style="font-weight: 800;">PAYMENT MODE:</td>
-                    <td>${order.paymentMode || 'Cash on Delivery'}</td>
-                    <td style="font-weight: 800;">COUPON APPLIED:</td>
-                    <td>${order.couponApplied || 'NONE'}</td>
+                    <td style="font-weight: 800; background-color: #f1f5f9;">PAYMENT MODE:</td>
+                    <td>Cash on Delivery / UPI</td>
+                    <td style="font-weight: 800; background-color: #f1f5f9;">COUPON CODE:</td>
+                    <td style="color: #16a34a; font-weight: 700;">${order.couponApplied || 'NONE'}</td>
                 </tr>
             </table>
 
@@ -489,9 +493,10 @@
                 <thead>
                     <tr>
                         <th style="width: 8%; text-align: center;">SL</th>
-                        <th style="width: 57%;">ITEM DESCRIPTION</th>
-                        <th style="width: 15%; text-align: center;">QUANTITY</th>
-                        <th style="width: 20%; text-align: right;">PRICE (INR)</th>
+                        <th style="width: 50%;">ITEM DESCRIPTION</th>
+                        <th style="width: 12%; text-align: center;">QTY</th>
+                        <th style="width: 15%; text-align: right;">RATE (INR)</th>
+                        <th style="width: 15%; text-align: right;">AMOUNT (INR)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -499,23 +504,23 @@
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td colspan="3" style="text-align: right; font-weight: 800;">ITEMS SUBTOTAL:</td>
+                        <td colspan="4" style="text-align: right; font-weight: 800;">ITEMS SUBTOTAL:</td>
                         <td style="text-align: right; font-weight: 800;">₹${order.subtotal || order.totalPaid}</td>
                     </tr>
                     <tr>
-                        <td colspan="3" style="text-align: right; font-weight: 800;">COUPON DISCOUNT:</td>
+                        <td colspan="4" style="text-align: right; font-weight: 800;">COUPON DISCOUNT:</td>
                         <td style="text-align: right; font-weight: 800; color: #16a34a;">-₹${order.discount || 0}</td>
                     </tr>
                     <tr>
-                        <td colspan="3" style="text-align: right; font-weight: 800;">PLATFORM FEE:</td>
+                        <td colspan="4" style="text-align: right; font-weight: 800;">PLATFORM FEE:</td>
                         <td style="text-align: right; font-weight: 800;">₹9.00</td>
                     </tr>
                     <tr>
-                        <td colspan="3" style="text-align: right; font-weight: 800;">DELIVERY CHARGES:</td>
+                        <td colspan="4" style="text-align: right; font-weight: 800;">DELIVERY CHARGES:</td>
                         <td style="text-align: right; font-weight: 800; color: #16a34a;">FREE (₹0.00)</td>
                     </tr>
                     <tr style="background-color: #f8fafc;">
-                        <td colspan="3" style="text-align: right; font-weight: 900; font-size: 1.05rem;">NET TOTAL PAID:</td>
+                        <td colspan="4" style="text-align: right; font-weight: 900; font-size: 1.05rem;">TOTAL PAID:</td>
                         <td style="text-align: right; font-weight: 900; font-size: 1.05rem; color: #fe424d;">₹${order.totalPaid}</td>
                     </tr>
                 </tfoot>
@@ -525,8 +530,8 @@
         document.body.appendChild(container);
 
         const opt = {
-            margin: 0.4,
-            filename: `Hungrymate_CashMemo_${order.orderId}.pdf`,
+            margin: 0.35,
+            filename: `Hungrymate_Invoice_${order.orderId}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2, useCORS: true },
             jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
@@ -535,13 +540,5 @@
         html2pdf().set(opt).from(container).save().then(() => {
             document.body.removeChild(container);
         });
-    }
-
-    function goToFeedbackPage(orderId, isDelivered) {
-        if (!isDelivered) {
-            alert(`Order #${orderId} is currently under transit! Feedback unlocks after doorstep delivery.`);
-            return;
-        }
-        window.location.href = `/orders/${orderId}/feedback`;
     }
 </script>

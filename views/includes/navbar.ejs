@@ -3,8 +3,9 @@
     
     <!-- Left Logo & Navigation Items -->
     <div class="d-flex align-items-center flex-shrink-0 gap-2 gap-lg-3">
+      <!-- New Circular Brand Logo -->
       <a class="navbar-brand m-0 p-0 d-flex align-items-center" href="/listings">
-        <img src="/mypic.png" alt="Hungrymate Logo" style="height: 46px; width: auto; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.12));" />
+        <img src="/myimg.png" alt="Hungrymate Logo" class="brand-circular-logo shadow-sm" />
       </a>
 
       <div class="d-none d-lg-flex align-items-center gap-1">
@@ -12,12 +13,11 @@
           <i class="fa-solid fa-utensils icon-item"></i> All food items
         </a>
 
-        <!-- Same Restaurant Option Modal Trigger -->
         <button type="button" class="nav-pill-btn nav-same-rest-btn border-0" data-bs-toggle="modal" data-bs-target="#sameRestaurantModal">
           <i class="fa-solid fa-store icon-item text-primary"></i> Same Restaurant Dishes
         </button>
 
-        <!-- Add new items: ONLY visible to Website Owner (Piyush Kumar) -->
+        <!-- Only Owner (Piyush Kumar) can Add New Items -->
         <% if (currUser && currUser.isOwner) { %>
           <a class="nav-pill-btn owner-highlight-btn" href="/listings/new">
             <i class="fa-solid fa-plus icon-item"></i> Add new items
@@ -214,6 +214,21 @@
 </form>
 
 <style>
+    /* Circular Brand Logo Styling */
+    .brand-circular-logo {
+        height: 46px !important;
+        width: 46px !important;
+        border-radius: 50% !important;
+        object-fit: cover !important;
+        border: 2px solid #fe424d !important;
+        background-color: #000000 !important;
+        padding: 1px !important;
+        transition: transform 0.25s ease;
+    }
+    .brand-circular-logo:hover {
+        transform: scale(1.05);
+    }
+
     .nav-pill-btn {
         display: inline-flex !important;
         align-items: center !important;

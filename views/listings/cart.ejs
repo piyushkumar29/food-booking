@@ -1,520 +1,262 @@
 <% layout("/layouts/boilerplate") %>
 
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-
-<style>
-    .cart-container-box { max-width: 1040px; margin: 2rem auto 4rem auto; }
-    .cart-card-item {
-        background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px;
-        padding: 1rem; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between;
-    }
-    .order-summary-card {
-        background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 20px;
-        padding: 1.5rem; box-shadow: 0 10px 25px rgba(15,23,42,0.06);
-    }
-    
-    /* Flipkart Style Payment Box */
-    .fk-payment-box {
-        background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 16px; overflow: hidden;
-    }
-    .fk-pay-row {
-        padding: 1rem 1.2rem; border-bottom: 1px solid #e2e8f0; cursor: pointer; transition: background 0.2s ease;
-    }
-    .fk-pay-row:hover { background: #f8fafc; }
-    .fk-pay-row.active { background: #f0fdf4; border-left: 4px solid #16a34a; }
-    
-    body.dark-mode .cart-card-item, 
-    body.dark-mode .order-summary-card,
-    body.dark-mode .fk-payment-box {
-        background: #121212 !important; border-color: #27272a !important; color: #ffffff !important;
-    }
-    body.dark-mode .fk-pay-row { border-bottom-color: #27272a !important; }
-    body.dark-mode .fk-pay-row:hover { background: #1c1c21 !important; }
-    body.dark-mode .fk-pay-row.active { background: #142318 !important; border-left-color: #22c55e !important; }
-
-    #orderSuccessModal {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.85); display: flex; align-items: center; justify-content: center;
-        z-index: 9999;
-    }
-    .success-card-content {
-        background: #ffffff; border-radius: 26px; padding: 2.5rem; text-align: center; max-width: 420px; width: 90%;
-        animation: popUp 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    @keyframes popUp { 0% { transform: scale(0.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-</style>
-
-<div id="orderSuccessModal" class="d-none">
-    <div class="success-card-content shadow-lg">
-        <div class="mb-3">
-            <i class="fa-solid fa-circle-check text-success" style="font-size: 4.8rem;"></i>
-        </div>
-        <h3 class="fw-bold text-dark mb-1">Hurray! Order Confirmed</h3>
-        <p class="text-muted small">Your food is now being prepared in the kitchen!</p>
-        <div class="spinner-border text-danger spinner-border-sm mt-2" role="status"></div>
-        <div class="small text-muted mt-2">Opening Live Delivery Track...</div>
-    </div>
-</div>
-
-<div class="cart-container-box" id="cartContentWrap" data-userlogged="<%= currUser ? 'true' : 'false' %>">
-    <h3 class="fw-bold mb-3"><i class="fa-solid fa-bag-shopping text-danger me-2"></i>Checkout & Payment</h3>
-
-    <div class="row">
-        <!-- Left: Cart Items & Step 1 Delivery Address -->
-        <div class="col-lg-7">
-            <div id="cartItemsContainer"></div>
-            <div id="emptyCartMessage" class="text-center py-5 d-none">
-                <i class="fa-solid fa-cart-arrow-down fs-1 text-muted mb-3"></i>
-                <h5 class="text-secondary">Your cart is empty!</h5>
-                <a href="/listings" class="btn btn-outline-danger rounded-pill px-4 mt-2">Explore Menu</a>
-            </div>
-
-            <!-- Step 1: Delivery Address Details -->
-            <div class="order-summary-card mt-3 position-relative" id="step1AddressBox">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="fw-bold text-primary m-0"><i class="fa-solid fa-1 me-2 badge bg-primary rounded-circle"></i> Delivery Address & Details</h5>
-                    <span class="badge bg-secondary" id="step1StatusBadge">Step 1 of 2</span>
-                </div>
-
-                <div class="mb-2">
-                    <label class="form-label small fw-semibold">Recipient Full Name</label>
-                    <input type="text" id="custName" class="form-control" value="<%= currUser ? currUser.username : '' %>" placeholder="Piyush Kumar" required>
-                </div>
-                <div class="mb-2">
-                    <label class="form-label small fw-semibold">Contact Phone (10 digits)</label>
-                    <input type="tel" id="custPhone" class="form-control" placeholder="9876543210" maxlength="10" required>
-                </div>
-                <div class="mb-3 position-relative">
-                    <label class="form-label small fw-semibold">Delivery Address (Real-time Worldwide Suggestions)</label>
-                    <textarea id="custAddress" class="form-control" rows="2" placeholder="Start typing: e.g. Opposite JIS College, Kalyani..." autocomplete="off" required></textarea>
-                    
-                    <ul id="addressSuggestionsBox" class="list-group position-absolute w-100 shadow-lg d-none" style="z-index: 1050; max-height: 190px; overflow-y: auto;"></ul>
-                </div>
-
-                <button class="btn btn-primary w-100 py-2 fw-bold rounded-pill shadow-sm" onclick="proceedToPaymentStep()">
-                    Confirm Address & Proceed to Payment <i class="fa-solid fa-arrow-right ms-1"></i>
+<div class="row justify-content-center my-3 my-md-4">
+    <div class="col-12 col-lg-8">
+        <div class="card shadow-sm border-0 rounded-4 p-3 p-md-4 bg-white mb-4">
+            
+            <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                <h4 class="fw-bold mb-0 text-danger"><i class="fa-solid fa-cart-shopping me-2"></i>Your Delicious Cart</h4>
+                <button class="btn btn-outline-danger btn-sm rounded-pill fw-bold" onclick="clearCart()">
+                    <i class="fa-solid fa-trash me-1"></i> Clear Cart
                 </button>
             </div>
-        </div>
 
-        <!-- Right: Bill Summary & Flipkart-Style Gateways -->
-        <div class="col-lg-5">
-            <div class="order-summary-card">
-                <h5 class="fw-bold mb-3 border-bottom pb-2">Price Details</h5>
-                
-                <div class="input-group mb-3">
-                    <input type="text" id="couponInput" class="form-control text-uppercase" placeholder="Enter Coupon Code">
-                    <button class="btn btn-dark fw-bold px-3" onclick="applyCouponCode()">Apply</button>
-                </div>
-                <div id="couponStatus" class="small mb-3"></div>
+            <div id="cartItemsContainer" class="mb-4">
+                <!-- Dynamically Populated by Cart Items -->
+            </div>
 
-                <div class="d-flex justify-content-between mb-2">
-                    <span>Price (<span id="cartCountTotal">0</span> items):</span>
-                    <span class="fw-semibold">&#8377;<span id="subtotalAmount">0</span></span>
+            <!-- Coupon Code Section -->
+            <div class="border rounded-4 p-3 mb-4 bg-light">
+                <label class="form-label fw-bold small text-dark mb-1"><i class="fa-solid fa-tag text-warning me-1"></i>Apply Promo / Coupon Code</label>
+                <div class="input-group">
+                    <input type="text" id="couponInput" class="form-control rounded-pill-start shadow-none" placeholder="Try HUNGRY60, WELCOME, or PIYUSH" style="text-transform: uppercase;">
+                    <button class="btn btn-danger rounded-pill-end px-4 fw-bold" type="button" onclick="applyCoupon()">Apply</button>
                 </div>
-                <div class="d-flex justify-content-between mb-2 text-muted small">
-                    <span>Platform Fee:</span>
-                    <span>&#8377;9</span>
-                </div>
-                <div class="d-flex justify-content-between mb-2 text-muted small">
-                    <span>Delivery Charges:</span>
-                    <span class="text-success fw-bold">FREE</span>
-                </div>
-                <div class="d-flex justify-content-between mb-3 text-success fw-semibold" id="discountRow" style="display: none !important;">
-                    <span>Total Discount:</span>
-                    <span>-&#8377;<span id="discountAmount">0</span></span>
-                </div>
-                <hr>
-                <div class="d-flex justify-content-between fs-5 fw-bold mb-4">
-                    <span>Total Amount:</span>
-                    <span class="text-danger">&#8377;<span id="finalTotalAmount">0</span></span>
-                </div>
+                <div id="couponStatusMessage" class="small mt-1"></div>
+            </div>
 
-                <!-- Flipkart Style Payment Options Block -->
-                <div id="paymentMethodsLockWrap" style="opacity: 0.4; pointer-events: none; transition: all 0.3s ease;">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="fw-bold m-0"><i class="fa-solid fa-shield-halved text-success me-1"></i> Select Payment Option</h6>
-                        <span class="badge bg-danger" id="payLockBadge"><i class="fa-solid fa-lock me-1"></i>Locked</span>
+            <!-- Delivery Address & Contact Form -->
+            <div class="border rounded-4 p-3 mb-4 bg-light">
+                <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-location-dot text-danger me-1"></i>Delivery Details</h6>
+                <div class="row g-2">
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label small fw-semibold">Customer Name</label>
+                        <input type="text" id="custName" class="form-control rounded-pill" value="<%= currUser ? currUser.username : '' %>" placeholder="Your Full Name" required>
                     </div>
-
-                    <div class="fk-payment-box mb-3">
-                        <!-- Option 1: UPI -->
-                        <div class="fk-pay-row active" onclick="switchFkPayTab('upi')">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="fkPayRadio" id="radioUpi" checked>
-                                <label class="form-check-label fw-bold d-flex justify-content-between align-items-center w-100" for="radioUpi">
-                                    <span>UPI (PhonePe / GPay / Paytm)</span>
-                                    <img src="https://img.icons8.com/color/48/000000/google-pay-india.png" style="height: 22px;">
-                                </label>
-                            </div>
-                            <div id="tabBodyUpi" class="mt-2 ps-4">
-                                <input type="text" id="upiIdInput" class="form-control form-control-sm mb-2" placeholder="e.g. name@okhdfcbank or 9876543210@ybl">
-                                <button class="btn btn-warning btn-sm fw-bold w-100" onclick="verifyAndPayUPI()">Pay via UPI</button>
-                            </div>
-                        </div>
-
-                        <!-- Option 2: Dynamic Phone QR -->
-                        <div class="fk-pay-row" onclick="switchFkPayTab('qr')">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="fkPayRadio" id="radioQr">
-                                <label class="form-check-label fw-bold d-flex justify-content-between align-items-center w-100" for="radioQr">
-                                    <span>QR Code Scan & Pay</span>
-                                    <i class="fa-solid fa-qrcode text-primary fs-5"></i>
-                                </label>
-                            </div>
-                            <div id="tabBodyQr" class="mt-2 ps-4 d-none text-center">
-                                <div id="qrCodeContainer" class="d-flex justify-content-center my-2"></div>
-                                <span class="badge bg-warning text-dark" id="qrWaitingBadge"><i class="fa-solid fa-spinner fa-spin me-1"></i> Scan from phone camera...</span>
-                            </div>
-                        </div>
-
-                        <!-- Option 3: Credit / Debit Cards -->
-                        <div class="fk-pay-row" onclick="switchFkPayTab('card')">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="fkPayRadio" id="radioCard">
-                                <label class="form-check-label fw-bold d-flex justify-content-between align-items-center w-100" for="radioCard">
-                                    <span>Credit / Debit / ATM Card</span>
-                                    <i class="fa-solid fa-credit-card text-success fs-5"></i>
-                                </label>
-                            </div>
-                            <div id="tabBodyCard" class="mt-2 ps-4 d-none">
-                                <input type="text" id="cardNumber" class="form-control form-control-sm mb-2" placeholder="16 Digit Card Number" maxlength="16">
-                                <div class="row g-2 mb-2">
-                                    <div class="col-6"><input type="text" id="cardExpiry" class="form-control form-control-sm" placeholder="MM/YY" maxlength="5"></div>
-                                    <div class="col-6"><input type="password" id="cardCvv" class="form-control form-control-sm" placeholder="CVV" maxlength="3"></div>
-                                </div>
-                                <button class="btn btn-warning btn-sm fw-bold w-100" onclick="verifyAndPayCard()">Pay Securely</button>
-                            </div>
-                        </div>
-
-                        <!-- Option 4: Cash on Delivery -->
-                        <div class="fk-pay-row" onclick="switchFkPayTab('cod')">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="fkPayRadio" id="radioCod">
-                                <label class="form-check-label fw-bold d-flex justify-content-between align-items-center w-100" for="radioCod">
-                                    <span>Cash on Delivery (COD)</span>
-                                    <i class="fa-solid fa-hand-holding-dollar text-success fs-5"></i>
-                                </label>
-                            </div>
-                            <div id="tabBodyCod" class="mt-2 ps-4 d-none">
-                                <p class="small text-muted mb-2">Pay cash or scan partner's QR at doorstep.</p>
-                                <button class="btn btn-warning btn-sm fw-bold w-100" onclick="triggerCelebrationAndRedirect('Cash on Delivery')">Confirm COD Order</button>
-                            </div>
-                        </div>
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label small fw-semibold">Mobile Number</label>
+                        <input type="tel" id="custPhone" class="form-control rounded-pill" placeholder="e.g. 9876543210" required>
                     </div>
-
-                    <div class="text-center small text-muted">
-                        <i class="fa-solid fa-lock text-success me-1"></i> Safe and Secure Payments. 100% Authentic.
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold">Delivery Address</label>
+                        <textarea id="custAddress" class="form-control rounded-3" rows="2" placeholder="Street, Flat No, Landmark, City Area..." required></textarea>
                     </div>
                 </div>
             </div>
+
+            <!-- Bill Breakdown Summary -->
+            <div class="border rounded-4 p-3 mb-4">
+                <h6 class="fw-bold mb-3">Order Cost Summary</h6>
+                <div class="d-flex justify-content-between small text-muted mb-1">
+                    <span>Items Subtotal:</span>
+                    <strong id="subtotalText">&#8377;0</strong>
+                </div>
+                <div class="d-flex justify-content-between small text-success mb-1">
+                    <span>Discount Applied:</span>
+                    <strong id="discountText">-&#8377;0</strong>
+                </div>
+                <div class="d-flex justify-content-between small text-muted mb-1">
+                    <span>Platform Fee:</span>
+                    <strong>&#8377;9</strong>
+                </div>
+                <div class="d-flex justify-content-between small text-success mb-2">
+                    <span>Delivery Charges:</span>
+                    <strong class="text-success">FREE</strong>
+                </div>
+                <div class="d-flex justify-content-between fs-5 fw-bold text-danger border-top pt-2">
+                    <span>To Pay:</span>
+                    <span id="grandTotalText">&#8377;0</span>
+                </div>
+            </div>
+
+            <button class="btn btn-danger w-100 rounded-pill py-3 fw-bold fs-6 shadow" onclick="placeFinalFoodOrder()">
+                <i class="fa-solid fa-bolt me-1"></i> Place Order Now (Cash on Delivery / UPI)
+            </button>
+
         </div>
     </div>
 </div>
 
 <script>
-    let discount = 0;
-    let activeQrToken = "";
-    let qrPollInterval = null;
-    let isAddressConfirmed = false;
+    let appliedCoupon = null;
+    let discountAmount = 0;
 
-    function checkUserLoggedIn() {
-        return document.getElementById("cartContentWrap").getAttribute("data-userlogged") === "true";
-    }
+    // Delivery Heroes Pool (Randomized per new order)
+    const heroPool = [
+        { name: "Rahul Verma", id: "HM-DEL-984", phone: "+91 98765 43210" },
+        { name: "Amitabh Sen", id: "HM-DEL-412", phone: "+91 98301 22415" },
+        { name: "Subhash Mondal", id: "HM-DEL-773", phone: "+91 89104 55621" },
+        { name: "Rohan Mukherjee", id: "HM-DEL-291", phone: "+91 94331 88902" },
+        { name: "Vikram Das", id: "HM-DEL-658", phone: "+91 97482 11340" },
+        { name: "Santosh Yadav", id: "HM-DEL-319", phone: "+91 91234 77881" },
+        { name: "Ankit Sharma", id: "HM-DEL-552", phone: "+91 98322 41098" }
+    ];
 
-    function switchFkPayTab(tab) {
-        document.querySelectorAll('.fk-pay-row').forEach(r => r.classList.remove('active'));
-        document.getElementById('tabBodyUpi').classList.add('d-none');
-        document.getElementById('tabBodyQr').classList.add('d-none');
-        document.getElementById('tabBodyCard').classList.add('d-none');
-        document.getElementById('tabBodyCod').classList.add('d-none');
+    document.addEventListener("DOMContentLoaded", renderCart);
 
-        if(tab === 'upi') {
-            document.getElementById('radioUpi').checked = true;
-            document.getElementById('radioUpi').closest('.fk-pay-row').classList.add('active');
-            document.getElementById('tabBodyUpi').classList.remove('d-none');
-        } else if(tab === 'qr') {
-            document.getElementById('radioQr').checked = true;
-            document.getElementById('radioQr').closest('.fk-pay-row').classList.add('active');
-            document.getElementById('tabBodyQr').classList.remove('d-none');
-            generateDynamicOrderQR();
-        } else if(tab === 'card') {
-            document.getElementById('radioCard').checked = true;
-            document.getElementById('radioCard').closest('.fk-pay-row').classList.add('active');
-            document.getElementById('tabBodyCard').classList.remove('d-none');
-        } else if(tab === 'cod') {
-            document.getElementById('radioCod').checked = true;
-            document.getElementById('radioCod').closest('.fk-pay-row').classList.add('active');
-            document.getElementById('tabBodyCod').classList.remove('d-none');
-        }
-    }
-
-    function renderCartItems() {
+    function renderCart() {
         const cart = JSON.parse(localStorage.getItem("hungrymate_cart") || "[]");
         const container = document.getElementById("cartItemsContainer");
-        const emptyMsg = document.getElementById("emptyCartMessage");
         container.innerHTML = "";
 
         if (cart.length === 0) {
-            emptyMsg.classList.remove("d-none");
-            updatePriceBreakdown(0);
+            container.innerHTML = `
+                <div class="text-center py-5">
+                    <i class="fa-solid fa-bowl-food fs-1 text-muted mb-2"></i>
+                    <h5 class="text-muted">Your cart is empty!</h5>
+                    <a href="/listings" class="btn btn-danger rounded-pill px-4 mt-2">Explore Menu</a>
+                </div>
+            `;
+            updateBillSummary(0);
             return;
         }
-        emptyMsg.classList.add("d-none");
 
         let subtotal = 0;
-        let count = 0;
+
         cart.forEach((item, index) => {
-            subtotal += item.price * item.quantity;
-            count += item.quantity;
+            const itemTotal = (item.price || 0) * (item.quantity || 1);
+            subtotal += itemTotal;
+
             container.innerHTML += `
-                <div class="cart-card-item">
+                <div class="d-flex align-items-center justify-content-between p-2 mb-2 border rounded-3 bg-light">
                     <div class="d-flex align-items-center gap-3">
-                        <img src="${item.image}" alt="${item.title}" style="width: 65px; height: 65px; object-fit: cover; border-radius: 12px;">
+                        <img src="${item.image}" alt="${item.title}" class="rounded-3 object-fit-cover" style="width: 55px; height: 55px;">
                         <div>
-                            <h6 class="fw-bold mb-0">${item.title}</h6>
-                            <span class="text-danger fw-semibold">&#8377;${item.price}</span>
+                            <h6 class="fw-bold mb-0 text-dark small">${item.title}</h6>
+                            <small class="text-danger fw-semibold">&#8377;${item.price} each</small>
+                            <small class="text-muted d-block" style="font-size: 0.7rem;">${item.restaurant || 'Kitchen'}</small>
                         </div>
                     </div>
+
                     <div class="d-flex align-items-center gap-2">
-                        <button class="btn btn-sm btn-outline-secondary px-2" onclick="modifyQuantity(${index}, -1)">-</button>
-                        <span class="fw-bold px-1">${item.quantity}</span>
-                        <button class="btn btn-sm btn-outline-secondary px-2" onclick="modifyQuantity(${index}, 1)">+</button>
-                        <button class="btn btn-sm btn-link text-danger ms-2" onclick="removeCartItem(${index})"><i class="fa-solid fa-trash"></i></button>
+                        <div class="d-flex align-items-center border rounded-pill bg-white px-2 py-0">
+                            <button class="btn btn-sm p-0 text-danger fw-bold" onclick="updateQty(${index}, -1)">-</button>
+                            <span class="mx-2 small fw-bold">${item.quantity}</span>
+                            <button class="btn btn-sm p-0 text-success fw-bold" onclick="updateQty(${index}, 1)">+</button>
+                        </div>
+                        <span class="fw-bold text-dark small" style="min-width: 60px; text-align: right;">&#8377;${itemTotal}</span>
+                        <button class="btn btn-sm text-secondary p-0 ms-1" onclick="removeItem(${index})"><i class="fa-solid fa-trash"></i></button>
                     </div>
                 </div>
             `;
         });
-        document.getElementById("cartCountTotal").innerText = count;
-        updatePriceBreakdown(subtotal);
+
+        updateBillSummary(subtotal);
     }
 
-    function modifyQuantity(index, change) {
+    function updateQty(index, delta) {
         let cart = JSON.parse(localStorage.getItem("hungrymate_cart") || "[]");
-        cart[index].quantity += change;
+        if (!cart[index]) return;
+        cart[index].quantity += delta;
         if (cart[index].quantity <= 0) cart.splice(index, 1);
         localStorage.setItem("hungrymate_cart", JSON.stringify(cart));
-        renderCartItems();
+        renderCart();
         if (typeof refreshNavCartBadge === "function") refreshNavCartBadge();
     }
 
-    function removeCartItem(index) {
+    function removeItem(index) {
         let cart = JSON.parse(localStorage.getItem("hungrymate_cart") || "[]");
         cart.splice(index, 1);
         localStorage.setItem("hungrymate_cart", JSON.stringify(cart));
-        renderCartItems();
+        renderCart();
         if (typeof refreshNavCartBadge === "function") refreshNavCartBadge();
     }
 
-    function updatePriceBreakdown(subtotal) {
-        document.getElementById("subtotalAmount").innerText = subtotal;
-        const platformFee = subtotal > 0 ? 9 : 0;
-        let finalAmount = subtotal + platformFee - discount;
-        if (finalAmount < 0) finalAmount = 0;
-        document.getElementById("finalTotalAmount").innerText = finalAmount;
+    function clearCart() {
+        if (!confirm("Are you sure you want to empty your cart?")) return;
+        localStorage.removeItem("hungrymate_cart");
+        renderCart();
+        if (typeof refreshNavCartBadge === "function") refreshNavCartBadge();
     }
 
-    function applyCouponCode() {
-        const code = document.getElementById("couponInput").value.trim().toUpperCase();
-        const subtotal = parseInt(document.getElementById("subtotalAmount").innerText) || 0;
-        const statusBox = document.getElementById("couponStatus");
-        const discRow = document.getElementById("discountRow");
-
-        if (code === "1STUSERFREE") {
-            discount = subtotal + 9;
-            statusBox.innerHTML = '<span class="text-success fw-bold">1STUSERFREE Applied! Order is 100% Free!</span>';
-        } else if (code === "FLAT60%" || code === "FLAT60") {
-            discount = Math.round(subtotal * 0.6);
-            statusBox.innerHTML = `<span class="text-success fw-bold">FLAT60% Applied! Saved &#8377;${discount}</span>`;
-        } else if (code === "HUNGRY20") {
-            discount = Math.round(subtotal * 0.2);
-            statusBox.innerHTML = `<span class="text-success fw-bold">HUNGRY20 Applied! Saved &#8377;${discount}</span>`;
-        } else {
-            statusBox.innerHTML = '<span class="text-danger fw-bold">Invalid Coupon Code!</span>';
-            discount = 0;
-        }
-
-        if (discount > 0) {
-            discRow.style.setProperty("display", "flex", "important");
-            document.getElementById("discountAmount").innerText = discount;
-        }
-        updatePriceBreakdown(subtotal);
-    }
-
-    function proceedToPaymentStep() {
-        const name = document.getElementById("custName").value.trim();
-        const phone = document.getElementById("custPhone").value.trim();
-        const address = document.getElementById("custAddress").value.trim();
+    function applyCoupon() {
+        const input = document.getElementById("couponInput").value.trim().toUpperCase();
+        const status = document.getElementById("couponStatusMessage");
         const cart = JSON.parse(localStorage.getItem("hungrymate_cart") || "[]");
+        if (cart.length === 0) return alert("Add items to your cart first!");
 
-        if (cart.length === 0) return alert("Your cart is empty! Please select food items first.");
-        if (!name) return alert("Please enter recipient name!");
-        if (phone.length < 10) return alert("Please enter valid 10-digit mobile number!");
-        if (address.length < 5) return alert("Please enter delivery location address!");
+        const subtotal = cart.reduce((acc, it) => acc + (it.price * it.quantity), 0);
 
-        isAddressConfirmed = true;
-        document.getElementById("step1StatusBadge").className = "badge bg-success";
-        document.getElementById("step1StatusBadge").innerText = "Address Verified ✓";
-        
-        const payWrap = document.getElementById("paymentMethodsLockWrap");
-        payWrap.style.opacity = "1";
-        payWrap.style.pointerEvents = "auto";
-        document.getElementById("payLockBadge").className = "badge bg-success";
-        document.getElementById("payLockBadge").innerHTML = "<i class='fa-solid fa-unlock me-1'></i>Unlocked";
-
-        payWrap.scrollIntoView({ behavior: 'smooth' });
-    }
-
-    function generateDynamicOrderQR() {
-        fetch("/api/get-server-ip")
-            .then(res => res.json())
-            .then(net => {
-                const qrContainer = document.getElementById("qrCodeContainer");
-                const total = document.getElementById("finalTotalAmount").innerText;
-                activeQrToken = "HM_" + Date.now();
-                
-                const orderUrl = `http://${net.ip}:3000/orders/qr-mobile-confirm?token=${activeQrToken}&amount=${total}`;
-                
-                qrContainer.innerHTML = "";
-                QRCode.toCanvas(orderUrl, { width: 175, margin: 1 }, function (error, canvas) {
-                    if (!error) qrContainer.appendChild(canvas);
-                });
-
-                if (qrPollInterval) clearInterval(qrPollInterval);
-                qrPollInterval = setInterval(async () => {
-                    try {
-                        const res = await fetch(`/orders/api/check-qr-status?token=${activeQrToken}`);
-                        const data = await res.json();
-                        if (data.confirmed) {
-                            clearInterval(qrPollInterval);
-                            triggerCelebrationAndRedirect("QR_PHONE_VERIFIED");
-                        }
-                    } catch(e) {}
-                }, 1500);
-            })
-            .catch(() => {});
-    }
-
-    function verifyAndPayUPI() {
-        const upi = document.getElementById("upiIdInput").value.trim();
-        const validHandles = ["@okhdfcbank", "@okaxis", "@oksbi", "@okicici", "@ybl", "@paytm", "@ibl", "@axl"];
-        const hasValidHandle = validHandles.some(h => upi.endsWith(h));
-
-        if (upi.includes("@") && upi.length >= 8 && hasValidHandle) {
-            triggerCelebrationAndRedirect("UPI");
+        if (input === "HUNGRY60" || input === "PIYUSH") {
+            discountAmount = Math.round(subtotal * 0.6);
+            appliedCoupon = input;
+            status.innerHTML = `<span class="text-success fw-bold"><i class="fa-solid fa-check me-1"></i>Hurray! 60% flat coupon applied (-₹${discountAmount})</span>`;
+        } else if (input === "WELCOME") {
+            discountAmount = Math.min(100, Math.round(subtotal * 0.3));
+            appliedCoupon = input;
+            status.innerHTML = `<span class="text-success fw-bold"><i class="fa-solid fa-check me-1"></i>Welcome discount applied (-₹${discountAmount})</span>`;
         } else {
-            alert("Invalid UPI ID! Please enter a real UPI handle like name@okhdfcbank or 9876543210@ybl");
+            discountAmount = 0;
+            appliedCoupon = null;
+            status.innerHTML = `<span class="text-danger fw-bold"><i class="fa-solid fa-xmark me-1"></i>Invalid coupon code! Try HUNGRY60 or PIYUSH</span>`;
         }
+        updateBillSummary(subtotal);
     }
 
-    function verifyAndPayCard() {
-        const num = document.getElementById('cardNumber').value.trim();
-        const exp = document.getElementById('cardExpiry').value.trim();
-        const cvv = document.getElementById('cardCvv').value.trim();
-
-        if (num.length === 16 && /^\d+$/.test(num) && exp.includes("/") && cvv.length === 3) {
-            triggerCelebrationAndRedirect("DEBIT_CREDIT_CARD");
-        } else {
-            alert("Invalid Card Details! Please fill real 16-digit Card Number, MM/YY, and 3-digit CVV.");
-        }
+    function updateBillSummary(subtotal) {
+        document.getElementById("subtotalText").innerHTML = `&#8377;${subtotal}`;
+        document.getElementById("discountText").innerHTML = `-&#8377;${discountAmount}`;
+        const finalTotal = Math.max(subtotal - discountAmount + (subtotal > 0 ? 9 : 0), 0);
+        document.getElementById("grandTotalText").innerHTML = `&#8377;${finalTotal}`;
     }
 
-    function triggerCelebrationAndRedirect(method) {
-        if (!checkUserLoggedIn()) {
-            alert("Please Sign up or Log in first before booking food items!");
-            window.location.href = "/login";
-            return;
-        }
+    // Place Order: Assigns unique random 15-30 min duration & random delivery hero
+    function placeFinalFoodOrder() {
+        const cart = JSON.parse(localStorage.getItem("hungrymate_cart") || "[]");
+        if (cart.length === 0) return alert("Your cart is empty! Add food items first.");
 
         const name = document.getElementById("custName").value.trim();
         const phone = document.getElementById("custPhone").value.trim();
         const address = document.getElementById("custAddress").value.trim();
-        const cart = JSON.parse(localStorage.getItem("hungrymate_cart") || "[]");
 
-        let maxPrep = 15;
-        let mainRestaurant = "Chef Kitchen";
-        cart.forEach(it => {
-            if (it.prepTime && it.prepTime > maxPrep) maxPrep = it.prepTime;
-            if (it.restaurant) mainRestaurant = it.restaurant;
-        });
+        if (!name || !phone || !address) {
+            return alert("Please enter Customer Name, Mobile Number and Delivery Address!");
+        }
 
-        const totalDurationMins = maxPrep + 12;
+        const subtotal = cart.reduce((acc, it) => acc + (it.price * it.quantity), 0);
+        const grandTotal = Math.max(subtotal - discountAmount + 9, 0);
+
+        // Generate Random Duration between 15 and 30 Minutes
+        const randomDurationMins = Math.floor(Math.random() * (30 - 15 + 1)) + 15;
+
+        // Generate Unique Order ID (e.g. HM-78214)
+        const orderId = "HM-" + Math.floor(10000 + Math.random() * 90000);
+
+        // Pick Random Delivery Partner
+        const randomHero = heroPool[Math.floor(Math.random() * heroPool.length)];
+
+        const now = new Date();
+        const placedAtStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ", " + now.toLocaleDateString("en-IN", { day: 'numeric', month: 'short' });
 
         const newOrder = {
-            orderId: "HM" + Math.floor(100000 + Math.random() * 900000),
-            items: cart,
-            totalPaid: document.getElementById("finalTotalAmount").innerText,
+            orderId: orderId,
             customerName: name,
             customerPhone: phone,
             address: address,
-            restaurantName: mainRestaurant,
-            placedAt: new Date().toLocaleTimeString(),
-            timestampStart: Date.now(),
-            totalDurationMins: totalDurationMins,
-            paymentMode: method,
-            deliveryHero: "Rahul Verma (+91 98765 43210)",
-            deliveryHeroId: "HM-DEL-984",
-            isDelivered: false
+            items: cart,
+            subtotal: subtotal,
+            discount: discountAmount,
+            couponApplied: appliedCoupon || "NONE",
+            totalPaid: grandTotal,
+            totalDurationMins: randomDurationMins, // Fixed random 15-30 min timer
+            timestampStart: Date.now(), // Real time anchor (prevents reset on page reload)
+            placedAt: placedAtStr,
+            deliveryHeroData: randomHero, // Random delivery partner & phone
+            restaurantName: cart[0].restaurant || "Chef Kitchen",
+            firstFoodItemId: cart[0].id || "", // For review feedback reference
+            isDelivered: false,
+            isCancelled: false
         };
 
-        localStorage.setItem("hungrymate_active_order", JSON.stringify(newOrder));
+        let history = JSON.parse(localStorage.getItem("hungrymate_order_history") || "[]");
+        history.unshift(newOrder); // New order on top
+        localStorage.setItem("hungrymate_order_history", JSON.stringify(history));
 
-        let hist = JSON.parse(localStorage.getItem("hungrymate_order_history") || "[]");
-        hist.unshift(newOrder);
-        localStorage.setItem("hungrymate_order_history", JSON.stringify(hist));
-
+        // Clear active cart
         localStorage.removeItem("hungrymate_cart");
         if (typeof refreshNavCartBadge === "function") refreshNavCartBadge();
 
-        confetti({ particleCount: 140, spread: 80, origin: { y: 0.6 } });
-        document.getElementById("orderSuccessModal").classList.remove("d-none");
-
-        setTimeout(() => {
-            window.location.href = "/orders/track";
-        }, 2200);
+        alert(`Order #${orderId} placed successfully! Delivery ETA: ${randomDurationMins} Mins.`);
+        window.location.href = "/orders/track";
     }
-
-    // Google Map Style Real-Time Autocomplete API
-    const addrInput = document.getElementById("custAddress");
-    const addrBox = document.getElementById("addressSuggestionsBox");
-    let addrDebounce = null;
-
-    addrInput.addEventListener("input", () => {
-        const query = addrInput.value.trim();
-        clearTimeout(addrDebounce);
-        addrBox.innerHTML = "";
-        if (!query) {
-            addrBox.classList.add("d-none");
-            return;
-        }
-
-        addrDebounce = setTimeout(() => {
-            fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=6`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.features && data.features.length > 0) {
-                        addrBox.classList.remove("d-none");
-                        data.features.forEach(f => {
-                            const p = f.properties;
-                            const fullAddr = [p.name, p.street, p.city, p.state, p.country].filter(Boolean).join(', ');
-                            const li = document.createElement("li");
-                            li.className = "list-group-item list-group-item-action small py-2";
-                            li.style.cursor = "pointer";
-                            li.innerHTML = `<i class="fa-solid fa-location-dot text-danger me-2"></i>${fullAddr}`;
-                            li.onclick = () => {
-                                addrInput.value = fullAddr;
-                                addrBox.classList.add("d-none");
-                            };
-                            addrBox.appendChild(li);
-                        });
-                    }
-                })
-                .catch(() => {});
-        }, 250);
-    });
-
-    document.addEventListener("DOMContentLoaded", () => {
-        renderCartItems();
-    });
 </script>
