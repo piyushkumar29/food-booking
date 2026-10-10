@@ -57,15 +57,15 @@ body {
   }
 }
 
-/* NAVBAR & BIG LOGO */
+/* NAVBAR & BIG LOGO (Point 1 & 3) */
 .navbar, .hm-main-navbar {
-  min-height: 4.6rem !important;
+  min-height: 4.8rem !important;
   height: auto !important;
   background-color: #ffffff !important;
   padding: 0.5rem 0.8rem !important;
   width: 100% !important;
   box-sizing: border-box !important;
-  transition: background-color 0.25s ease;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
 .brand-navbar-logo {
@@ -82,6 +82,39 @@ body {
     height: 52px !important;
     max-width: 170px !important;
   }
+}
+
+/* Capsule Nav Buttons (Default Light Mode) */
+.nav-pill-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 0.45rem 0.95rem !important;
+  border-radius: 50px !important;
+  font-weight: 700 !important;
+  font-size: 0.85rem !important;
+  color: #1e293b !important;
+  text-decoration: none !important;
+  background-color: transparent !important;
+  border: 1.5px solid transparent !important;
+  transition: all 0.25s ease !important;
+  white-space: nowrap !important;
+}
+.icon-item { margin-right: 0.4rem; font-size: 0.95rem; }
+.nav-all-food .icon-item { color: #fe424d; }
+.nav-track-order .icon-item { color: #10b981; }
+.nav-offers .icon-item { color: #f59e0b; }
+.owner-highlight-btn {
+  background-color: #fef2f2 !important;
+  color: #fe424d !important;
+  border: 1.5px solid #fecaca !important;
+}
+
+.nav-pill-btn:hover {
+  background-color: #ffffff !important;
+  border-color: #ffdada !important;
+  color: #fe424d !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(254, 66, 77, 0.16) !important;
 }
 
 /* =========================================================
@@ -282,7 +315,7 @@ body {
 /* FOOTER BASE */
 .f-info {
   text-align: center;
-  padding: 2rem 1rem;
+  padding: 2.2rem 1rem;
   background-color: #f1f5f9 !important;
   border-top: 1.5px solid #e2e8f0 !important;
   color: #334155 !important;
@@ -296,7 +329,7 @@ body {
 .f-info-socials i:hover { color: var(--hm-red) !important; transform: translateY(-2px); }
 
 /* =========================================================
-   DARK MODE COMPLETE OVERRIDES (HEADER & FOOTER WHITE FIX)
+   DARK MODE COMPLETE ENGINE (Points 1, 2 & 3)
    ========================================================= */
 
 body.dark-mode {
@@ -304,33 +337,60 @@ body.dark-mode {
   color: #ffffff !important;
 }
 
-/* Header & Navbar Pure Deep Black */
+/* 1. Header/Navbar Pure Deep Black */
 body.dark-mode .navbar,
 body.dark-mode .hm-main-navbar,
-body.dark-mode nav.navbar {
+body.dark-mode nav.navbar,
+body.dark-mode .bg-white {
   background-color: #000000 !important;
-  border-bottom: 1px solid #27272a !important;
+  border-bottom: 1.5px solid #27272a !important;
 }
 
+/* 2. Navbar Capsule Buttons in Dark Mode: Black background, white border, white text, golden icons */
+body.dark-mode .nav-pill-btn {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 1.5px solid #ffffff !important;
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.08) !important;
+}
+
+body.dark-mode .nav-pill-btn .icon-item {
+  color: #facc15 !important; /* Golden icon */
+}
+
+body.dark-mode .nav-pill-btn:hover {
+  background-color: #18181b !important;
+  border-color: #facc15 !important;
+  color: #facc15 !important;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 4px 14px rgba(250, 204, 21, 0.25) !important;
+}
+
+body.dark-mode .nav-pill-btn:hover .icon-item {
+  color: #facc15 !important;
+}
+
+/* Search Input in Dark Mode */
 body.dark-mode #foodSearchInput,
 body.dark-mode #mobileFoodSearchInput {
   background-color: #18181b !important;
-  border-color: #3f3f46 !important;
+  border: 1.5px solid #ffffff !important;
   color: #ffffff !important;
 }
 
 body.dark-mode #foodSearchInput::placeholder,
 body.dark-mode #mobileFoodSearchInput::placeholder {
-  color: #a1a1aa !important;
+  color: #cbd5e1 !important;
 }
 
-body.dark-mode .nav-pill-btn {
-  background-color: #1e293b !important;
+body.dark-mode .btn.text-secondary {
   color: #ffffff !important;
-  border-color: #334155 !important;
 }
-body.dark-mode .nav-pill-btn .icon-item {
-  color: #facc15 !important;
+
+body.dark-mode .btn-light.border {
+  background-color: #000000 !important;
+  border: 1.5px solid #ffffff !important;
+  color: #ffffff !important;
 }
 
 body.dark-mode .listing-card {
@@ -346,21 +406,31 @@ body.dark-mode .btn-add-cart-pill {
   font-weight: 800 !important;
 }
 
-/* Footer Dark Mode - Pure White Text Fix */
+/* 3. Footer Dark Mode Text: Pure White Text & Crisp contrast */
 body.dark-mode .f-info {
   background-color: #050505 !important;
-  border-top-color: #27272a !important;
+  border-top: 1.5px solid #27272a !important;
   color: #ffffff !important;
 }
+
 body.dark-mode .f-info-brand,
 body.dark-mode .f-info-brand span,
 body.dark-mode .f-info small,
 body.dark-mode .f-info .text-muted,
+body.dark-mode .f-info-links,
 body.dark-mode .f-info-links a,
 body.dark-mode .f-info-socials i {
   color: #ffffff !important;
+  opacity: 1 !important;
 }
+
 body.dark-mode .f-info-brand strong,
+body.dark-mode .f-info small strong.text-danger,
 body.dark-mode .f-info small strong {
-  color: #facc15 !important;
+  color: #facc15 !important; /* Golden/bright highlight for Piyush Kumar */
+}
+
+body.dark-mode .flipkart-bottom-bar {
+  background-color: #000000 !important;
+  border-top-color: #27272a !important;
 }

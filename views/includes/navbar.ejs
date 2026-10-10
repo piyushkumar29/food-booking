@@ -8,13 +8,14 @@
         <img src="/myimg.png" alt="Hungrymate Logo" class="brand-navbar-logo" />
       </a>
 
-      <div class="d-none d-lg-flex align-items-center gap-1">
+      <div class="d-none d-lg-flex align-items-center gap-2">
         <a class="nav-pill-btn nav-all-food" href="/listings">
           <i class="fa-solid fa-utensils icon-item"></i> All food items
         </a>
 
-        <button type="button" class="nav-pill-btn nav-same-rest-btn border-0" data-bs-toggle="modal" data-bs-target="#sameRestaurantModal">
-          <i class="fa-solid fa-store icon-item text-primary"></i> Same Restaurant Dishes
+        <!-- Same Restaurant Option Modal Trigger -->
+        <button type="button" class="nav-pill-btn nav-same-rest-btn" data-bs-toggle="modal" data-bs-target="#sameRestaurantModal">
+          <i class="fa-solid fa-store icon-item"></i> Same Restaurant Dishes
         </button>
 
         <% if (currUser && currUser.isOwner) { %>
@@ -32,9 +33,9 @@
       </div>
     </div>
 
-    <!-- Center Search Bar (Desktop) -->
-    <div class="position-relative mx-2 flex-grow-1 d-none d-md-block" style="max-width: 420px;">
-      <form class="d-flex align-items-center m-0 w-100" id="foodSearchForm" onsubmit="return false;">
+    <!-- Center Search Bar (Desktop) with Auto Recommendations -->
+    <div class="position-relative mx-2 flex-grow-1 d-none d-md-block" style="max-width: 440px;">
+      <form class="d-flex align-items-center m-0 w-100" id="foodSearchForm" onsubmit="event.preventDefault(); if (typeof executeSearchNow === 'function') executeSearchNow(); return false;">
         <div class="input-group w-100 position-relative">
           <input 
             class="form-control rounded-pill pe-5 py-2 shadow-none" 
@@ -44,16 +45,17 @@
             autocomplete="off"
             style="border: 1.5px solid #cbd5e1; font-size: 0.88rem;"
           />
-          <button class="btn position-absolute end-0 top-50 translate-middle-y me-2 border-0 bg-transparent text-secondary p-0" type="submit" id="searchSubmitBtn">
+          <button class="btn position-absolute end-0 top-50 translate-middle-y me-2 border-0 bg-transparent text-secondary p-0" type="button" onclick="if (typeof executeSearchNow === 'function') executeSearchNow();">
             <i class="fa-solid fa-magnifying-glass fs-6"></i>
           </button>
         </div>
       </form>
 
-      <div id="searchHistoryBox" class="position-absolute border rounded-3 shadow-lg w-100 mt-1 d-none" style="z-index: 1060; max-height: 240px; overflow-y: auto; left: 0;">
+      <!-- Autocomplete Dropdown List -->
+      <div id="searchHistoryBox" class="position-absolute border rounded-3 shadow-lg w-100 mt-1 d-none" style="z-index: 1060; max-height: 250px; overflow-y: auto; left: 0;">
         <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom" style="font-size: 0.78rem; opacity: 0.85;">
-          <span class="fw-bold" id="searchDropdownHeader"><i class="fa-solid fa-utensils text-danger me-1"></i> SUGGESTIONS</span>
-          <span role="button" id="clearHistoryBtn" class="text-danger fw-semibold" style="cursor: pointer;">Clear</span>
+          <span class="fw-bold" id="searchDropdownHeader"><i class="fa-solid fa-utensils text-danger me-1"></i> MATCHING DISHES & RESTAURANTS</span>
+          <span role="button" id="clearHistoryBtn" class="text-danger fw-semibold" style="cursor: pointer;" onclick="document.getElementById('searchHistoryBox').classList.add('d-none')">Close</span>
         </div>
         <ul id="historyList" class="list-unstyled m-0 p-0"></ul>
       </div>
@@ -131,7 +133,7 @@
 
   </div>
 
-  <!-- Mobile Search Bar (< 768px) -->
+  <!-- Mobile Search Bar (< 768px) with Auto Recommendations -->
   <div class="d-md-none w-100 mt-2 position-relative">
     <div class="input-group w-100 position-relative">
       <input 
@@ -141,8 +143,9 @@
         placeholder="Search food or restaurants..." 
         autocomplete="off"
         style="border: 1.5px solid #cbd5e1; font-size: 0.85rem;"
+        onkeydown="if(event.key === 'Enter'){ event.preventDefault(); if(typeof executeSearchNow === 'function') executeSearchNow(); }"
       />
-      <button class="btn position-absolute end-0 top-50 translate-middle-y me-2 border-0 bg-transparent text-secondary p-0" type="button">
+      <button class="btn position-absolute end-0 top-50 translate-middle-y me-2 border-0 bg-transparent text-secondary p-0" type="button" onclick="if(typeof executeSearchNow === 'function') executeSearchNow();">
         <i class="fa-solid fa-magnifying-glass fs-6"></i>
       </button>
     </div>
@@ -181,7 +184,7 @@
   <% } %>
 </div>
 
-<!-- Modal: Same Restaurant Search & Quick Picker -->
+<!-- Modal: Same Restaurant Search & Quick Picker (Point 8) -->
 <div class="modal fade" id="sameRestaurantModal" tabindex="-1" aria-labelledby="sameRestaurantModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content rounded-4 border-0 shadow">
@@ -195,7 +198,7 @@
       <div class="modal-body">
         <div class="input-group mb-3">
           <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
-          <input type="text" id="manualRestSearchInput" class="form-control border-start-0 shadow-none" placeholder="Type restaurant name e.g. Aminia, Haji Biryani..." oninput="filterRestListInModal()">
+          <input type="text" id="manualRestSearchInput" class="form-control border-start-0 shadow-none" placeholder="Type restaurant name e.g. Domino's, Aminia..." oninput="filterRestListInModal()">
         </div>
 
         <h6 class="small fw-bold text-muted mb-2">ALL RESTAURANTS IN DATABASE:</h6>
@@ -211,128 +214,6 @@
 <form id="editAvatarForm" action="/user/update-avatar" method="POST" class="d-none">
   <input type="hidden" name="avatarData" id="avatarDataInput" />
 </form>
-
-<style>
-    /* Natural Size Brand Logo (No Circle Enclosure) */
-    .brand-navbar-logo {
-        height: 54px !important;
-        width: auto !important;
-        max-width: 170px !important;
-        object-fit: contain !important;
-        display: block !important;
-        transition: transform 0.2s ease;
-    }
-    .brand-navbar-logo:hover {
-        transform: scale(1.03);
-    }
-    @media (max-width: 575px) {
-        .brand-navbar-logo {
-            height: 46px !important;
-            max-width: 140px !important;
-        }
-    }
-
-    .nav-pill-btn {
-        display: inline-flex !important;
-        align-items: center !important;
-        padding: 0.42rem 0.85rem !important;
-        border-radius: 50px !important;
-        font-weight: 700 !important;
-        font-size: 0.85rem !important;
-        color: #1e293b !important;
-        text-decoration: none !important;
-        background-color: transparent !important;
-        border: 1.5px solid transparent !important;
-        transition: all 0.2s ease !important;
-        white-space: nowrap !important;
-    }
-    .icon-item { margin-right: 0.4rem; font-size: 0.95rem; }
-    .nav-all-food .icon-item { color: #fe424d; }
-    .nav-track-order .icon-item { color: #10b981; }
-    .nav-offers .icon-item { color: #f59e0b; }
-    .owner-highlight-btn {
-        background-color: #fef2f2 !important;
-        color: #fe424d !important;
-        border: 1.5px solid #fecaca !important;
-    }
-    .owner-highlight-btn .icon-item { color: #fe424d; }
-
-    .nav-pill-btn:hover {
-        background-color: #ffffff !important;
-        border-color: #ffdada !important;
-        color: #fe424d !important;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(254, 66, 77, 0.16) !important;
-    }
-
-    body.dark-mode .nav-pill-btn {
-        background-color: #D0C09E !important;
-        color: #000000 !important;
-        border: 1.5px solid #D0C09E !important;
-    }
-    body.dark-mode .nav-pill-btn .icon-item { color: #000000 !important; }
-
-    .nav-auth-signup-btn {
-        border: 1.5px solid #212529 !important;
-        color: #212529 !important;
-        background: transparent !important;
-    }
-    .nav-auth-login-btn {
-        background: #212529 !important;
-        color: #ffffff !important;
-        border: 1.5px solid #212529 !important;
-    }
-
-    .profile-avatar-circle {
-        width: 36px; height: 36px; border-radius: 50%;
-        background: linear-gradient(135deg, #fe424d 0%, #ec4899 100%);
-        color: #ffffff; display: flex; align-items: center; justify-content: center;
-        font-weight: 700; font-size: 0.95rem; border: 2px solid #ffffff; overflow: hidden;
-    }
-
-    .flipkart-bottom-bar {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        background: #ffffff;
-        display: flex;
-        align-items: center;
-        justify-content: space-around;
-        padding: 0.4rem 0.2rem;
-        z-index: 1050;
-        box-shadow: 0 -4px 16px rgba(0,0,0,0.08);
-    }
-    .fk-bar-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        color: #64748b;
-        text-decoration: none;
-        font-size: 0.65rem;
-        font-weight: 700;
-        flex: 1;
-        transition: color 0.2s ease;
-    }
-    .fk-bar-item i {
-        font-size: 1.15rem;
-        margin-bottom: 2px;
-    }
-    .fk-bar-item.active, .fk-bar-item:hover {
-        color: #fe424d;
-    }
-    body.dark-mode .flipkart-bottom-bar {
-        background: #121212 !important;
-        border-top-color: #27272a !important;
-    }
-    body.dark-mode .fk-bar-item {
-        color: #a1a1aa !important;
-    }
-    body.dark-mode .fk-bar-item.active {
-        color: #D0C09E !important;
-    }
-</style>
 
 <script>
 function promptEditName(currentName) {
@@ -367,32 +248,6 @@ function refreshNavCartBadge() {
 document.addEventListener("DOMContentLoaded", refreshNavCartBadge);
 window.addEventListener("storage", refreshNavCartBadge);
 
-function populateRestaurantModal() {
-    const container = document.getElementById("restaurantChipsContainer");
-    if (!container) return;
-
-    let rests = new Set();
-    const cards = document.querySelectorAll(".food-card-box");
-    cards.forEach(c => {
-        const r = c.getAttribute("data-restaurant");
-        if (r && r.trim() !== "") rests.add(r.trim());
-    });
-
-    if (rests.size === 0) {
-        ["super star haji briyani", "Aminia Restaurant", "Oudh 1590", "Domino's Pizza", "Pizza Hut", "Haldiram's", "Wow! Momo", "Flurys Kolkata", "Burger King", "Cafe Coffee Day"].forEach(r => rests.add(r));
-    }
-
-    container.innerHTML = "";
-    Array.from(rests).sort().forEach(r => {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "btn btn-sm btn-outline-secondary rounded-pill rest-chip-btn";
-        btn.innerHTML = `<i class="fa-solid fa-store me-1 text-danger"></i> ${r}`;
-        btn.onclick = () => selectRestaurantFilter(r);
-        container.appendChild(btn);
-    });
-}
-
 function filterRestListInModal() {
     const q = (document.getElementById("manualRestSearchInput").value || "").toLowerCase().trim();
     const btns = document.querySelectorAll(".rest-chip-btn");
@@ -420,17 +275,11 @@ function selectRestaurantFilter(restName) {
     }
 }
 
-document.addEventListener("DOMContentLoaded", populateRestaurantModal);
-
-const dInput = document.getElementById("foodSearchInput");
-const mInput = document.getElementById("mobileFoodSearchInput");
-
-function syncSearch(val) {
-    if (dInput && dInput.value !== val) dInput.value = val;
-    if (mInput && mInput.value !== val) mInput.value = val;
-    if (typeof applyAllFilters === "function") applyAllFilters();
-}
-
-if (dInput) dInput.addEventListener("input", (e) => syncSearch(e.target.value));
-if (mInput) mInput.addEventListener("input", (e) => syncSearch(e.target.value));
+document.addEventListener("click", (e) => {
+    const sBox = document.getElementById("searchHistoryBox");
+    const sInput = document.getElementById("foodSearchInput");
+    if (sBox && !sBox.contains(e.target) && e.target !== sInput) {
+        sBox.classList.add("d-none");
+    }
+});
 </script>

@@ -83,14 +83,14 @@
         flex-shrink: 0;
     }
     body.dark-mode .clickable-toggle-box {
-        background-color: #121212 !important;
-        border-color: #27272a !important;
+        background-color: #000000 !important;
+        border: 1.5px solid #ffffff !important;
         color: #ffffff !important;
     }
     .toggle-label { font-size: 0.72rem; font-weight: 700; margin: 0; white-space: nowrap; }
 </style>
 
-<!-- Categories & Controls (Point 6: Exact Functional Categories) -->
+<!-- Categories & Controls (Point 4: 100% Functional Categories) -->
 <div class="top-action-bar">
     <div class="filter-wrapper">
         <button class="scroll-btn me-1 d-none d-sm-flex" id="slideLeft"><i class="fa-solid fa-chevron-left"></i></button>
@@ -100,7 +100,8 @@
             <div class="filter" data-category="breakfast"><div><i class="fa-solid fa-egg text-warning"></i></div><p>Breakfast</p></div>
             <div class="filter" data-category="biryani"><div><i class="fa-solid fa-bowl-rice text-warning"></i></div><p>Biryani</p></div>
             <div class="filter" data-category="thali"><div><i class="fa-solid fa-plate-wheat text-success"></i></div><p>Thali</p></div>
-            <div class="filter" data-category="fast food"><div><i class="fa-solid fa-pizza-slice text-danger"></i></div><p>Pizza/Burger</p></div>
+            <div class="filter" data-category="pizza"><div><i class="fa-solid fa-pizza-slice text-danger"></i></div><p>Pizza/Fast Food</p></div>
+            <div class="filter" data-category="burger"><div><i class="fa-solid fa-burger text-warning"></i></div><p>Burger</p></div>
             <div class="filter" data-category="street food"><div><i class="fa-solid fa-hotdog text-warning"></i></div><p>Street Food</p></div>
             <div class="filter" data-category="rolls"><div><i class="fa-solid fa-scroll text-primary"></i></div><p>Kathi Rolls</p></div>
             <div class="filter" data-category="momos"><div><i class="fa-solid fa-cloud text-secondary"></i></div><p>Momos</p></div>
@@ -157,6 +158,7 @@
              data-restaurant="<%= (listing.restaurant || '').toLowerCase() %>"
              data-location="<%= (listing.location || '').toLowerCase() %>"
              data-category="<%= (listing.category || '').toLowerCase() %>"
+             data-description="<%= (listing.description || '').toLowerCase() %>"
              data-isveg="<%= String(listing.isVeg) %>">
             
             <div class="listing-card">
@@ -203,13 +205,13 @@
     <% } %>
 </div>
 
-<!-- Point 7: Friendly No Match Card with Alternatives -->
+<!-- Friendly No Match Card with Alternatives (Point 6) -->
 <div id="noMatchMessage" class="text-center py-5 d-none">
-    <div class="p-4 rounded-4 bg-white shadow-sm d-inline-block" style="max-width: 480px;">
+    <div class="p-4 rounded-4 bg-white shadow-sm d-inline-block" style="max-width: 480px; border: 1.5px solid #cbd5e1;">
         <i class="fa-solid fa-bowl-food fs-1 text-danger mb-3"></i>
         <h5 class="fw-bold text-dark">No Food Items Found!</h5>
         <p class="text-muted small mb-3">We couldn't find any dish matching your exact keywords. Try searching for popular items like <strong>Biryani, Pizza, Burger, Tacos, Rolls, or Cakes</strong>.</p>
-        <button class="btn btn-danger rounded-pill px-4 btn-sm fw-bold" onclick="resetAllSearchAndFilters()">
+        <button class="btn btn-danger rounded-pill px-4 btn-sm fw-bold shadow-sm" onclick="resetAllSearchAndFilters()">
             Explore All Food Items
         </button>
     </div>
@@ -311,52 +313,57 @@
     const categoryFilters = document.querySelectorAll(".filter");
     const noMatchMsg = document.getElementById("noMatchMessage");
 
-    // Point 6: Strict Exact Category Matching Engine
-    function checkCategoryMatch(activeCat, title, category, isVeg) {
+    // Point 4: Strict Exact Category Matching Engine for Predefined & Upcoming Dishes
+    function checkCategoryMatch(activeCat, title, category, description, isVeg) {
         if (activeCat === "all" || activeCat === "trending") return true;
         if (activeCat === "veg") return isVeg;
         if (activeCat === "non veg") return !isVeg;
         
-        // Exact cake/bakery match
+        const fullContent = `${title} ${category} ${description}`.toLowerCase();
+
         if (activeCat === "cake") {
-            return category.includes("cake") || category.includes("bakery") || title.includes("cake") || title.includes("pastry") || title.includes("brownie") || title.includes("muffin");
+            return fullContent.includes("cake") || fullContent.includes("bakery") || fullContent.includes("pastry") || fullContent.includes("brownie") || fullContent.includes("muffin");
         }
         if (activeCat === "dessert") {
-            return category.includes("dessert") || category.includes("ice-cream") || title.includes("ice cream") || title.includes("gelato") || title.includes("kulfi") || title.includes("dessert");
+            return fullContent.includes("dessert") || fullContent.includes("ice cream") || fullContent.includes("ice-cream") || fullContent.includes("gelato") || fullContent.includes("kulfi") || fullContent.includes("sundae");
         }
         if (activeCat === "breakfast") {
-            return category.includes("breakfast") || title.includes("pancake") || title.includes("waffle") || title.includes("toast") || title.includes("paratha") || title.includes("croissant") || title.includes("dosa") || title.includes("idli") || title.includes("egg");
+            return fullContent.includes("breakfast") || fullContent.includes("pancake") || fullContent.includes("waffle") || fullContent.includes("toast") || fullContent.includes("paratha") || fullContent.includes("croissant") || fullContent.includes("dosa") || fullContent.includes("idli") || fullContent.includes("egg");
         }
         if (activeCat === "thali") {
-            return category.includes("thali") || title.includes("thali") || title.includes("meals") || title.includes("platter");
+            return fullContent.includes("thali") || fullContent.includes("meals") || fullContent.includes("platter");
         }
         if (activeCat === "biryani") {
-            return category.includes("biryani") || title.includes("biryani") || title.includes("pulao") || title.includes("rice");
+            return fullContent.includes("biryani") || fullContent.includes("pulao") || fullContent.includes("rice");
         }
-        if (activeCat === "fast food") {
-            return category.includes("fast food") || title.includes("pizza") || title.includes("burger") || title.includes("fries") || title.includes("tacos") || title.includes("nachos");
+        if (activeCat === "pizza") {
+            return fullContent.includes("pizza") || fullContent.includes("tacos") || fullContent.includes("nachos") || fullContent.includes("fries") || fullContent.includes("fast food");
+        }
+        if (activeCat === "burger") {
+            return fullContent.includes("burger") || fullContent.includes("hot dog");
         }
         if (activeCat === "rolls") {
-            return category.includes("roll") || title.includes("roll") || title.includes("shawarma") || title.includes("kathi") || title.includes("wrap");
+            return fullContent.includes("roll") || fullContent.includes("shawarma") || fullContent.includes("kathi") || fullContent.includes("wrap");
         }
         if (activeCat === "momos") {
-            return category.includes("momo") || title.includes("momo") || title.includes("dumpling");
+            return fullContent.includes("momo") || fullContent.includes("dumpling");
         }
         if (activeCat === "chinese") {
-            return category.includes("chinese") || title.includes("noodles") || title.includes("chow mein") || title.includes("ramen") || title.includes("manchurian");
+            return fullContent.includes("chinese") || fullContent.includes("noodles") || fullContent.includes("chow mein") || fullContent.includes("ramen") || fullContent.includes("manchurian");
         }
         if (activeCat === "north indian") {
-            return category.includes("north") || title.includes("paneer") || title.includes("dal") || title.includes("naan") || title.includes("butter chicken") || title.includes("roti") || title.includes("curry");
+            return fullContent.includes("north") || fullContent.includes("paneer") || fullContent.includes("dal") || fullContent.includes("naan") || fullContent.includes("butter chicken") || fullContent.includes("curry") || fullContent.includes("roti");
         }
         if (activeCat === "south indian") {
-            return category.includes("south") || title.includes("dosa") || title.includes("idli") || title.includes("sambar") || title.includes("vada") || title.includes("uttapam");
+            return fullContent.includes("south") || fullContent.includes("dosa") || fullContent.includes("idli") || fullContent.includes("sambar") || fullContent.includes("vada") || fullContent.includes("uttapam");
         }
         if (activeCat === "beverages") {
-            return category.includes("beverage") || title.includes("shake") || title.includes("coffee") || title.includes("tea") || title.includes("juice") || title.includes("cooler") || title.includes("smoothie");
+            return fullContent.includes("beverage") || fullContent.includes("shake") || fullContent.includes("coffee") || fullContent.includes("tea") || fullContent.includes("juice") || fullContent.includes("smoothie") || fullContent.includes("cooler");
         }
-        return category.includes(activeCat) || title.includes(activeCat);
+        return fullContent.includes(activeCat);
     }
 
+    // Points 5 & 6: Live Search & Execution Filter
     function applyAllFilters() {
         const query = ((searchInput ? searchInput.value : "") || (mobileSearchInput ? mobileSearchInput.value : "")).trim().toLowerCase();
         const vegOnly = onlyVegToggle.checked;
@@ -367,12 +374,15 @@
             const restaurant = card.getAttribute("data-restaurant") || "";
             const location = card.getAttribute("data-location") || "";
             const category = card.getAttribute("data-category") || "";
+            const description = card.getAttribute("data-description") || "";
             const isVeg = card.getAttribute("data-isveg") === "true";
 
-            const matchSearch = !query || title.includes(query) || restaurant.includes(query) || location.includes(query) || category.includes(query);
+            // Multi-keyword check for related items
+            const fullContent = `${title} ${restaurant} ${location} ${category} ${description}`;
+            const matchSearch = !query || fullContent.includes(query) || query.split(' ').every(k => fullContent.includes(k));
             const matchVeg = !vegOnly || isVeg;
             const matchRestaurant = !activeRestaurantFilter || restaurant === activeRestaurantFilter || restaurant.includes(activeRestaurantFilter);
-            const matchCat = checkCategoryMatch(activeCat, title, category, isVeg);
+            const matchCat = checkCategoryMatch(activeCat, title, category, description, isVeg);
 
             if (matchSearch && matchVeg && matchCat && matchRestaurant) {
                 card.style.display = "flex";
@@ -386,7 +396,13 @@
         else noMatchMsg.classList.add("d-none");
     }
 
-    // Point 7: Interactive Autocomplete Recommendations Generation
+    window.executeSearchNow = function() {
+        const sBox = document.getElementById("searchHistoryBox");
+        if (sBox) sBox.classList.add("d-none");
+        applyAllFilters();
+    };
+
+    // Point 5: Real-time Alphabet-by-Alphabet Autocomplete
     function buildLiveRecommendations(inputEl) {
         if (!inputEl) return;
         const box = document.getElementById("searchHistoryBox");
@@ -430,6 +446,13 @@
             }
             applyAllFilters();
         });
+
+        inputEl.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                executeSearchNow();
+            }
+        });
     }
 
     buildLiveRecommendations(searchInput);
@@ -444,7 +467,7 @@
         });
     });
 
-    // Point 8: Auto-extract all unique restaurants from DOM and update modal chips
+    // Point 8: Auto-extract all unique restaurants from Predefined + Upcoming DOM items
     document.addEventListener("DOMContentLoaded", () => {
         const container = document.getElementById("restaurantChipsContainer");
         if (container) {
