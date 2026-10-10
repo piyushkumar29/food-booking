@@ -83,14 +83,14 @@
         flex-shrink: 0;
     }
     body.dark-mode .clickable-toggle-box {
-        background-color: #121215 !important;
-        border: 1.5px solid #3f3f46 !important;
+        background-color: #000000 !important;
+        border: 1.5px solid #ffffff !important;
         color: #ffffff !important;
     }
     .toggle-label { font-size: 0.72rem; font-weight: 700; margin: 0; white-space: nowrap; }
 </style>
 
-<!-- Categories & Controls (Points 2 & 3: Extraction Engine) -->
+<!-- Categories & Controls (Points 2 & 3) -->
 <div class="top-action-bar">
     <div class="filter-wrapper">
         <button class="scroll-btn me-1 d-none d-sm-flex" id="slideLeft"><i class="fa-solid fa-chevron-left"></i></button>
@@ -100,7 +100,8 @@
             <div class="filter" data-category="breakfast"><div><i class="fa-solid fa-egg text-warning"></i></div><p>Breakfast</p></div>
             <div class="filter" data-category="biryani"><div><i class="fa-solid fa-bowl-rice text-warning"></i></div><p>Biryani</p></div>
             <div class="filter" data-category="thali"><div><i class="fa-solid fa-plate-wheat text-success"></i></div><p>Thali</p></div>
-            <div class="filter" data-category="pizza"><div><i class="fa-solid fa-pizza-slice text-danger"></i></div><p>Pizza/Burger</p></div>
+            <div class="filter" data-category="pizza"><div><i class="fa-solid fa-pizza-slice text-danger"></i></div><p>Pizza/Fast Food</p></div>
+            <div class="filter" data-category="burger"><div><i class="fa-solid fa-burger text-warning"></i></div><p>Burger</p></div>
             <div class="filter" data-category="street food"><div><i class="fa-solid fa-hotdog text-warning"></i></div><p>Street Food</p></div>
             <div class="filter" data-category="rolls"><div><i class="fa-solid fa-scroll text-primary"></i></div><p>Kathi Rolls</p></div>
             <div class="filter" data-category="momos"><div><i class="fa-solid fa-cloud text-secondary"></i></div><p>Momos</p></div>
@@ -129,13 +130,13 @@
     </div>
 </div>
 
-<!-- Active Restaurant Filter Strip -->
+<!-- Active Restaurant Filter Notification Strip -->
 <div id="activeRestaurantAlert" class="alert alert-warning py-2 px-3 small d-flex justify-content-between align-items-center my-2 d-none rounded-3">
-    <span><i class="fa-solid fa-store text-danger me-1"></i> Showing all food from: <strong id="filterRestName">Restaurant</strong></span>
-    <button type="button" class="btn btn-sm btn-dark rounded-pill py-0 px-3 fw-bold" onclick="clearRestaurantFilter()">Show All</button>
+    <span><i class="fa-solid fa-store text-danger me-1"></i> Showing all food items from: <strong id="filterRestName">Restaurant</strong></span>
+    <button type="button" class="btn btn-sm btn-dark rounded-pill py-0 px-3 fw-bold" onclick="clearRestaurantFilter()">Show All Dishes</button>
 </div>
 
-<!-- Uniform Food Cards Grid -->
+<!-- Food Cards Grid -->
 <div class="pure-food-grid" id="listingsContainer">
     <% for(let listing of allListings) { %>
         <% 
@@ -182,7 +183,7 @@
                             </div>
                         </div>
                         <small class="text-muted d-block text-truncate mb-1">
-                            <a href="javascript:void(0)" onclick="filterSpecificRestaurant('<%= listing.restaurant %>')" class="text-decoration-none text-muted" title="Click to view all dishes from this restaurant">
+                            <a href="javascript:void(0)" onclick="filterSpecificRestaurant('<%= listing.restaurant %>')" class="text-decoration-none" title="Click to view all dishes from this restaurant">
                                 <i class="fa-solid fa-store text-danger me-1"></i><%= listing.restaurant || 'Hungrymate Hub' %>
                             </a>
                         </small>
@@ -204,7 +205,7 @@
     <% } %>
 </div>
 
-<!-- Friendly No Match Card with Alternatives -->
+<!-- Friendly No Match Box -->
 <div id="noMatchMessage" class="text-center py-5 d-none">
     <div class="p-4 rounded-4 shadow-sm d-inline-block border" style="max-width: 480px;">
         <i class="fa-solid fa-bowl-food fs-1 text-danger mb-3"></i>
@@ -226,6 +227,7 @@
         }
     }
 
+    // Point 5: Same Restaurant Real Extraction
     function filterSpecificRestaurant(restName) {
         if (!restName) return;
         localStorage.setItem("hungrymate_last_viewed_restaurant", restName);
@@ -312,7 +314,7 @@
     const categoryFilters = document.querySelectorAll(".filter");
     const noMatchMsg = document.getElementById("noMatchMessage");
 
-    // Exact Category Match Function (Point 2)
+    // Point 2: Exact Category Semantic Engine
     function checkCategoryMatch(activeCat, title, category, description, isVeg) {
         if (activeCat === "all" || activeCat === "trending") return true;
         if (activeCat === "veg") return isVeg;
@@ -321,10 +323,10 @@
         const fullContent = `${title} ${category} ${description}`.toLowerCase();
 
         if (activeCat === "cake") {
-            return fullContent.includes("cake") || fullContent.includes("bakery") || fullContent.includes("pastry") || fullContent.includes("brownie") || fullContent.includes("muffin");
+            return fullContent.includes("cake") || fullContent.includes("bakery") || fullContent.includes("pastry") || fullContent.includes("brownie") || fullContent.includes("muffin") || fullContent.includes("pretzel");
         }
         if (activeCat === "dessert") {
-            return fullContent.includes("dessert") || fullContent.includes("ice cream") || fullContent.includes("ice-cream") || fullContent.includes("gelato") || fullContent.includes("kulfi") || fullContent.includes("sundae");
+            return fullContent.includes("dessert") || fullContent.includes("ice cream") || fullContent.includes("ice-cream") || fullContent.includes("gelato") || fullContent.includes("kulfi") || fullContent.includes("scoop") || fullContent.includes("sundae");
         }
         if (activeCat === "breakfast") {
             return fullContent.includes("breakfast") || fullContent.includes("pancake") || fullContent.includes("waffle") || fullContent.includes("toast") || fullContent.includes("paratha") || fullContent.includes("croissant") || fullContent.includes("dosa") || fullContent.includes("idli") || fullContent.includes("egg");
@@ -362,24 +364,37 @@
         return fullContent.includes(activeCat);
     }
 
-    // Live Search Extraction (Point 3)
+    // Points 2, 3 & 5: Universal Real-Time Filter & Search Execution
     function applyAllFilters() {
         const query = ((searchInput ? searchInput.value : "") || (mobileSearchInput ? mobileSearchInput.value : "")).trim().toLowerCase();
         const vegOnly = onlyVegToggle.checked;
         let visibleCount = 0;
 
         foodCards.forEach(card => {
-            const title = card.getAttribute("data-title") || "";
-            const restaurant = card.getAttribute("data-restaurant") || "";
-            const location = card.getAttribute("data-location") || "";
-            const category = card.getAttribute("data-category") || "";
-            const description = card.getAttribute("data-description") || "";
+            const title = (card.getAttribute("data-title") || "").toLowerCase();
+            const restaurant = (card.getAttribute("data-restaurant") || "").toLowerCase();
+            const location = (card.getAttribute("data-location") || "").toLowerCase();
+            const category = (card.getAttribute("data-category") || "").toLowerCase();
+            const description = (card.getAttribute("data-description") || "").toLowerCase();
             const isVeg = card.getAttribute("data-isveg") === "true";
 
             const fullContent = `${title} ${restaurant} ${location} ${category} ${description}`;
-            const matchSearch = !query || fullContent.includes(query) || query.split(' ').every(k => fullContent.includes(k));
+            
+            // Substring + Word boundary search
+            let matchSearch = true;
+            if (query) {
+                const words = query.split(/\s+/).filter(Boolean);
+                matchSearch = words.every(w => fullContent.includes(w));
+            }
+
             const matchVeg = !vegOnly || isVeg;
-            const matchRestaurant = !activeRestaurantFilter || restaurant === activeRestaurantFilter || restaurant.includes(activeRestaurantFilter);
+            
+            // Exact / partial match for active restaurant
+            let matchRestaurant = true;
+            if (activeRestaurantFilter) {
+                matchRestaurant = restaurant.includes(activeRestaurantFilter) || activeRestaurantFilter.includes(restaurant);
+            }
+
             const matchCat = checkCategoryMatch(activeCat, title, category, description, isVeg);
 
             if (matchSearch && matchVeg && matchCat && matchRestaurant) {
@@ -400,6 +415,7 @@
         applyAllFilters();
     };
 
+    // Point 3: Live Alphabet-by-Alphabet Autocomplete Dropdown
     function buildLiveRecommendations(inputEl) {
         if (!inputEl) return;
         const box = document.getElementById("searchHistoryBox");
@@ -418,8 +434,8 @@
             foodCards.forEach(card => {
                 const title = card.getAttribute("data-title") || "";
                 const restaurant = card.getAttribute("data-restaurant") || "";
-                if (title.includes(val)) suggestions.add(title);
-                if (restaurant.includes(val)) suggestions.add(restaurant);
+                if (title.toLowerCase().includes(val)) suggestions.add(title);
+                if (restaurant.toLowerCase().includes(val)) suggestions.add(restaurant);
             });
 
             const arr = Array.from(suggestions).slice(0, 6);
@@ -428,6 +444,8 @@
                 list.innerHTML = "";
                 arr.forEach(item => {
                     const li = document.createElement("li");
+                    li.className = "px-3 py-2 cursor-pointer";
+                    li.style.cursor = "pointer";
                     li.innerHTML = `<i class="fa-solid fa-magnifying-glass text-warning me-2"></i> ${item}`;
                     li.onclick = () => {
                         inputEl.value = item;
@@ -464,6 +482,7 @@
         });
     });
 
+    // Point 5: Real-time Auto Extraction of Unique Restaurants from Database Listings
     document.addEventListener("DOMContentLoaded", () => {
         const container = document.getElementById("restaurantChipsContainer");
         if (container) {
