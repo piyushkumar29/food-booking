@@ -57,7 +57,7 @@ body {
   }
 }
 
-/* NAVBAR & BIG LOGO (Point 1 & 3) */
+/* NAVBAR & BIG LOGO */
 .navbar, .hm-main-navbar {
   min-height: 4.8rem !important;
   height: auto !important;
@@ -329,7 +329,7 @@ body {
 .f-info-socials i:hover { color: var(--hm-red) !important; transform: translateY(-2px); }
 
 /* =========================================================
-   DARK MODE COMPLETE ENGINE (Points 1, 2 & 3)
+   DARK MODE STRICT OVERRIDES (POINTS 1, 2 & 3)
    ========================================================= */
 
 body.dark-mode {
@@ -337,21 +337,24 @@ body.dark-mode {
   color: #ffffff !important;
 }
 
-/* 1. Header/Navbar Pure Deep Black */
+/* 1. Header/Navbar Pure Deep Black (Bootstrap Override) */
 body.dark-mode .navbar,
 body.dark-mode .hm-main-navbar,
 body.dark-mode nav.navbar,
+body.dark-mode .navbar.bg-white,
 body.dark-mode .bg-white {
   background-color: #000000 !important;
+  background: #000000 !important;
   border-bottom: 1.5px solid #27272a !important;
 }
 
-/* 2. Navbar Capsule Buttons in Dark Mode: Black background, white border, white text, golden icons */
+/* 2. Capsule Nav Buttons in Dark Mode: Black bg, White border, White text, Golden icons */
 body.dark-mode .nav-pill-btn {
   background-color: #000000 !important;
+  background: #000000 !important;
   color: #ffffff !important;
   border: 1.5px solid #ffffff !important;
-  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1) !important;
 }
 
 body.dark-mode .nav-pill-btn .icon-item {
@@ -363,7 +366,7 @@ body.dark-mode .nav-pill-btn:hover {
   border-color: #facc15 !important;
   color: #facc15 !important;
   transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 4px 14px rgba(250, 204, 21, 0.25) !important;
+  box-shadow: 0 4px 14px rgba(250, 204, 21, 0.3) !important;
 }
 
 body.dark-mode .nav-pill-btn:hover .icon-item {
@@ -380,7 +383,7 @@ body.dark-mode #mobileFoodSearchInput {
 
 body.dark-mode #foodSearchInput::placeholder,
 body.dark-mode #mobileFoodSearchInput::placeholder {
-  color: #cbd5e1 !important;
+  color: #a1a1aa !important;
 }
 
 body.dark-mode .btn.text-secondary {
@@ -406,7 +409,7 @@ body.dark-mode .btn-add-cart-pill {
   font-weight: 800 !important;
 }
 
-/* 3. Footer Dark Mode Text: Pure White Text & Crisp contrast */
+/* 3. Footer in Dark Mode: Crisp White Text */
 body.dark-mode .f-info {
   background-color: #050505 !important;
   border-top: 1.5px solid #27272a !important;
@@ -424,10 +427,9 @@ body.dark-mode .f-info-socials i {
   opacity: 1 !important;
 }
 
-body.dark-mode .f-info-brand strong,
-body.dark-mode .f-info small strong.text-danger,
+body.dark-mode .f-info strong.text-danger,
 body.dark-mode .f-info small strong {
-  color: #facc15 !important; /* Golden/bright highlight for Piyush Kumar */
+  color: #facc15 !important; /* Golden pop for Piyush Kumar */
 }
 
 body.dark-mode .flipkart-bottom-bar {

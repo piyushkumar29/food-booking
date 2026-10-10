@@ -90,7 +90,7 @@
     .toggle-label { font-size: 0.72rem; font-weight: 700; margin: 0; white-space: nowrap; }
 </style>
 
-<!-- Categories & Controls (Point 4: 100% Functional Categories) -->
+<!-- Categories & Controls (Point 4: 100% Exact Functional Category Matching) -->
 <div class="top-action-bar">
     <div class="filter-wrapper">
         <button class="scroll-btn me-1 d-none d-sm-flex" id="slideLeft"><i class="fa-solid fa-chevron-left"></i></button>
@@ -100,8 +100,7 @@
             <div class="filter" data-category="breakfast"><div><i class="fa-solid fa-egg text-warning"></i></div><p>Breakfast</p></div>
             <div class="filter" data-category="biryani"><div><i class="fa-solid fa-bowl-rice text-warning"></i></div><p>Biryani</p></div>
             <div class="filter" data-category="thali"><div><i class="fa-solid fa-plate-wheat text-success"></i></div><p>Thali</p></div>
-            <div class="filter" data-category="pizza"><div><i class="fa-solid fa-pizza-slice text-danger"></i></div><p>Pizza/Fast Food</p></div>
-            <div class="filter" data-category="burger"><div><i class="fa-solid fa-burger text-warning"></i></div><p>Burger</p></div>
+            <div class="filter" data-category="pizza"><div><i class="fa-solid fa-pizza-slice text-danger"></i></div><p>Pizza/Burger</p></div>
             <div class="filter" data-category="street food"><div><i class="fa-solid fa-hotdog text-warning"></i></div><p>Street Food</p></div>
             <div class="filter" data-category="rolls"><div><i class="fa-solid fa-scroll text-primary"></i></div><p>Kathi Rolls</p></div>
             <div class="filter" data-category="momos"><div><i class="fa-solid fa-cloud text-secondary"></i></div><p>Momos</p></div>
@@ -313,7 +312,7 @@
     const categoryFilters = document.querySelectorAll(".filter");
     const noMatchMsg = document.getElementById("noMatchMessage");
 
-    // Point 4: Strict Exact Category Matching Engine for Predefined & Upcoming Dishes
+    // Point 4: Strict Exact Category Matching Engine
     function checkCategoryMatch(activeCat, title, category, description, isVeg) {
         if (activeCat === "all" || activeCat === "trending") return true;
         if (activeCat === "veg") return isVeg;
@@ -336,11 +335,8 @@
         if (activeCat === "biryani") {
             return fullContent.includes("biryani") || fullContent.includes("pulao") || fullContent.includes("rice");
         }
-        if (activeCat === "pizza") {
-            return fullContent.includes("pizza") || fullContent.includes("tacos") || fullContent.includes("nachos") || fullContent.includes("fries") || fullContent.includes("fast food");
-        }
-        if (activeCat === "burger") {
-            return fullContent.includes("burger") || fullContent.includes("hot dog");
+        if (activeCat === "pizza" || activeCat === "fast food") {
+            return fullContent.includes("pizza") || fullContent.includes("burger") || fullContent.includes("tacos") || fullContent.includes("nachos") || fullContent.includes("fries") || fullContent.includes("fast food");
         }
         if (activeCat === "rolls") {
             return fullContent.includes("roll") || fullContent.includes("shawarma") || fullContent.includes("kathi") || fullContent.includes("wrap");
@@ -377,7 +373,6 @@
             const description = card.getAttribute("data-description") || "";
             const isVeg = card.getAttribute("data-isveg") === "true";
 
-            // Multi-keyword check for related items
             const fullContent = `${title} ${restaurant} ${location} ${category} ${description}`;
             const matchSearch = !query || fullContent.includes(query) || query.split(' ').every(k => fullContent.includes(k));
             const matchVeg = !vegOnly || isVeg;
@@ -467,7 +462,7 @@
         });
     });
 
-    // Point 8: Auto-extract all unique restaurants from Predefined + Upcoming DOM items
+    // Auto-extract all unique restaurants from Predefined + Upcoming DOM items
     document.addEventListener("DOMContentLoaded", () => {
         const container = document.getElementById("restaurantChipsContainer");
         if (container) {
