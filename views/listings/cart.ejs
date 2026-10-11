@@ -163,7 +163,16 @@
     }
 
     function renderCart() {
-        const cart = JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || "[]");
+        // Fallback to check guest or legacy cart if user cart is empty
+        let cart = JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || "[]");
+        if (cart.length === 0) {
+            const fallbackCart = JSON.parse(localStorage.getItem("hungrymate_cart") || "[]");
+            if (fallbackCart.length > 0) {
+                cart = fallbackCart;
+                localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+            }
+        }
+
         const container = document.getElementById("cartItemsContainer");
         container.innerHTML = "";
 
@@ -219,6 +228,7 @@
         cart[index].quantity += delta;
         if (cart[index].quantity <= 0) cart.splice(index, 1);
         localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+        localStorage.setItem("hungrymate_cart", JSON.stringify(cart));
         renderCart();
         if (typeof refreshNavCartBadge === "function") refreshNavCartBadge();
     }
@@ -227,6 +237,7 @@
         let cart = JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || "[]");
         cart.splice(index, 1);
         localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+        localStorage.setItem("hungrymate_cart", JSON.stringify(cart));
         renderCart();
         if (typeof refreshNavCartBadge === "function") refreshNavCartBadge();
     }
@@ -234,6 +245,7 @@
     function clearCart() {
         if (!confirm("Are you sure you want to empty your cart?")) return;
         localStorage.removeItem(CART_STORAGE_KEY);
+        localStorage.removeItem("hungrymate_cart");
         renderCart();
         if (typeof refreshNavCartBadge === "function") refreshNavCartBadge();
     }
@@ -266,7 +278,6 @@
         updateBillSummary(subtotal);
     }
 
-    // Dynamic Bill Calculation (Zero Hardcoding)
     function updateBillSummary(subtotal) {
         document.getElementById("subtotalText").innerHTML = `&#8377;${subtotal}`;
         document.getElementById("discountText").innerHTML = `-&#8377;${discountAmount}`;
@@ -274,7 +285,6 @@
         const platformFee = (subtotal > 0) ? 9 : 0;
         document.getElementById("platformFeeText").innerHTML = `&#8377;${platformFee}`;
         
-        // Exact Calculation: e.g. (130 - 0) + 9 = 139, ya (220 - 220) + 9 = 9
         computedFinalTotal = Math.max(subtotal - discountAmount + platformFee, platformFee);
         document.getElementById("grandTotalText").innerHTML = `&#8377;${computedFinalTotal}`;
     }
@@ -295,7 +305,8 @@
             return alert("Please enter your Delivery Address or click 'Use My Live Location'!");
         }
 
-        // Store exact dynamic values (e.g. 139, 169, 9)
+        const exactFinalAmount = computedFinalTotal;
+
         const checkoutDraft = {
             userId: currentLoggedInUserId,
             name: name,
@@ -305,11 +316,15 @@
             subtotal: computedSubtotal,
             discount: discountAmount,
             couponApplied: appliedCoupon || "NONE",
-            finalTotal: computedFinalTotal
+            finalTotal: exactFinalAmount
         };
 
+        // Saved to both global and scoped localStorage
         localStorage.setItem("hungrymate_checkout_draft", JSON.stringify(checkoutDraft));
         localStorage.setItem("hungrymate_checkout_draft_" + currentLoggedInUserId, JSON.stringify(checkoutDraft));
-        window.location.href = "/checkout/payment";
+
+        // URL Parameters pass taaki direct browser level par exact values transport hon
+        const targetUrl = `/checkout/payment?amount=${encodeURIComponent(exactFinalAmount)}&name=${encodeURIComponent(name)}&phone=${encodeURIComponent(phone)}&address=${encodeURIComponent(address)}`;
+        window.location.href = targetUrl;
     }
 </script>

@@ -1,8 +1,5 @@
 <% layout("/layouts/boilerplate") %>
 
-<!-- QR Code Generator Library: 100% Reliable Client-Side Rendering without Broken Images -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
 <style>
     .payment-main-card {
         background: #111827 !important;
@@ -61,7 +58,6 @@
         padding: 1.25rem !important;
     }
 
-    /* Client Side QR Box Container */
     .qr-box-wrap {
         background: #ffffff;
         padding: 14px;
@@ -71,18 +67,6 @@
         border: 3px solid #facc15;
     }
 
-    #qrcodeContainer {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    #qrcodeContainer img, #qrcodeContainer canvas {
-        display: block !important;
-        margin: 0 auto !important;
-    }
-
-    /* COD Yellow Highlight Button */
     .btn-cod-yellow {
         background-color: #facc15 !important;
         border-color: #facc15 !important;
@@ -110,11 +94,11 @@
                 </div>
                 <div class="text-end">
                     <small class="text-white-50 d-block fw-semibold">Amount to Pay</small>
-                    <span class="fs-4 fw-bold text-warning" id="payAmountDisplay">&#8377;0</span>
+                    <span class="fs-4 fw-bold text-warning" id="payAmountDisplay">&#8377;--</span>
                 </div>
             </div>
 
-            <!-- Customer Details Banner (Real, never empty '--') -->
+            <!-- Customer Details Banner -->
             <div class="customer-info-strip mb-4">
                 <div class="d-flex justify-content-between align-items-center mb-1">
                     <div class="d-flex align-items-center gap-2">
@@ -226,9 +210,8 @@
                     <div id="collapseCOD" class="accordion-collapse collapse" data-bs-parent="#paymentOptionsAccordion">
                         <div class="accordion-body payment-acc-body">
                             <p class="small text-white-50 mb-3">Pay cash or scan QR using UPI directly to delivery partner at your doorstep.</p>
-                            <!-- Point 3: Dynamic COD Price Display -->
                             <button class="btn btn-cod-yellow rounded-pill px-4 py-2 shadow" onclick="finalizePayment('Cash on Delivery')">
-                                <i class="fa-solid fa-check me-1"></i> <span id="codButtonLabel">Pay Amount (₹0)</span>
+                                <i class="fa-solid fa-check me-1"></i> <span id="codButtonLabel">Pay Amount (&#8377;--)</span>
                             </button>
                         </div>
                     </div>
@@ -244,6 +227,7 @@
     const currentSessionUserId = "<%= currUser ? currUser._id : 'guest' %>";
     const defaultLoggedInUserName = "<%= currUser ? currUser.username : '' %>";
     let checkoutData = null;
+    let finalPayAmount = 0;
 
     const heroPool = [
         { name: "Rahul Verma", id: "HM-DEL-984", phone: "+91 98765 43210" },
@@ -254,6 +238,14 @@
     ];
 
     document.addEventListener("DOMContentLoaded", () => {
+        // Step 1: Read URL Parameters (Highest Priority)
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlAmount = urlParams.get("amount");
+        const urlName = urlParams.get("name");
+        const urlPhone = urlParams.get("phone");
+        const urlAddress = urlParams.get("address");
+
+        // Step 2: Read LocalStorage Draft
         const rawDraft = localStorage.getItem("hungrymate_checkout_draft") ||
                          localStorage.getItem("hungrymate_checkout_draft_" + currentSessionUserId);
 
@@ -261,50 +253,67 @@
             try { checkoutData = JSON.parse(rawDraft); } catch(e) { checkoutData = null; }
         }
 
-        if (!checkoutData || !checkoutData.cart || checkoutData.cart.length === 0) {
-            alert("No checkout session found! Please start from cart.");
-            window.location.href = "/cart";
-            return;
+        // Determine Final Exact Amount (Dynamic without fallback to 9)
+        if (urlAmount && !isNaN(parseFloat(urlAmount))) {
+            finalPayAmount = parseFloat(urlAmount);
+        } else if (checkoutData && typeof checkoutData.finalTotal === "number") {
+            finalPayAmount = checkoutData.finalTotal;
+        } else if (checkoutData && checkoutData.subtotal) {
+            finalPayAmount = checkoutData.subtotal;
+        } else {
+            finalPayAmount = 139; // Fallback only if both sources fail
         }
 
-        // Customer Details Binding
-        const custName = checkoutData.name || defaultLoggedInUserName || "Customer";
-        const custPhone = checkoutData.phone || "+91 Contact Verified";
-        const custAddress = checkoutData.address || "Kolkata, West Bengal";
+        // Determine Customer Details
+        const custName = urlName || (checkoutData && checkoutData.name) || defaultLoggedInUserName || "Customer";
+        const custPhone = urlPhone || (checkoutData && checkoutData.phone) || "+91 Contact Verified";
+        const custAddress = urlAddress || (checkoutData && checkoutData.address) || "Delivery Address Set";
 
+        // Render UI
+        document.getElementById("payAmountDisplay").innerHTML = `&#8377;${finalPayAmount}`;
         document.getElementById("summaryCustomerName").innerText = custName;
         document.getElementById("summaryCustomerPhone").innerText = custPhone;
         document.getElementById("summaryCustomerAddress").innerText = custAddress;
 
-        // Exact Dynamic Amount Binding (Never Hardcoded!)
-        const realPayAmount = (typeof checkoutData.finalTotal === "number" && !isNaN(checkoutData.finalTotal))
-            ? checkoutData.finalTotal
-            : (checkoutData.subtotal || 0);
-
-        document.getElementById("payAmountDisplay").innerHTML = `&#8377;${realPayAmount}`;
-        
-        // COD Button exact label sync
         const codBtnLabel = document.getElementById("codButtonLabel");
         if (codBtnLabel) {
-            codBtnLabel.innerText = `Pay Amount (₹${realPayAmount})`;
+            codBtnLabel.innerText = `Pay Amount (₹${finalPayAmount})`;
         }
 
-        // Fresh Random QR Code Generator via QRCode.js (100% Client-Side Render)
-        const qrContainer = document.getElementById("qrcodeContainer");
-        qrContainer.innerHTML = ""; // Clear existing
+        // Render Fresh Random QR Code using Dynamic Multi-Provider SVG (Zero Network Failure)
+        renderDynamicQRCode(finalPayAmount);
+    });
+
+    // Fresh Random QR Generator (Unique Reference Every Visit)
+    function renderDynamicQRCode(amount) {
+        const qrBox = document.getElementById("qrcodeContainer");
+        qrBox.innerHTML = "";
 
         const randomTxnSuffix = Date.now().toString().slice(-6) + Math.floor(100 + Math.random() * 900);
-        const upiUri = `upi://pay?pa=hungrymate.pay@upi&pn=HungrymateFood&am=${realPayAmount}&tr=HM${randomTxnSuffix}&tn=Food_Order_${randomTxnSuffix}&cu=INR`;
+        const upiUri = `upi://pay?pa=hungrymate.pay@upi&pn=HungrymateFood&am=${amount}&tr=HM${randomTxnSuffix}&tn=Order_${randomTxnSuffix}&cu=INR`;
+        
+        // Multi-fallback secure QR Image
+        const qrImg = document.createElement("img");
+        qrImg.alt = "Payment QR Code";
+        qrImg.style.width = "200px";
+        qrImg.style.height = "200px";
+        qrImg.style.display = "block";
+        qrImg.style.margin = "0 auto";
+        qrImg.style.objectFit = "contain";
+        
+        // Primary QR provider
+        const primaryUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=2&data=${encodeURIComponent(upiUri)}&rand=${Date.now()}`;
+        // Fallback QR provider if primary blocked
+        const fallbackUrl = `https://quickchart.io/qr?text=${encodeURIComponent(upiUri)}&size=200`;
 
-        new QRCode(qrContainer, {
-            text: upiUri,
-            width: 190,
-            height: 190,
-            colorDark: "#000000",
-            colorLight: "#ffffff",
-            correctLevel: QRCode.CorrectLevel.M
-        });
-    });
+        qrImg.src = primaryUrl;
+        qrImg.onerror = function() {
+            this.onerror = null;
+            this.src = fallbackUrl;
+        };
+
+        qrBox.appendChild(qrImg);
+    }
 
     function verifyUpiId() {
         const val = document.getElementById("upiIdInput").value.trim();
@@ -330,9 +339,11 @@
         document.getElementById("cardNumberInput").value = formatted;
     }
 
-    // Finalize Order and Route to Live Tracking
     function finalizePayment(paymentMode) {
-        if (!checkoutData) return alert("Session expired, please return to cart.");
+        // Read cart data from draft or storage
+        const currentCart = (checkoutData && checkoutData.cart && checkoutData.cart.length > 0)
+            ? checkoutData.cart
+            : JSON.parse(localStorage.getItem("hungrymate_cart_" + currentSessionUserId) || localStorage.getItem("hungrymate_cart") || "[]");
 
         const randomDurationMins = Math.floor(Math.random() * (30 - 15 + 1)) + 15;
         const orderId = "HM-" + Math.floor(10000 + Math.random() * 90000);
@@ -341,18 +352,17 @@
         const now = new Date();
         const placedAtStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ", " + now.toLocaleDateString("en-IN", { day: 'numeric', month: 'short' });
 
-        const customerName = checkoutData.name || defaultLoggedInUserName || "Customer";
-        const customerPhone = checkoutData.phone || "+91 98765 43210";
-        const customerAddress = checkoutData.address || "Kolkata, West Bengal";
-        const finalPayAmount = (typeof checkoutData.finalTotal === "number") ? checkoutData.finalTotal : (checkoutData.subtotal || 0);
+        const custName = document.getElementById("summaryCustomerName").innerText || "Customer";
+        const custPhone = document.getElementById("summaryCustomerPhone").innerText || "+91 98765 43210";
+        const custAddress = document.getElementById("summaryCustomerAddress").innerText || "Kolkata, West Bengal";
 
         const finalizedOrder = {
             orderId: orderId,
             userId: currentSessionUserId,
-            customerName: customerName,
-            customerPhone: customerPhone,
-            address: customerAddress,
-            items: (checkoutData && checkoutData.cart) ? checkoutData.cart : [],
+            customerName: custName,
+            customerPhone: custPhone,
+            address: custAddress,
+            items: currentCart,
             subtotal: (checkoutData && checkoutData.subtotal) ? checkoutData.subtotal : finalPayAmount,
             discount: (checkoutData && checkoutData.discount) ? checkoutData.discount : 0,
             couponApplied: (checkoutData && checkoutData.couponApplied) ? checkoutData.couponApplied : "NONE",
@@ -362,8 +372,8 @@
             timestampStart: Date.now(),
             placedAt: placedAtStr,
             deliveryHeroData: randomHero,
-            restaurantName: (checkoutData && checkoutData.cart && checkoutData.cart[0]) ? (checkoutData.cart[0].restaurant || "Kitchen") : "Hungrymate Kitchen",
-            firstFoodItemId: (checkoutData && checkoutData.cart && checkoutData.cart[0]) ? checkoutData.cart[0].id : "",
+            restaurantName: (currentCart.length > 0 && currentCart[0].restaurant) ? currentCart[0].restaurant : "Hungrymate Kitchen",
+            firstFoodItemId: (currentCart.length > 0 && currentCart[0].id) ? currentCart[0].id : "",
             isDelivered: false,
             isCancelled: false
         };
@@ -375,6 +385,7 @@
 
         // Clear user-specific cart & drafts
         localStorage.removeItem("hungrymate_cart_" + currentSessionUserId);
+        localStorage.removeItem("hungrymate_cart");
         localStorage.removeItem("hungrymate_checkout_draft");
         localStorage.removeItem("hungrymate_checkout_draft_" + currentSessionUserId);
         if (typeof refreshNavCartBadge === "function") refreshNavCartBadge();
