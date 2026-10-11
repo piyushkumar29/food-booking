@@ -478,7 +478,7 @@ body.dark-mode .text-dark {
   color: #f8fafc !important;
 }
 
-/* Smooth Soft Greyish-White Off-White Inputs (No harsh stark pitch-black) */
+/* Smooth Soft Greyish-White Off-White Inputs */
 body.dark-mode .form-control,
 body.dark-mode .form-select,
 body.dark-mode textarea {
@@ -507,7 +507,7 @@ body.dark-mode .bg-light {
   color: #f8fafc !important;
 }
 
-/* Point 4: Food Cards Visible Text in Dark Mode (No Hidden Text) */
+/* Point 4: Food Cards Visible Text in Dark Mode */
 body.dark-mode .food-card-box .listing-card {
   background-color: #111827 !important;
   border: 1px solid #1f2937 !important;
@@ -519,7 +519,7 @@ body.dark-mode .listing-card small.text-muted,
 body.dark-mode .listing-card small.text-muted a,
 body.dark-mode .listing-card p,
 body.dark-mode .text-secondary {
-  color: #cbd5e1 !important; /* Clearly readable bright silver text */
+  color: #cbd5e1 !important;
 }
 body.dark-mode .card-action-footer { border-top-color: #1f2937 !important; }
 body.dark-mode .food-new-price { color: #facc15 !important; }

@@ -44,14 +44,14 @@
         z-index: 10;
     }
     body.dark-mode .track-card-box {
-        background: #121212 !important;
-        border-color: #27272a !important;
-        color: #ffffff !important;
+        background: #111827 !important;
+        border-color: #1f2937 !important;
+        color: #f8fafc !important;
     }
     body.dark-mode .delivery-partner-badge {
-        background: #18181b !important;
-        border-color: #3f3f46 !important;
-        color: #ffffff !important;
+        background: #1e293b !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
     }
 
     #deliveryCompletedBanner {
@@ -61,30 +61,6 @@
         padding: 1.25rem;
         text-align: center;
         margin-bottom: 1.5rem;
-    }
-
-    /* EXCEL SHEET THEME TAX INVOICE */
-    .excel-pdf-container {
-        padding: 25px;
-        background: #ffffff;
-        color: #000000;
-        font-family: 'Plus Jakarta Sans', Arial, sans-serif;
-    }
-    .excel-table {
-        width: 100%;
-        border-collapse: collapse;
-        border: 2px solid #000000;
-        margin-top: 10px;
-        margin-bottom: 15px;
-    }
-    .excel-table th, .excel-table td {
-        border: 1px solid #000000;
-        padding: 7px 10px;
-        font-size: 0.85rem;
-    }
-    .excel-table th {
-        background-color: #e2e8f0;
-        font-weight: 800;
     }
 </style>
 
@@ -96,12 +72,17 @@
         <div id="multiOrdersTabStrip" class="d-flex gap-2 flex-wrap"></div>
     </div>
 
+    <!-- Refund Notification Banner (When Cancelled) -->
+    <div id="refundNoticeBanner" class="alert alert-danger d-none rounded-3 py-2 px-3 small mb-3">
+        <i class="fa-solid fa-circle-exclamation me-1"></i> <strong>Order Cancelled:</strong> <span id="refundMessageText">Your order has been cancelled.</span>
+    </div>
+
     <!-- Delivered Banner with Real PDF Receipt Download -->
     <div id="deliveryCompletedBanner" class="d-none shadow-sm">
         <h4 class="fw-bold mb-1"><i class="fa-solid fa-circle-check me-1"></i>Hurray! Food Delivered Successfully</h4>
         <p class="small mb-2">Your meal was handed over hot & fresh. Enjoy your food!</p>
         <button class="btn btn-light rounded-pill px-3 py-1 fw-bold text-success shadow-sm btn-sm" onclick="downloadCurrentReceiptPdf()">
-            <i class="fa-solid fa-file-invoice-dollar me-1"></i>Download Cash Memo Receipt (Excel Theme PDF)
+            <i class="fa-solid fa-file-invoice-dollar me-1"></i>Download Cash Memo Receipt (Excel Format PDF)
         </button>
     </div>
 
@@ -111,8 +92,8 @@
             <span class="small text-muted">Order ID: <strong id="trackOrderId" class="text-warning">HM-NONE</strong></span>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <!-- Cancel Button: Disabled once Bike reaches Doorstep Station -->
-            <button id="cancelOrderBtn" class="btn btn-sm btn-outline-danger rounded-pill fw-bold" onclick="cancelActiveOrder()">
+            <!-- Point 6: Flipkart/Amazon Style Cancel Confirmation Trigger -->
+            <button id="cancelOrderBtn" class="btn btn-sm btn-outline-danger rounded-pill fw-bold" onclick="openCancelReasonModal()">
                 <i class="fa-solid fa-ban me-1"></i> Cancel Order
             </button>
             <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold">
@@ -121,7 +102,7 @@
         </div>
     </div>
 
-    <!-- Delivery Hero Partner Details (Randomized per order) -->
+    <!-- Delivery Hero Partner Details -->
     <div class="delivery-partner-badge">
         <div class="d-flex align-items-center gap-2">
             <div class="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center fw-bold fs-5" style="width: 44px; height: 44px;">
@@ -170,7 +151,7 @@
         </div>
     </div>
 
-    <!-- Past Order Receipts Table (Points 7 & 8: Clickable Order Link to Details Route) -->
+    <!-- Past Order Receipts Table -->
     <div class="mt-4 pt-3 border-top">
         <div class="d-flex justify-content-between align-items-center mb-2">
             <h6 class="fw-bold mb-0"><i class="fa-solid fa-clock-rotate-left text-danger me-1"></i>Past Order Receipts & History</h6>
@@ -195,6 +176,37 @@
     </div>
 </div>
 
+<!-- Modal: Cancel Order Reason Modal (Point 6) -->
+<div class="modal fade" id="cancelReasonModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 p-3 shadow-lg">
+      <div class="modal-header border-bottom pb-2">
+        <h5 class="modal-title fw-bold text-danger"><i class="fa-solid fa-triangle-exclamation me-1"></i> Cancel Order</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="small text-muted mb-2">Please select a valid reason for cancelling this order:</p>
+        <div class="mb-3">
+          <select id="cancellationReasonSelect" class="form-select rounded-pill">
+            <option value="Ordered by mistake">I ordered by mistake</option>
+            <option value="Delivery time is too long">Delivery time is too long</option>
+            <option value="Change in address">I need to change my delivery address</option>
+            <option value="Found a better price or dish elsewhere">Found a better offer or dish elsewhere</option>
+            <option value="Other">Other reason</option>
+          </select>
+        </div>
+        <div class="small text-muted mb-2">
+          <i class="fa-solid fa-shield-halved text-success me-1"></i> Payments made via UPI or Debit/Credit Card will be refunded automatically to your source account within 1-2 business days.
+        </div>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Keep Order</button>
+        <button type="button" class="btn btn-danger rounded-pill px-3 fw-bold" onclick="confirmCancelWithReason()">Confirm Cancellation</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
     let currentAnimInterval = null;
     let selectedOrderIndex = 0;
@@ -205,7 +217,6 @@
         renderHistoryTable();
     });
 
-    // Real-Time Anchor: Re-calculates elapsed time so refresh NEVER restarts timer
     function syncAllOrdersLifecycle() {
         let history = JSON.parse(localStorage.getItem("hungrymate_order_history") || "[]");
         let updated = false;
@@ -266,6 +277,7 @@
         const etaText = document.getElementById("etaCounter");
         const cancelBtn = document.getElementById("cancelOrderBtn");
         const compBanner = document.getElementById("deliveryCompletedBanner");
+        const refundBanner = document.getElementById("refundNoticeBanner");
 
         if (order) {
             document.getElementById("trackOrderId").innerText = order.orderId;
@@ -294,7 +306,14 @@
                 cancelBtn.classList.add("d-none");
                 bike.style.display = "none";
                 compBanner.classList.add("d-none");
+                refundBanner.classList.remove("d-none");
+                const isOnlinePay = (order.paymentMode || "").includes("UPI") || (order.paymentMode || "").includes("Card");
+                document.getElementById("refundMessageText").innerText = isOnlinePay 
+                    ? `Reason: ${order.cancelReason || 'Cancelled by user'}. A refund of ₹${order.totalPaid} has been initiated back to your ${order.paymentMode}.`
+                    : `Reason: ${order.cancelReason || 'Cancelled by user'}. (Cash on Delivery - No charge deducted).`;
                 return;
+            } else {
+                refundBanner.classList.add("d-none");
             }
 
             if (order.isDelivered || elapsed >= durationTotalMs) {
@@ -317,7 +336,6 @@
                     bike.style.left = ((point.x / 940) * 100) + "%";
                     bike.style.top = ((point.y / 240) * 100) + "%";
 
-                    // Doorstep restriction: If progress > 80% (Near Doorstep), Hide Cancel
                     if (progress >= 0.80) {
                         cancelBtn.classList.add("d-none");
                     } else {
@@ -350,19 +368,37 @@
             bike.style.display = "none";
             cancelBtn.classList.add("d-none");
             compBanner.classList.add("d-none");
+            refundBanner.classList.add("d-none");
         }
     }
 
-    function cancelActiveOrder() {
+    function openCancelReasonModal() {
+        const modal = new bootstrap.Modal(document.getElementById('cancelReasonModal'));
+        modal.show();
+    }
+
+    function confirmCancelWithReason() {
         let history = JSON.parse(localStorage.getItem("hungrymate_order_history") || "[]");
         let currentOrder = history[selectedOrderIndex];
-
         if (!currentOrder) return;
-        if (!confirm(`Are you sure you want to cancel Order #${currentOrder.orderId}?`)) return;
 
+        const reason = document.getElementById("cancellationReasonSelect").value;
         currentOrder.isCancelled = true;
+        currentOrder.cancelReason = reason;
+
         updateLocalOrderRecord(currentOrder);
-        alert(`Order #${currentOrder.orderId} cancelled successfully!`);
+
+        const modalEl = document.getElementById('cancelReasonModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+
+        const isOnlinePay = (currentOrder.paymentMode || "").includes("UPI") || (currentOrder.paymentMode || "").includes("Card");
+        if (isOnlinePay) {
+            alert(`Order #${currentOrder.orderId} cancelled.\nReason: ${reason}\n\nRefund of ₹${currentOrder.totalPaid} has been credited to your source account!`);
+        } else {
+            alert(`Order #${currentOrder.orderId} cancelled.\nReason: ${reason}`);
+        }
+
         setupActiveOrderTabs();
         renderHistoryTable();
     }
@@ -376,7 +412,6 @@
         }
     }
 
-    // Render Past Order History (Clickable Order ID route to /orders/:orderId/detail)
     function renderHistoryTable() {
         const history = JSON.parse(localStorage.getItem("hungrymate_order_history") || "[]");
         const tbody = document.getElementById("pastOrdersTableBody");
@@ -394,7 +429,7 @@
                 tbody.innerHTML += `
                     <tr>
                         <td>
-                            <a href="/orders/${h.orderId}/detail" class="fw-bold text-danger text-decoration-none" title="View Detailed Order & Rate">
+                            <a href="/orders/${h.orderId}/detail" class="fw-bold text-danger text-decoration-none">
                                 #${h.orderId} <i class="fa-solid fa-arrow-up-right-from-square small ms-1"></i>
                             </a>
                         </td>
@@ -405,7 +440,7 @@
                         <td>${statusBadge}</td>
                         <td>
                             <div class="d-flex gap-1">
-                                <button class="btn btn-sm btn-outline-danger rounded-pill py-0 px-2" title="Download Excel-Theme PDF" onclick="downloadSpecificOrderReceipt(${idx})">
+                                <button class="btn btn-sm btn-outline-danger rounded-pill py-0 px-2" title="Download Excel Format PDF" onclick="downloadSpecificOrderReceipt(${idx})">
                                     <i class="fa-solid fa-file-pdf"></i>
                                 </button>
                                 <a href="/orders/${h.orderId}/detail" class="btn btn-sm btn-outline-warning rounded-pill py-0 px-2 text-dark" title="Review & Feedback">
@@ -419,13 +454,14 @@
         }
     }
 
+    // Point 8: PDF Download Rule - Only Delivered or Cancelled orders can be downloaded; In-transit blocked
     function downloadSpecificOrderReceipt(index) {
         const history = JSON.parse(localStorage.getItem("hungrymate_order_history") || "[]");
         const targetOrder = history[index];
         if(!targetOrder) return;
 
         if(!targetOrder.isDelivered && !targetOrder.isCancelled) {
-            alert(`Order #${targetOrder.orderId} is currently under transit! Full receipt unlocks once delivered.`);
+            alert(`Order #${targetOrder.orderId} is currently under transit! Full tax invoice receipt unlocks after delivery or cancellation.`);
             return;
         }
 
@@ -439,89 +475,99 @@
         generateExcelPdf(target);
     }
 
-    // EXCEL SHEET THEME TAX INVOICE GENERATOR (Real Data Filled)
+    // Point 8: High Quality Full-Width Excel Style Tax Invoice (No cut-off)
     function generateExcelPdf(order) {
         const hero = order.deliveryHeroData || { name: "Rahul Verma", id: "HM-DEL-984", phone: "+91 98765 43210" };
         const container = document.createElement("div");
-        container.className = "excel-pdf-container";
+        container.style.width = "720px";
+        container.style.padding = "20px";
+        container.style.background = "#ffffff";
+        container.style.color = "#000000";
+        container.style.fontFamily = "'Plus Jakarta Sans', Arial, sans-serif";
+        container.style.boxSizing = "border-box";
 
         let itemsHtml = "";
         (order.items || []).forEach((it, i) => {
             itemsHtml += `
                 <tr>
-                    <td style="text-align: center;">${i + 1}</td>
-                    <td><strong>${it.title}</strong> (${it.restaurant || 'Kitchen'})</td>
-                    <td style="text-align: center;">${it.quantity}</td>
-                    <td style="text-align: right;">₹${it.price.toFixed(2)}</td>
-                    <td style="text-align: right;">₹${(it.price * it.quantity).toFixed(2)}</td>
+                    <td style="border: 1px solid #000; padding: 6px; text-align: center;">${i + 1}</td>
+                    <td style="border: 1px solid #000; padding: 6px;"><strong>${it.title}</strong> (${it.restaurant || 'Kitchen'})</td>
+                    <td style="border: 1px solid #000; padding: 6px; text-align: center;">${it.quantity}</td>
+                    <td style="border: 1px solid #000; padding: 6px; text-align: right;">₹${it.price.toFixed(2)}</td>
+                    <td style="border: 1px solid #000; padding: 6px; text-align: right;">₹${(it.price * it.quantity).toFixed(2)}</td>
                 </tr>
             `;
         });
 
+        const isCancelled = order.isCancelled === true;
+        const statusBanner = isCancelled 
+            ? `<div style="background-color: #fee2e2; border: 2px dashed #dc2626; color: #dc2626; padding: 8px; text-align: center; font-weight: 900; margin-bottom: 12px; font-size: 1rem;">
+                ⚠️ ORDER STATUS: CANCELLED (VOID INVOICE - REASON: ${order.cancelReason || 'Cancelled'})
+               </div>`
+            : `<div style="background-color: #dcfce7; border: 1.5px solid #16a34a; color: #16a34a; padding: 6px; text-align: center; font-weight: 800; margin-bottom: 12px; font-size: 0.9rem;">
+                ✓ ORDER STATUS: COMPLETED & DELIVERED
+               </div>`;
+
         container.innerHTML = `
-            <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 12px;">
-                <h2 style="font-weight: 900; margin: 0; letter-spacing: 1px;">HUNGRYMATE FOOD LOGISTICS PVT LTD</h2>
-                <small style="font-size: 0.85rem; color: #475569;">Official Tax Invoice & Cash Memo Receipt (Excel Format)</small>
+            <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 10px;">
+                <h2 style="font-weight: 900; margin: 0; font-size: 1.4rem;">HUNGRYMATE FOOD LOGISTICS PVT LTD</h2>
+                <small style="font-size: 0.8rem; color: #475569;">Official Tax Invoice & Cash Memo Receipt</small>
             </div>
 
-            <table class="excel-table">
+            ${statusBanner}
+
+            <table style="width: 100%; border-collapse: collapse; border: 2px solid #000; margin-bottom: 12px; font-size: 0.82rem;">
                 <tr>
-                    <td style="width: 25%; font-weight: 800; background-color: #f1f5f9;">ORDER ID:</td>
-                    <td style="width: 25%;">#${order.orderId}</td>
-                    <td style="width: 25%; font-weight: 800; background-color: #f1f5f9;">ORDER DATE:</td>
-                    <td style="width: 25%;">${order.placedAt}</td>
+                    <td style="border: 1px solid #000; padding: 6px; font-weight: 800; background-color: #f1f5f9; width: 22%;">ORDER ID:</td>
+                    <td style="border: 1px solid #000; padding: 6px; width: 28%;">#${order.orderId}</td>
+                    <td style="border: 1px solid #000; padding: 6px; font-weight: 800; background-color: #f1f5f9; width: 22%;">ORDER DATE:</td>
+                    <td style="border: 1px solid #000; padding: 6px; width: 28%;">${order.placedAt}</td>
                 </tr>
                 <tr>
-                    <td style="font-weight: 800; background-color: #f1f5f9;">CUSTOMER:</td>
-                    <td>${order.customerName || 'Customer'} (${order.customerPhone || 'N/A'})</td>
-                    <td style="font-weight: 800; background-color: #f1f5f9;">DELIVERY HERO:</td>
-                    <td>${hero.name} (${hero.id}) - ${hero.phone}</td>
+                    <td style="border: 1px solid #000; padding: 6px; font-weight: 800; background-color: #f1f5f9;">CUSTOMER:</td>
+                    <td style="border: 1px solid #000; padding: 6px;">${order.customerName || 'Customer'} (${order.customerPhone || 'N/A'})</td>
+                    <td style="border: 1px solid #000; padding: 6px; font-weight: 800; background-color: #f1f5f9;">DELIVERY HERO:</td>
+                    <td style="border: 1px solid #000; padding: 6px;">${hero.name} (${hero.id}) - ${hero.phone}</td>
                 </tr>
                 <tr>
-                    <td style="font-weight: 800; background-color: #f1f5f9;">DELIVERY ADDRESS:</td>
-                    <td colspan="3">${order.address}</td>
+                    <td style="border: 1px solid #000; padding: 6px; font-weight: 800; background-color: #f1f5f9;">ADDRESS:</td>
+                    <td colspan="3" style="border: 1px solid #000; padding: 6px;">${order.address}</td>
                 </tr>
                 <tr>
-                    <td style="font-weight: 800; background-color: #f1f5f9;">PAYMENT MODE:</td>
-                    <td>Cash on Delivery / UPI</td>
-                    <td style="font-weight: 800; background-color: #f1f5f9;">COUPON CODE:</td>
-                    <td style="color: #16a34a; font-weight: 700;">${order.couponApplied || 'NONE'}</td>
+                    <td style="border: 1px solid #000; padding: 6px; font-weight: 800; background-color: #f1f5f9;">PAYMENT METHOD:</td>
+                    <td style="border: 1px solid #000; padding: 6px;">${order.paymentMode || 'Cash on Delivery'}</td>
+                    <td style="border: 1px solid #000; padding: 6px; font-weight: 800; background-color: #f1f5f9;">COUPON APPLIED:</td>
+                    <td style="border: 1px solid #000; padding: 6px; color: #16a34a; font-weight: 700;">${order.couponApplied || 'NONE'}</td>
                 </tr>
             </table>
 
-            <table class="excel-table">
+            <table style="width: 100%; border-collapse: collapse; border: 2px solid #000; margin-bottom: 12px; font-size: 0.82rem;">
                 <thead>
-                    <tr>
-                        <th style="width: 8%; text-align: center;">SL</th>
-                        <th style="width: 50%;">ITEM DESCRIPTION</th>
-                        <th style="width: 12%; text-align: center;">QTY</th>
-                        <th style="width: 15%; text-align: right;">RATE (INR)</th>
-                        <th style="width: 15%; text-align: right;">AMOUNT (INR)</th>
+                    <tr style="background-color: #e2e8f0;">
+                        <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 8%;">SL</th>
+                        <th style="border: 1px solid #000; padding: 6px; width: 50%;">ITEM DESCRIPTION</th>
+                        <th style="border: 1px solid #000; padding: 6px; text-align: center; width: 12%;">QTY</th>
+                        <th style="border: 1px solid #000; padding: 6px; text-align: right; width: 15%;">RATE (INR)</th>
+                        <th style="border: 1px solid #000; padding: 6px; text-align: right; width: 15%;">AMOUNT (INR)</th>
                     </tr>
                 </thead>
-                <tbody>
-                    ${itemsHtml}
-                </tbody>
+                <tbody>${itemsHtml}</tbody>
                 <tfoot>
                     <tr>
-                        <td colspan="4" style="text-align: right; font-weight: 800;">ITEMS SUBTOTAL:</td>
-                        <td style="text-align: right; font-weight: 800;">₹${order.subtotal || order.totalPaid}</td>
+                        <td colspan="4" style="border: 1px solid #000; padding: 6px; text-align: right; font-weight: 800;">SUBTOTAL:</td>
+                        <td style="border: 1px solid #000; padding: 6px; text-align: right; font-weight: 800;">₹${order.subtotal || order.totalPaid}</td>
                     </tr>
                     <tr>
-                        <td colspan="4" style="text-align: right; font-weight: 800;">COUPON DISCOUNT:</td>
-                        <td style="text-align: right; font-weight: 800; color: #16a34a;">-₹${order.discount || 0}</td>
+                        <td colspan="4" style="border: 1px solid #000; padding: 6px; text-align: right; font-weight: 800;">DISCOUNT:</td>
+                        <td style="border: 1px solid #000; padding: 6px; text-align: right; font-weight: 800; color: #16a34a;">-₹${order.discount || 0}</td>
                     </tr>
                     <tr>
-                        <td colspan="4" style="text-align: right; font-weight: 800;">PLATFORM FEE:</td>
-                        <td style="text-align: right; font-weight: 800;">₹9.00</td>
-                    </tr>
-                    <tr>
-                        <td colspan="4" style="text-align: right; font-weight: 800;">DELIVERY CHARGES:</td>
-                        <td style="text-align: right; font-weight: 800; color: #16a34a;">FREE (₹0.00)</td>
+                        <td colspan="4" style="border: 1px solid #000; padding: 6px; text-align: right; font-weight: 800;">PLATFORM FEE:</td>
+                        <td style="border: 1px solid #000; padding: 6px; text-align: right; font-weight: 800;">₹9.00</td>
                     </tr>
                     <tr style="background-color: #f8fafc;">
-                        <td colspan="4" style="text-align: right; font-weight: 900; font-size: 1.05rem;">TOTAL PAID:</td>
-                        <td style="text-align: right; font-weight: 900; font-size: 1.05rem; color: #fe424d;">₹${order.totalPaid}</td>
+                        <td colspan="4" style="border: 1px solid #000; padding: 6px; text-align: right; font-weight: 900; font-size: 1rem;">TOTAL PAID:</td>
+                        <td style="border: 1px solid #000; padding: 6px; text-align: right; font-weight: 900; font-size: 1rem; color: ${isCancelled ? '#64748b; text-decoration: line-through;' : '#fe424d;'}">₹${order.totalPaid}</td>
                     </tr>
                 </tfoot>
             </table>
@@ -530,11 +576,11 @@
         document.body.appendChild(container);
 
         const opt = {
-            margin: 0.35,
-            filename: `Hungrymate_Invoice_${order.orderId}.pdf`,
+            margin: [10, 10, 10, 10],
+            filename: `Hungrymate_Invoice_${order.orderId}${isCancelled ? '_CANCELLED' : ''}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
-            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            html2canvas: { scale: 2, useCORS: true, scrollX: 0, scrollY: 0 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
         html2pdf().set(opt).from(container).save().then(() => {
