@@ -19,7 +19,6 @@
                 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                     <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-location-dot text-danger me-1"></i>Delivery Details</h6>
                     
-                    <!-- Live GPS Auto-Detect Button -->
                     <button type="button" class="btn btn-sm btn-outline-primary rounded-pill fw-bold d-flex align-items-center gap-1 shadow-sm" id="detectLocationBtn" onclick="fetchLiveUserLocation()">
                         <i class="fa-solid fa-crosshairs text-danger"></i>
                         <span id="locationBtnText">Use My Live Location</span>
@@ -70,7 +69,7 @@
                 </div>
                 <div class="d-flex justify-content-between small text-muted mb-1">
                     <span>Platform Fee:</span>
-                    <strong>&#8377;9</strong>
+                    <strong id="platformFeeText">&#8377;9</strong>
                 </div>
                 <div class="d-flex justify-content-between small text-success mb-2">
                     <span>Delivery Charges:</span>
@@ -96,13 +95,14 @@
     const CART_STORAGE_KEY = "hungrymate_cart_" + currentLoggedInUserId;
     let appliedCoupon = null;
     let discountAmount = 0;
+    let computedFinalTotal = 0;
 
     document.addEventListener("DOMContentLoaded", () => {
         renderCart();
-        const savedCheckout = JSON.parse(localStorage.getItem("hungrymate_checkout_draft") || "{}");
-        if (savedCheckout.name) document.getElementById("custName").value = savedCheckout.name;
-        if (savedCheckout.phone) document.getElementById("custPhone").value = savedCheckout.phone;
-        if (savedCheckout.address) document.getElementById("custAddress").value = savedCheckout.address;
+        const savedDraft = JSON.parse(localStorage.getItem("hungrymate_checkout_draft") || "{}");
+        if (savedDraft.name) document.getElementById("custName").value = savedDraft.name;
+        if (savedDraft.phone) document.getElementById("custPhone").value = savedDraft.phone;
+        if (savedDraft.address) document.getElementById("custAddress").value = savedDraft.address;
     });
 
     function fetchLiveUserLocation() {
@@ -260,11 +260,15 @@
     function updateBillSummary(subtotal) {
         document.getElementById("subtotalText").innerHTML = `&#8377;${subtotal}`;
         document.getElementById("discountText").innerHTML = `-&#8377;${discountAmount}`;
-        const finalTotal = Math.max(subtotal - discountAmount + (subtotal > 0 ? 9 : 0), 0);
-        document.getElementById("grandTotalText").innerHTML = `&#8377;${finalTotal}`;
+        
+        // Exact calculation: Platform Fee ₹9 always added if cart has items
+        const platformFee = (subtotal > 0) ? 9 : 0;
+        document.getElementById("platformFeeText").innerHTML = `&#8377;${platformFee}`;
+        
+        computedFinalTotal = Math.max(subtotal - discountAmount + platformFee, platformFee);
+        document.getElementById("grandTotalText").innerHTML = `&#8377;${computedFinalTotal}`;
     }
 
-    // Point 2: Unified Draft Storage Guarantee
     function proceedToPaymentPage() {
         const cart = JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || "[]");
         if (cart.length === 0) return alert("Your cart is empty! Add items from menu first.");
@@ -278,8 +282,8 @@
         }
 
         const subtotal = cart.reduce((acc, it) => acc + (it.price * it.quantity), 0);
-        const finalTotal = Math.max(subtotal - discountAmount + 9, 0);
 
+        // Store checkout draft in both global and scoped storage for 100% failproof read
         const checkoutDraft = {
             userId: currentLoggedInUserId,
             name: name,
@@ -289,10 +293,9 @@
             subtotal: subtotal,
             discount: discountAmount,
             couponApplied: appliedCoupon || "NONE",
-            finalTotal: finalTotal
+            finalTotal: computedFinalTotal
         };
 
-        // Saved both standard and scoped key to guarantee 100% session persistence
         localStorage.setItem("hungrymate_checkout_draft", JSON.stringify(checkoutDraft));
         localStorage.setItem("hungrymate_checkout_draft_" + currentLoggedInUserId, JSON.stringify(checkoutDraft));
         window.location.href = "/checkout/payment";

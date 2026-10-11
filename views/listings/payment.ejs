@@ -1,5 +1,45 @@
 <% layout("/layouts/boilerplate") %>
 
+<style>
+    /* High contrast dark/light accordion styling for payment methods */
+    .payment-acc-btn {
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+        font-weight: 700 !important;
+        padding: 1rem 1.25rem !important;
+        border: none !important;
+    }
+    .payment-acc-btn:not(.collapsed) {
+        background-color: #f1f5f9 !important;
+        color: #fe424d !important;
+        box-shadow: none !important;
+    }
+    body.dark-mode .payment-acc-btn {
+        background-color: #1e293b !important;
+        color: #ffffff !important;
+    }
+    body.dark-mode .payment-acc-btn:not(.collapsed) {
+        background-color: #24334d !important;
+        color: #facc15 !important;
+    }
+    body.dark-mode .accordion-item {
+        background-color: #162032 !important;
+        border-color: #334155 !important;
+    }
+    body.dark-mode .accordion-body {
+        background-color: #162032 !important;
+        color: #ffffff !important;
+    }
+    .qr-box-wrap {
+        background: #ffffff;
+        padding: 12px;
+        display: inline-block;
+        border-radius: 16px;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+        border: 2px solid #e2e8f0;
+    }
+</style>
+
 <div class="row justify-content-center my-3 my-md-4">
     <div class="col-12 col-md-10 col-lg-8">
         <div class="card shadow-sm border-0 rounded-4 p-3 p-md-4 bg-white mb-4">
@@ -10,63 +50,68 @@
                     <h4 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-credit-card me-2 text-danger"></i>Choose Payment Method</h4>
                 </div>
                 <div class="text-end">
-                    <small class="text-muted d-block">Amount to Pay</small>
-                    <span class="fs-4 fw-bold text-danger" id="payAmountDisplay">&#8377;0</span>
+                    <small class="text-muted d-block fw-semibold">Amount to Pay</small>
+                    <span class="fs-4 fw-bold text-danger" id="payAmountDisplay">&#8377;9</span>
                 </div>
             </div>
 
             <!-- Customer Details Summary -->
-            <div class="p-3 bg-light rounded-4 mb-4">
+            <div class="p-3 bg-light rounded-4 mb-4 border">
                 <div class="d-flex justify-content-between align-items-center mb-1">
-                    <strong id="summaryCustomerName" class="text-dark">--</strong>
-                    <span id="summaryCustomerPhone" class="small text-muted">--</span>
+                    <strong id="summaryCustomerName" class="text-dark fs-6">Loading customer...</strong>
+                    <span id="summaryCustomerPhone" class="small fw-bold text-danger">--</span>
                 </div>
-                <small id="summaryCustomerAddress" class="text-secondary d-block text-truncate">--</small>
+                <small id="summaryCustomerAddress" class="text-secondary d-block">--</small>
             </div>
 
             <!-- Payment Options Accordion -->
             <div class="accordion" id="paymentOptionsAccordion">
                 
-                <!-- 1. DYNAMIC QR CODE -->
+                <!-- 1. DYNAMIC QR CODE WITH RELIABLE GENERATOR -->
                 <div class="accordion-item border rounded-3 mb-3 overflow-hidden">
                     <h2 class="accordion-header">
-                        <button class="accordion-button fw-bold text-dark shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapseQR">
-                            <i class="fa-solid fa-qrcode fs-5 text-primary me-2"></i> Instant UPI QR Code (Scan with Any App)
+                        <button class="accordion-button payment-acc-btn shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapseQR">
+                            <i class="fa-solid fa-qrcode fs-5 text-primary me-2"></i> Instant UPI QR Code (Scan with Any UPI App)
                         </button>
                     </h2>
                     <div id="collapseQR" class="accordion-collapse collapse show" data-bs-parent="#paymentOptionsAccordion">
-                        <div class="accordion-body text-center bg-light">
-                            <p class="small text-muted mb-2">Scan using PhonePe, Google Pay, Paytm, or BHIM</p>
-                            <div class="p-2 bg-white d-inline-block rounded-3 shadow-sm border mb-2">
-                                <img id="dynamicQrImage" src="" alt="Payment QR Code" style="width: 190px; height: 190px; object-fit: contain;">
+                        <div class="accordion-body text-center">
+                            <p class="small text-muted mb-2">Scan & pay using PhonePe, Google Pay, Paytm, or BHIM</p>
+                            
+                            <div class="qr-box-wrap mb-2">
+                                <img id="dynamicQrImage" src="" alt="Payment QR Code" style="width: 200px; height: 200px; object-fit: contain; display: block;" onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi%3A%2F%2Fpay%3Fpa%3Dhungrymate%40upi%26pn%3DHungrymate%26am%3D9%26cu%3DINR';">
                             </div>
-                            <div class="small fw-semibold text-dark">Hungrymate Official Merchant UPI: <code class="text-danger">hungrymate.pay@upi</code></div>
-                            <button class="btn btn-primary rounded-pill px-4 mt-3 fw-bold" onclick="finalizePayment('UPI QR Code')">
-                                <i class="fa-solid fa-check me-1"></i> I Have Completed QR Payment
+                            
+                            <div class="small fw-semibold text-dark mt-1">
+                                Merchant UPI ID: <code class="text-danger fw-bold">hungrymate.pay@upi</code>
+                            </div>
+                            
+                            <button class="btn btn-primary rounded-pill px-4 mt-3 fw-bold shadow-sm" onclick="finalizePayment('UPI QR Code')">
+                                <i class="fa-solid fa-check me-1"></i> Confirm & Place Order with QR
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- 2. REAL UPI ID ENTRY & NAME FETCH -->
+                <!-- 2. ENTER UPI ID -->
                 <div class="accordion-item border rounded-3 mb-3 overflow-hidden">
                     <h2 class="accordion-header">
-                        <button class="accordion-button collapsed fw-bold text-dark shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUPI">
+                        <button class="accordion-button collapsed payment-acc-btn shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUPI">
                             <i class="fa-brands fa-google-pay fs-5 text-warning me-2"></i> Enter UPI ID / VPA
                         </button>
                     </h2>
                     <div id="collapseUPI" class="accordion-collapse collapse" data-bs-parent="#paymentOptionsAccordion">
-                        <div class="accordion-body bg-light">
+                        <div class="accordion-body">
                             <label class="form-label small fw-semibold">Virtual Payment Address (VPA)</label>
                             <div class="input-group mb-2">
                                 <input type="text" id="upiIdInput" class="form-control rounded-start-pill px-3 shadow-none" placeholder="e.g. mobile@okhdfcbank or user@paytm">
                                 <button class="btn btn-outline-secondary rounded-end-pill px-3 fw-bold" type="button" onclick="verifyUpiId()">Verify ID</button>
                             </div>
                             <div id="upiVerifiedBadge" class="small text-success fw-bold d-none mb-3">
-                                <i class="fa-solid fa-circle-check me-1"></i> Verified User: <span id="upiHolderName" class="text-dark">Piyush Kumar</span>
+                                <i class="fa-solid fa-circle-check me-1"></i> Verified User: <span id="upiHolderName" class="text-dark">--</span>
                             </div>
                             <button class="btn btn-warning text-dark rounded-pill px-4 fw-bold" onclick="finalizePayment('UPI App (Verified)')">
-                                Pay via UPI
+                                Confirm & Pay via UPI
                             </button>
                         </div>
                     </div>
@@ -75,12 +120,12 @@
                 <!-- 3. CREDIT & DEBIT CARD -->
                 <div class="accordion-item border rounded-3 mb-3 overflow-hidden">
                     <h2 class="accordion-header">
-                        <button class="accordion-button collapsed fw-bold text-dark shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCard">
+                        <button class="accordion-button collapsed payment-acc-btn shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCard">
                             <i class="fa-regular fa-credit-card fs-5 text-info me-2"></i> Credit / Debit Card
                         </button>
                     </h2>
                     <div id="collapseCard" class="accordion-collapse collapse" data-bs-parent="#paymentOptionsAccordion">
-                        <div class="accordion-body bg-light">
+                        <div class="accordion-body">
                             <div class="row g-2 mb-2">
                                 <div class="col-12">
                                     <label class="form-label small fw-semibold">Card Number</label>
@@ -103,7 +148,7 @@
                                 <i class="fa-solid fa-circle-check me-1"></i> Cardholder Verified: <span id="verifiedCardHolder">--</span>
                             </div>
                             <button class="btn btn-info text-white rounded-pill px-4 fw-bold" onclick="finalizePayment('Credit/Debit Card')">
-                                Pay with Card
+                                Confirm & Pay with Card
                             </button>
                         </div>
                     </div>
@@ -112,12 +157,12 @@
                 <!-- 4. CASH ON DELIVERY (COD) -->
                 <div class="accordion-item border rounded-3 overflow-hidden">
                     <h2 class="accordion-header">
-                        <button class="accordion-button collapsed fw-bold text-dark shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCOD">
+                        <button class="accordion-button collapsed payment-acc-btn shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCOD">
                             <i class="fa-solid fa-money-bill-wave fs-5 text-success me-2"></i> Cash on Delivery (COD)
                         </button>
                     </h2>
                     <div id="collapseCOD" class="accordion-collapse collapse" data-bs-parent="#paymentOptionsAccordion">
-                        <div class="accordion-body bg-light">
+                        <div class="accordion-body">
                             <p class="small text-muted mb-3">Pay cash or scan QR using UPI directly to delivery hero at your doorstep.</p>
                             <button class="btn btn-success rounded-pill px-4 fw-bold shadow-sm" onclick="finalizePayment('Cash on Delivery')">
                                 Confirm Order with COD
@@ -145,28 +190,44 @@
     ];
 
     document.addEventListener("DOMContentLoaded", () => {
-        // Point 2: Dual Key Recovery to permanently eliminate session error
-        checkoutData = JSON.parse(
-            localStorage.getItem("hungrymate_checkout_draft") ||
-            localStorage.getItem("hungrymate_checkout_draft_" + currentSessionUserId) ||
-            "null"
-        );
+        // Robust dual key retrieval: checks both global and scoped storage
+        const rawDraft = localStorage.getItem("hungrymate_checkout_draft") ||
+                         localStorage.getItem("hungrymate_checkout_draft_" + currentSessionUserId);
 
-        if (!checkoutData || !checkoutData.cart || checkoutData.cart.length === 0) {
+        if (!rawDraft) {
             alert("No checkout session found! Please start from cart.");
             window.location.href = "/cart";
             return;
         }
 
-        document.getElementById("payAmountDisplay").innerHTML = `&#8377;${checkoutData.finalTotal}`;
-        document.getElementById("summaryCustomerName").innerText = checkoutData.name;
-        document.getElementById("summaryCustomerPhone").innerText = checkoutData.phone;
-        document.getElementById("summaryCustomerAddress").innerText = checkoutData.address;
+        try {
+            checkoutData = JSON.parse(rawDraft);
+        } catch(e) {
+            checkoutData = null;
+        }
 
-        const qrAmount = checkoutData.finalTotal;
-        const randomRef = "HM" + Math.floor(1000 + Math.random() * 9000);
-        const upiString = encodeURIComponent(`upi://pay?pa=hungrymate.pay@upi&pn=HungrymateFood&am=${qrAmount}&tr=${randomRef}&cu=INR`);
-        document.getElementById("dynamicQrImage").src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${upiString}`;
+        if (!checkoutData || !checkoutData.cart || checkoutData.cart.length === 0) {
+            alert("Cart is empty! Please add items first.");
+            window.location.href = "/cart";
+            return;
+        }
+
+        // Amount Synchronization: Reads exact final amount passed from cart (e.g. ₹9)
+        const finalPayAmount = (typeof checkoutData.finalTotal !== "undefined" && checkoutData.finalTotal !== null)
+            ? checkoutData.finalTotal
+            : 9;
+
+        document.getElementById("payAmountDisplay").innerHTML = `&#8377;${finalPayAmount}`;
+        document.getElementById("summaryCustomerName").innerText = checkoutData.name || "Customer";
+        document.getElementById("summaryCustomerPhone").innerText = checkoutData.phone || "";
+        document.getElementById("summaryCustomerAddress").innerText = checkoutData.address || "";
+
+        // Dynamic QR code generation for the exact amount (e.g. ₹9)
+        const randomRefId = "HM" + Math.floor(100000 + Math.random() * 900000);
+        const upiUri = `upi://pay?pa=hungrymate.pay@upi&pn=HungrymateFood&am=${finalPayAmount}&tr=${randomRefId}&tn=FoodOrder&cu=INR`;
+        const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=2&data=${encodeURIComponent(upiUri)}`;
+        
+        document.getElementById("dynamicQrImage").src = qrApiUrl;
     });
 
     function verifyUpiId() {
@@ -193,7 +254,10 @@
         document.getElementById("cardNumberInput").value = formatted;
     }
 
+    // Point 4: Finalize Order and Redirect to Live Tracking with Specific Order ID
     function finalizePayment(paymentMode) {
+        if (!checkoutData) return alert("Session expired, please return to cart.");
+
         const randomDurationMins = Math.floor(Math.random() * (30 - 15 + 1)) + 15;
         const orderId = "HM-" + Math.floor(10000 + Math.random() * 90000);
         const randomHero = heroPool[Math.floor(Math.random() * heroPool.length)];
@@ -217,8 +281,8 @@
             timestampStart: Date.now(),
             placedAt: placedAtStr,
             deliveryHeroData: randomHero,
-            restaurantName: checkoutData.cart[0].restaurant || "Kitchen",
-            firstFoodItemId: checkoutData.cart[0].id || "",
+            restaurantName: (checkoutData.cart && checkoutData.cart[0]) ? (checkoutData.cart[0].restaurant || "Kitchen") : "Kitchen",
+            firstFoodItemId: (checkoutData.cart && checkoutData.cart[0]) ? checkoutData.cart[0].id : "",
             isDelivered: false,
             isCancelled: false
         };
@@ -234,7 +298,7 @@
         localStorage.removeItem("hungrymate_checkout_draft_" + currentSessionUserId);
         if (typeof refreshNavCartBadge === "function") refreshNavCartBadge();
 
-        alert(`Order #${orderId} Placed Successfully using ${paymentMode}!`);
+        alert(`Order #${orderId} Placed Successfully via ${paymentMode}!`);
         window.location.href = "/orders/track";
     }
 </script>
