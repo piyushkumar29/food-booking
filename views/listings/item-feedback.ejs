@@ -1,26 +1,27 @@
 <% layout("/layouts/boilerplate") %>
 
 <style>
-    .star-rating-box {
-        display: flex;
-        flex-direction: row-reverse;
+    .interactive-star-group {
+        display: inline-flex;
+        align-items: center;
         justify-content: center;
-        gap: 0.5rem;
-    }
-    .star-rating-box input {
-        display: none;
-    }
-    .star-rating-box label {
-        font-size: 2.2rem;
-        color: #cbd5e1;
+        gap: 0.6rem;
         cursor: pointer;
-        transition: color 0.2s ease, transform 0.2s ease;
+        padding: 0.6rem;
     }
-    .star-rating-box label:hover,
-    .star-rating-box label:hover ~ label,
-    .star-rating-box input:checked ~ label {
-        color: #facc15;
-        transform: scale(1.1);
+
+    .interactive-star-group i {
+        font-size: 2.3rem;
+        color: #475569;
+        transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease, filter 0.2s ease;
+        cursor: pointer;
+    }
+
+    .interactive-star-group i.active-star,
+    .interactive-star-group i.hover-star {
+        color: #facc15 !important;
+        filter: drop-shadow(0 0 7px rgba(250, 204, 21, 0.65)) !important;
+        transform: scale(1.2);
     }
 </style>
 
@@ -34,48 +35,35 @@
                 <p class="text-muted small mb-0"><i class="fa-solid fa-store text-danger me-1"></i><%= listing.restaurant || 'Hungrymate Hub' %></p>
             </div>
 
-            <!-- Dish Thumbnail Preview -->
             <div class="text-center mb-3">
                 <img src="<%= listing.image.url %>" alt="<%= listing.title %>" class="rounded-3 shadow-sm object-fit-cover" style="height: 120px; width: 180px;">
             </div>
 
             <form method="POST" action="/listings/<%= listing._id %>/reviews" enctype="multipart/form-data" novalidate class="needs-validation">
                 
-                <!-- Star Rating System (5 to 1 Stars) -->
                 <div class="mb-4 text-center">
                     <label class="form-label fw-bold small text-dark d-block mb-1">Tap Stars to Rate:</label>
-                    <div class="star-rating-box">
-                        <input type="radio" id="star5" name="review[rating]" value="5" required />
-                        <label for="star5" title="5 Stars - Outstanding">&#9733;</label>
-
-                        <input type="radio" id="star4" name="review[rating]" value="4" />
-                        <label for="star4" title="4 Stars - Very Good">&#9733;</label>
-
-                        <input type="radio" id="star3" name="review[rating]" value="3" />
-                        <label for="star3" title="3 Stars - Good">&#9733;</label>
-
-                        <input type="radio" id="star2" name="review[rating]" value="2" />
-                        <label for="star2" title="2 Stars - Needs Improvement">&#9733;</label>
-
-                        <input type="radio" id="star1" name="review[rating]" value="1" />
-                        <label for="star1" title="1 Star - Poor">&#9733;</label>
+                    <div class="interactive-star-group" id="starRatingContainer">
+                        <i class="fa-solid fa-star active-star" data-rating="1"></i>
+                        <i class="fa-solid fa-star active-star" data-rating="2"></i>
+                        <i class="fa-solid fa-star active-star" data-rating="3"></i>
+                        <i class="fa-solid fa-star active-star" data-rating="4"></i>
+                        <i class="fa-solid fa-star active-star" data-rating="5"></i>
                     </div>
+                    <input type="hidden" name="review[rating]" id="selectedRatingInput" value="5" required>
                 </div>
 
-                <!-- Reviewer Name (Auto filled from session) -->
                 <div class="mb-3">
                     <label class="form-label fw-semibold small">Your Name / Handle</label>
-                    <input type="text" class="form-control rounded-pill px-3" value="<%= currUser.username %>" readonly style="background-color: #f8fafc;" />
+                    <input type="text" class="form-control rounded-pill px-3" value="<%= currUser ? currUser.username : 'Customer' %>" readonly style="background-color: #f8fafc;" />
                 </div>
 
-                <!-- Feedback Description -->
                 <div class="mb-3">
                     <label for="comment" class="form-label fw-semibold small">Describe Your Experience</label>
                     <textarea name="review[comment]" id="comment" class="form-control rounded-4 p-3" rows="4" placeholder="How was the taste, packaging, freshness, and delivery?" required></textarea>
                     <div class="invalid-feedback">Please share a few words about the dish.</div>
                 </div>
 
-                <!-- Photo Upload from Phone / Folder -->
                 <div class="mb-4">
                     <label for="reviewImage" class="form-label fw-semibold small"><i class="fa-solid fa-camera text-danger me-1"></i>Attach Food Photo (Optional)</label>
                     <input type="file" name="reviewImage" id="reviewImage" class="form-control rounded-pill" accept="image/*" />
@@ -92,3 +80,49 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const starContainer = document.getElementById("starRatingContainer");
+        const stars = starContainer.querySelectorAll("i");
+        const ratingInput = document.getElementById("selectedRatingInput");
+        let currentRating = 5;
+
+        stars.forEach(star => {
+            star.addEventListener("mouseenter", function() {
+                const hoverVal = parseInt(this.getAttribute("data-rating"));
+                stars.forEach(s => {
+                    const val = parseInt(s.getAttribute("data-rating"));
+                    if (val <= hoverVal) {
+                        s.classList.add("hover-star");
+                    } else {
+                        s.classList.remove("hover-star");
+                        s.classList.remove("active-star");
+                    }
+                });
+            });
+
+            star.addEventListener("click", function() {
+                currentRating = parseInt(this.getAttribute("data-rating"));
+                ratingInput.value = currentRating;
+                updateStarDisplay(currentRating);
+            });
+        });
+
+        starContainer.addEventListener("mouseleave", function() {
+            stars.forEach(s => s.classList.remove("hover-star"));
+            updateStarDisplay(currentRating);
+        });
+
+        function updateStarDisplay(val) {
+            stars.forEach(s => {
+                const starVal = parseInt(s.getAttribute("data-rating"));
+                if (starVal <= val) {
+                    s.classList.add("active-star");
+                } else {
+                    s.classList.remove("active-star");
+                }
+            });
+        }
+    });
+</script>
