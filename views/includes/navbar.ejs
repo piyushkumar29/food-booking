@@ -1,18 +1,19 @@
 <nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top shadow-sm hm-main-navbar py-2 px-2 px-md-3">
   <div class="container-fluid d-flex align-items-center justify-content-between p-0 flex-nowrap">
     
-    <!-- Left Logo & Desktop Navigation Items -->
+    <!-- Left Logo & Navigation Items -->
     <div class="d-flex align-items-center flex-shrink-0 gap-2 gap-lg-3">
       <a class="navbar-brand m-0 p-0 d-flex align-items-center" href="/listings">
         <img src="/myimg.png" alt="Hungrymate Logo" class="brand-navbar-logo" />
       </a>
 
-      <!-- Desktop Navigation Links (Hidden on Mobile) -->
+      <!-- Desktop Navigation Links -->
       <div class="d-none d-lg-flex align-items-center gap-2">
         <a class="nav-pill-btn nav-all-food" href="/listings">
           <i class="fa-solid fa-utensils icon-item"></i> All food items
         </a>
 
+        <!-- Same Restaurant Option Modal Trigger -->
         <button type="button" class="nav-pill-btn nav-same-rest-btn" data-bs-toggle="modal" data-bs-target="#sameRestaurantModal">
           <i class="fa-solid fa-store icon-item"></i> Same Restaurant Dishes
         </button>
@@ -60,7 +61,7 @@
       </div>
     </div>
 
-    <!-- Right Controls: Desktop Cart & User Dropdown -->
+    <!-- Right Controls: Cart & Sign up / Log in (Points 10, 12, 13) -->
     <div class="d-flex align-items-center gap-2 flex-shrink-0">
       <a href="/cart" class="btn btn-light border position-relative rounded-pill px-3 py-1 d-flex align-items-center gap-1 text-decoration-none d-none d-md-inline-flex" title="View Cart">
         <i class="fa-solid fa-cart-shopping text-danger"></i>
@@ -68,10 +69,11 @@
         <span id="navCartCountBadge" class="badge rounded-pill bg-danger" style="font-size: 0.7rem;">0</span>
       </a>
 
+      <!-- Point 10: Sign up & Log in with dedicated visible dark-mode classes -->
       <% if(!currUser) { %>
-        <div class="d-none d-md-flex gap-1">
-          <a class="btn nav-auth-signup-btn rounded-pill px-3 py-1 fw-bold btn-sm" href="/signup">Sign up</a>
-          <a class="btn nav-auth-login-btn rounded-pill px-3 py-1 fw-bold btn-sm" href="/login">Log in</a>
+        <div class="d-flex gap-1">
+          <a class="btn nav-auth-signup-btn rounded-pill px-3 py-1 fw-bold btn-sm shadow-sm" href="/signup">Sign up</a>
+          <a class="btn nav-auth-login-btn rounded-pill px-3 py-1 fw-bold btn-sm shadow-sm" href="/login">Log in</a>
         </div>
       <% } %>
 
@@ -136,7 +138,7 @@
 
   </div>
 
-  <!-- Mobile Clean Search Bar (Full Width, No messy blue links underneath) -->
+  <!-- Mobile Clean Search Bar -->
   <div class="d-md-none w-100 mt-2 position-relative">
     <div class="input-group w-100 position-relative">
       <input 
@@ -154,7 +156,7 @@
   </div>
 </nav>
 
-<!-- Point 1 & 2: Flipkart Style Bottom Bar Navigation (Mobile Only < 992px) -->
+<!-- Flipkart Style Mobile Bottom Navigation Bar (< 992px) -->
 <div class="flipkart-bottom-bar d-lg-none border-top">
   <a href="/listings" class="fk-bar-item active">
     <i class="fa-solid fa-house"></i>
@@ -190,7 +192,6 @@
         }
       }
     %>
-    <!-- Mobile User Avatar at Bottom Bar -->
     <a href="javascript:void(0)" class="fk-bar-item" data-bs-toggle="modal" data-bs-target="#mobileAccountModal">
       <div class="mobile-bottom-avatar-circle">
         <% if(currUser.avatar && currUser.avatar.trim() !== '') { %>
@@ -209,7 +210,7 @@
   <% } %>
 </div>
 
-<!-- Mobile Account Bottom Sheet Modal -->
+<!-- Mobile Account Bottom Modal -->
 <% if(currUser) { %>
 <div class="modal fade" id="mobileAccountModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-sm">
@@ -220,7 +221,7 @@
       </div>
       <% if(currUser.isOwner) { %>
         <a class="btn btn-outline-danger btn-sm rounded-pill mb-2 fw-bold" href="/listings/new">
-          <i class="fa-solid fa-plus me-1"></i> Add New Item (Owner)
+          <i class="fa-solid fa-plus me-1"></i> Add New Item
         </a>
       <% } %>
       <button type="button" class="btn btn-light btn-sm rounded-pill mb-2 text-start px-3" onclick="promptEditName('<%= currUser.username %>')">
@@ -238,7 +239,7 @@
 </div>
 <% } %>
 
-<!-- Modal: Same Restaurant Search & Quick Picker -->
+<!-- Modal: Same Restaurant Search & Quick Picker (Point 5) -->
 <div class="modal fade" id="sameRestaurantModal" tabindex="-1" aria-labelledby="sameRestaurantModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content rounded-4 border-0 shadow">
@@ -270,6 +271,10 @@
 </form>
 
 <script>
+// Scoped user cart key
+const currentLoggedInUserId = "<%= currUser ? currUser._id : 'guest' %>";
+const CART_STORAGE_KEY = "hungrymate_cart_" + currentLoggedInUserId;
+
 function promptEditName(currentName) {
     const updated = prompt("Enter your new profile name:", currentName);
     if (updated !== null && updated.trim() !== "" && updated.trim() !== currentName) {
@@ -292,7 +297,7 @@ function uploadPermanentAvatar(event) {
 }
 
 function refreshNavCartBadge() {
-    const cart = JSON.parse(localStorage.getItem("hungrymate_cart") || "[]");
+    const cart = JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || "[]");
     const totalCount = cart.reduce((acc, item) => acc + (item.quantity || 1), 0);
     const badge = document.getElementById("navCartCountBadge");
     const mobileBadge = document.getElementById("mobileCartBadge");

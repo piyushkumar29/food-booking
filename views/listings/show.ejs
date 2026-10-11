@@ -29,7 +29,6 @@
 %>
 
 <style>
-    /* Clean Distribution Bars (Screenshot 49 look) */
     .rating-summary-card {
         background: #ffffff;
         border-radius: 18px;
@@ -59,7 +58,7 @@
     }
     .rating-progress-fill {
         height: 100%;
-        background: #0284c7; /* Vibrant Blue Bar */
+        background: #0284c7;
         border-radius: 20px;
     }
 </style>
@@ -110,7 +109,7 @@
                     </span>
                 </div>
 
-                <!-- EXCLUSIVE OWNER CONTROLS -->
+                <!-- OWNER CONTROLS -->
                 <% if (isPiyushOwner) { %>
                     <div class="alert alert-warning border-0 py-2 px-3 rounded-3 d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                         <span class="small fw-bold text-dark"><i class="fa-solid fa-crown text-warning me-1"></i> Owner Controls (Piyush Kumar)</span>
@@ -119,7 +118,7 @@
                                 <i class="fa-solid fa-pen-to-square me-1"></i> Edit Listing
                             </a>
                             <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE" class="d-inline m-0">
-                                <button class="btn btn-outline-danger rounded-pill px-3 py-1 fw-bold btn-sm shadow-sm" onclick="return confirm('Piyush, are you sure you want to permanently delete this food item from Atlas database?');">
+                                <button class="btn btn-outline-danger rounded-pill px-3 py-1 fw-bold btn-sm shadow-sm" onclick="return confirm('Delete this food item?');">
                                     <i class="fa-solid fa-trash me-1"></i> Delete Item
                                 </button>
                             </form>
@@ -142,7 +141,7 @@
             </div>
         </div>
 
-        <!-- RATINGS & FEEDBACK SECTION (MODERN DISTRIBUTION BAR - SCREENSHOT 49 STYLE) -->
+        <!-- RATINGS & FEEDBACK SECTION -->
         <div class="card shadow-sm border-0 rounded-4 bg-white p-3 p-md-4 mb-4">
             
             <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
@@ -151,15 +150,12 @@
                     <small class="text-muted">Real reviews by Hungrymate Foodies</small>
                 </div>
                 
-                <!-- Dedicated Add Feedback Button -->
                 <a href="/listings/<%= listing._id %>/reviews/feedback-form" class="btn btn-outline-danger rounded-pill px-3 py-1 fw-bold btn-sm shadow-sm">
                     <i class="fa-solid fa-pen me-1"></i> Give Feedback
                 </a>
             </div>
 
-            <!-- Average Rating + Percentage Distribution Grid (Screenshot 49) -->
             <div class="row align-items-center p-3 mb-4 rounded-4 bg-light g-3">
-                
                 <div class="col-12 col-sm-4 text-center border-sm-end">
                     <div class="rating-big-number"><%= avgRating %></div>
                     <div class="text-warning fs-5 my-1">
@@ -179,14 +175,13 @@
                             <div class="rating-progress-track">
                                 <div class="rating-progress-fill" style="width: <%= pct %>%;"></div>
                             </div>
-                            <span style="width: 38px; text-align: right; color: #64748b;"><%= pct %>%</span>
+                            <span style="width: 38px; text-align: right; color: #94a3b8;"><%= pct %>%</span>
                         </div>
                     <% }); %>
                 </div>
-
             </div>
 
-            <!-- All Reviews Cards List -->
+            <!-- All Reviews List -->
             <% if(listing.reviews && listing.reviews.length > 0) { %>
                 <div class="row g-3">
                     <% for(review of listing.reviews) { %>
@@ -203,7 +198,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- Golden Stars Badge -->
                                     <span class="badge bg-warning text-dark px-2 py-1 rounded-pill fw-bold" style="font-size: 0.75rem;">
                                         ★ <%= review.rating %>.0
                                     </span>
@@ -211,21 +205,19 @@
 
                                 <p class="text-secondary small mb-2" style="line-height: 1.5;"><%= review.comment %></p>
 
-                                <!-- Attached Review Photo if any -->
                                 <% if(review.image && review.image.url) { %>
                                     <div class="mb-2">
                                         <img src="<%= review.image.url %>" alt="Food Review Image" class="rounded-3 shadow-sm object-fit-cover" style="height: 100px; width: 140px; cursor: pointer;" onclick="window.open('<%= review.image.url %>', '_blank')">
                                     </div>
                                 <% } %>
 
-                                <!-- Only Author / Owner Edit & Delete Buttons -->
                                 <% if(currUser && (currUser.isOwner || (review.author && review.author._id.equals(currUser._id)))) { %>
                                     <div class="d-flex justify-content-end gap-2 pt-2 border-top">
                                         <a href="/listings/<%= listing._id %>/reviews/<%= review._id %>/edit" class="btn btn-sm btn-outline-secondary rounded-pill py-0 px-2" style="font-size: 0.72rem;">
                                             <i class="fa-solid fa-pen"></i> Edit
                                         </a>
                                         <form method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" class="m-0">
-                                            <button class="btn btn-sm btn-outline-danger rounded-pill py-0 px-2" style="font-size: 0.72rem;" onclick="return confirm('Delete this feedback permanently?');">
+                                            <button class="btn btn-sm btn-outline-danger rounded-pill py-0 px-2" style="font-size: 0.72rem;" onclick="return confirm('Delete this review?');">
                                                 <i class="fa-solid fa-trash"></i> Delete
                                             </button>
                                         </form>
@@ -248,15 +240,18 @@
 </div>
 
 <script>
+const currentLoggedInUserId = "<%= currUser ? currUser._id : 'guest' %>";
+const CART_STORAGE_KEY = "hungrymate_cart_" + currentLoggedInUserId;
+
 function addToCart(id, title, price, image, prepTime, restaurant) {
-    let cart = JSON.parse(localStorage.getItem("hungrymate_cart") || "[]");
+    let cart = JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || "[]");
     const existing = cart.find(item => item.id === id);
     if (existing) {
         existing.quantity += 1;
     } else {
         cart.push({ id, title, price, image, prepTime: prepTime || 20, restaurant: restaurant || "Chef Kitchen", quantity: 1 });
     }
-    localStorage.setItem("hungrymate_cart", JSON.stringify(cart));
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
     if (typeof refreshNavCartBadge === "function") refreshNavCartBadge();
     alert(`${title} added to your cart!`);
 }
