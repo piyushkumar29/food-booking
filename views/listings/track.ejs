@@ -76,12 +76,14 @@
     body.dark-mode .custom-dark-modal .btn-close {
         filter: invert(1) brightness(1.5) !important;
     }
-    body.dark-mode .custom-dark-modal .form-select {
+    body.dark-mode .custom-dark-modal .form-select,
+    body.dark-mode .custom-dark-modal .form-control {
         background-color: #1e293b !important;
         border: 1.5px solid #334155 !important;
         color: #f8fafc !important;
     }
-    body.dark-mode .custom-dark-modal .form-select:focus {
+    body.dark-mode .custom-dark-modal .form-select:focus,
+    body.dark-mode .custom-dark-modal .form-control:focus {
         border-color: #facc15 !important;
         box-shadow: 0 0 0 0.25rem rgba(250, 204, 21, 0.2) !important;
     }
@@ -93,6 +95,12 @@
     body.dark-mode .custom-dark-modal .btn-light:hover {
         background-color: #2d3b55 !important;
         color: #ffffff !important;
+    }
+    .refund-payout-box {
+        background: #182235;
+        border: 1.5px dashed #facc15;
+        border-radius: 14px;
+        padding: 0.85rem;
     }
 </style>
 
@@ -113,7 +121,7 @@
     </div>
 <% } else { %>
 
-<!-- Clean Empty Order Box (Rendered when user has placed NO orders yet) -->
+<!-- Clean Empty Order Box -->
 <div id="noOrdersPlacedCard" class="track-card-box text-center py-5 d-none">
     <i class="fa-solid fa-motorcycle fs-1 text-danger mb-3"></i>
     <h4 class="fw-bold mb-2">No Orders Placed Yet!</h4>
@@ -235,27 +243,56 @@
     </div>
 </div>
 
-<!-- Modal: Cancel Order Reason Modal (Harmonized Dark/Light Theme) -->
+<!-- Modal: Cancel Order Reason Modal with COD Refund Payout Collection -->
 <div class="modal fade" id="cancelReasonModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content custom-dark-modal rounded-4 border-0 p-3 shadow-lg">
-      <div class="modal-header pb-2">
+      <div class="modal-header pb-2 border-0">
         <h5 class="modal-title fw-bold text-danger"><i class="fa-solid fa-triangle-exclamation me-1"></i> Cancel Order</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"></button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body pt-1">
         <p class="small text-muted mb-2">Please select a valid reason for cancelling this order:</p>
         <div class="mb-3">
           <select id="cancellationReasonSelect" class="form-select rounded-pill shadow-none">
+            <option value="Found a better offer or dish elsewhere">Found a better offer or dish elsewhere</option>
             <option value="Ordered by mistake">I ordered by mistake</option>
             <option value="Delivery time is too long">Delivery time is too long</option>
             <option value="Change in address">I need to change my delivery address</option>
-            <option value="Found a better price or dish elsewhere">Found a better offer or dish elsewhere</option>
             <option value="Other">Other reason</option>
           </select>
         </div>
-        <div class="small text-muted mb-2">
-          <i class="fa-solid fa-shield-halved text-success me-1"></i> Payments made via UPI or Debit/Credit Card will be refunded automatically to your source account within 1-2 business days.
+
+        <!-- COD Payout Collection Section (Visible ONLY for Cash on Delivery) -->
+        <div id="codRefundPayoutSection" class="refund-payout-box mb-3 d-none">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <i class="fa-solid fa-wallet text-warning fs-5"></i>
+                <div>
+                    <h6 class="mb-0 fw-bold text-warning small">COD Refund Payout Details</h6>
+                    <small class="text-white-50" style="font-size: 0.72rem;">Enter your UPI ID or Bank Account to receive any prepaid fees/credits.</small>
+                </div>
+            </div>
+            
+            <div class="mb-2">
+                <label class="form-label small fw-semibold text-white mb-1">Refund UPI ID (Instant Payout)</label>
+                <input type="text" id="codRefundUpiInput" class="form-control rounded-pill px-3 shadow-none" placeholder="e.g. mobile@upi or username@okhdfcbank">
+            </div>
+
+            <div class="text-center text-white-50 small my-1 fw-bold">--- OR BANK ACCOUNT ---</div>
+
+            <div class="row g-2">
+                <div class="col-7">
+                    <input type="text" id="codRefundAccInput" class="form-control rounded-pill px-3 shadow-none" placeholder="Account Number">
+                </div>
+                <div class="col-5">
+                    <input type="text" id="codRefundIfscInput" class="form-control rounded-pill px-3 shadow-none" placeholder="IFSC Code" style="text-transform: uppercase;">
+                </div>
+            </div>
+        </div>
+
+        <!-- Auto-Source Alert for Online UPI/Card -->
+        <div id="onlineSourceRefundAlert" class="small text-muted mb-2">
+          <i class="fa-solid fa-shield-halved text-success me-1"></i> Payments made via UPI or Debit/Credit Card will be refunded automatically to your source account within 1–2 business days.
         </div>
       </div>
       <div class="modal-footer border-0 pt-0">
@@ -375,10 +412,14 @@
             bike.style.display = "none";
             compBanner.classList.add("d-none");
             refundBanner.classList.remove("d-none");
-            const isOnlinePay = (order.paymentMode || "").includes("UPI") || (order.paymentMode || "").includes("Card");
-            document.getElementById("refundMessageText").innerText = isOnlinePay 
-                ? `Reason: ${order.cancelReason || 'Cancelled by user'}. A refund of ₹${order.totalPaid} has been initiated back to your ${order.paymentMode}.`
-                : `Reason: ${order.cancelReason || 'Cancelled by user'}. (Cash on Delivery - No charge deducted).`;
+            
+            const isCOD = (order.paymentMode || "").includes("Delivery") || (order.paymentMode || "") === "COD";
+            if (isCOD) {
+                const payoutText = order.refundPayoutTarget ? ` Refund payout details registered (${order.refundPayoutTarget}).` : " No amount deducted.";
+                document.getElementById("refundMessageText").innerText = `Reason: ${order.cancelReason || 'Cancelled by user'}.${payoutText}`;
+            } else {
+                document.getElementById("refundMessageText").innerText = `Reason: ${order.cancelReason || 'Cancelled by user'}. A refund of ₹${order.totalPaid} has been initiated back to your ${order.paymentMode}.`;
+            }
             return;
         } else {
             refundBanner.classList.add("d-none");
@@ -432,7 +473,24 @@
         }
     }
 
+    // Modal Trigger: Detects if current order was COD and shows Bank/UPI inputs
     function openCancelReasonModal() {
+        let history = JSON.parse(localStorage.getItem(USER_HISTORY_KEY) || "[]");
+        let currentOrder = history[selectedOrderIndex];
+        if (!currentOrder) return;
+
+        const isCOD = (currentOrder.paymentMode || "").includes("Delivery") || (currentOrder.paymentMode || "") === "COD";
+        const codBox = document.getElementById("codRefundPayoutSection");
+        const onlineAlert = document.getElementById("onlineSourceRefundAlert");
+
+        if (isCOD) {
+            codBox.classList.remove("d-none");
+            onlineAlert.classList.add("d-none");
+        } else {
+            codBox.classList.add("d-none");
+            onlineAlert.classList.remove("d-none");
+        }
+
         const modal = new bootstrap.Modal(document.getElementById('cancelReasonModal'));
         modal.show();
     }
@@ -443,8 +501,24 @@
         if (!currentOrder) return;
 
         const reason = document.getElementById("cancellationReasonSelect").value;
+        const isCOD = (currentOrder.paymentMode || "").includes("Delivery") || (currentOrder.paymentMode || "") === "COD";
+
+        let payoutDestination = "";
+        if (isCOD) {
+            const upiVal = document.getElementById("codRefundUpiInput").value.trim();
+            const accVal = document.getElementById("codRefundAccInput").value.trim();
+            const ifscVal = document.getElementById("codRefundIfscInput").value.trim();
+
+            if (upiVal) {
+                payoutDestination = `UPI: ${upiVal}`;
+            } else if (accVal && ifscVal) {
+                payoutDestination = `Bank A/C: ${accVal} (${ifscVal.toUpperCase()})`;
+            }
+        }
+
         currentOrder.isCancelled = true;
         currentOrder.cancelReason = reason;
+        currentOrder.refundPayoutTarget = payoutDestination;
 
         updateLocalOrderRecord(currentOrder);
 
@@ -452,9 +526,10 @@
         const modal = bootstrap.Modal.getInstance(modalEl);
         if (modal) modal.hide();
 
-        const isOnlinePay = (currentOrder.paymentMode || "").includes("UPI") || (currentOrder.paymentMode || "").includes("Card");
-        if (isOnlinePay) {
-            alert(`Order #${currentOrder.orderId} cancelled.\nReason: ${reason}\n\nRefund of ₹${currentOrder.totalPaid} has been credited to your source account!`);
+        if (isCOD && payoutDestination) {
+            alert(`Order #${currentOrder.orderId} cancelled.\nReason: ${reason}\n\nRefund destination saved: ${payoutDestination}. Any prepaid fee of ₹${currentOrder.totalPaid} will be processed to this account.`);
+        } else if (!isCOD) {
+            alert(`Order #${currentOrder.orderId} cancelled.\nReason: ${reason}\n\nRefund of ₹${currentOrder.totalPaid} will be credited back to your original ${currentOrder.paymentMode}!`);
         } else {
             alert(`Order #${currentOrder.orderId} cancelled.\nReason: ${reason}`);
         }
