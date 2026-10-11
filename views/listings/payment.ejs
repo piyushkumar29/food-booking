@@ -1,7 +1,9 @@
 <% layout("/layouts/boilerplate") %>
 
+<!-- QR Code Generator Library: 100% Reliable Client-Side Rendering without Broken Images -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
 <style>
-    /* Premium Midnight Slate & Gold Accent Theme for Payment Page */
     .payment-main-card {
         background: #111827 !important;
         border: 1.5px solid #1f2937 !important;
@@ -42,7 +44,6 @@
         box-shadow: none !important;
     }
 
-    /* Point 2: Crisp White & Gold Visible Dropdown Arrow */
     .payment-acc-btn::after {
         filter: invert(1) brightness(1.8) !important;
         margin-left: auto !important;
@@ -60,17 +61,28 @@
         padding: 1.25rem !important;
     }
 
-    /* QR Code Container */
+    /* Client Side QR Box Container */
     .qr-box-wrap {
         background: #ffffff;
-        padding: 12px;
+        padding: 14px;
         display: inline-block;
         border-radius: 18px;
         box-shadow: 0 4px 18px rgba(0,0,0,0.35);
         border: 3px solid #facc15;
     }
 
-    /* Point 4: COD Yellow Theme Button */
+    #qrcodeContainer {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #qrcodeContainer img, #qrcodeContainer canvas {
+        display: block !important;
+        margin: 0 auto !important;
+    }
+
+    /* COD Yellow Highlight Button */
     .btn-cod-yellow {
         background-color: #facc15 !important;
         border-color: #facc15 !important;
@@ -98,16 +110,16 @@
                 </div>
                 <div class="text-end">
                     <small class="text-white-50 d-block fw-semibold">Amount to Pay</small>
-                    <span class="fs-4 fw-bold text-warning" id="payAmountDisplay">&#8377;9</span>
+                    <span class="fs-4 fw-bold text-warning" id="payAmountDisplay">&#8377;0</span>
                 </div>
             </div>
 
-            <!-- Point 5: Customer Details Banner (Real, never empty '--') -->
+            <!-- Customer Details Banner (Real, never empty '--') -->
             <div class="customer-info-strip mb-4">
                 <div class="d-flex justify-content-between align-items-center mb-1">
                     <div class="d-flex align-items-center gap-2">
                         <i class="fa-solid fa-circle-user text-warning fs-5"></i>
-                        <strong id="summaryCustomerName" class="text-white fs-6">Loading...</strong>
+                        <strong id="summaryCustomerName" class="text-white fs-6">Customer</strong>
                     </div>
                     <span id="summaryCustomerPhone" class="small fw-bold text-warning">--</span>
                 </div>
@@ -117,7 +129,7 @@
             <!-- Payment Options Accordion -->
             <div class="accordion" id="paymentOptionsAccordion">
                 
-                <!-- 1. DYNAMIC FRESH QR CODE (Point 3: Unique each time) -->
+                <!-- 1. DYNAMIC QR CODE -->
                 <div class="accordion-item payment-acc-item">
                     <h2 class="accordion-header">
                         <button class="accordion-button payment-acc-btn shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapseQR">
@@ -129,7 +141,7 @@
                             <p class="small text-white-50 mb-2">Scan & pay using PhonePe, Google Pay, Paytm, or BHIM</p>
                             
                             <div class="qr-box-wrap mb-2">
-                                <img id="dynamicQrImage" src="" alt="Payment QR Code" style="width: 200px; height: 200px; object-fit: contain; display: block;">
+                                <div id="qrcodeContainer"></div>
                             </div>
                             
                             <div class="small fw-semibold text-white mt-1">
@@ -204,7 +216,7 @@
                     </div>
                 </div>
 
-                <!-- 4. CASH ON DELIVERY (COD) - Point 4: Yellow Accent & Exact Price Display -->
+                <!-- 4. CASH ON DELIVERY (COD) -->
                 <div class="accordion-item payment-acc-item">
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed payment-acc-btn shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCOD">
@@ -214,9 +226,9 @@
                     <div id="collapseCOD" class="accordion-collapse collapse" data-bs-parent="#paymentOptionsAccordion">
                         <div class="accordion-body payment-acc-body">
                             <p class="small text-white-50 mb-3">Pay cash or scan QR using UPI directly to delivery partner at your doorstep.</p>
-                            <!-- Point 4: Yellow Accent Button with Exact Price -->
+                            <!-- Point 3: Dynamic COD Price Display -->
                             <button class="btn btn-cod-yellow rounded-pill px-4 py-2 shadow" onclick="finalizePayment('Cash on Delivery')">
-                                <i class="fa-solid fa-check me-1"></i> <span id="codButtonLabel">Pay Amount (₹9)</span>
+                                <i class="fa-solid fa-check me-1"></i> <span id="codButtonLabel">Pay Amount (₹0)</span>
                             </button>
                         </div>
                     </div>
@@ -249,32 +261,49 @@
             try { checkoutData = JSON.parse(rawDraft); } catch(e) { checkoutData = null; }
         }
 
-        // Point 5: Guarantee customer details are populated
-        const custName = (checkoutData && checkoutData.name) ? checkoutData.name : (defaultLoggedInUserName || "Customer");
-        const custPhone = (checkoutData && checkoutData.phone) ? checkoutData.phone : "+91 Verified Contact";
-        const custAddress = (checkoutData && checkoutData.address) ? checkoutData.address : "Kolkata, West Bengal (Live Location)";
+        if (!checkoutData || !checkoutData.cart || checkoutData.cart.length === 0) {
+            alert("No checkout session found! Please start from cart.");
+            window.location.href = "/cart";
+            return;
+        }
+
+        // Customer Details Binding
+        const custName = checkoutData.name || defaultLoggedInUserName || "Customer";
+        const custPhone = checkoutData.phone || "+91 Contact Verified";
+        const custAddress = checkoutData.address || "Kolkata, West Bengal";
 
         document.getElementById("summaryCustomerName").innerText = custName;
         document.getElementById("summaryCustomerPhone").innerText = custPhone;
         document.getElementById("summaryCustomerAddress").innerText = custAddress;
 
-        // Exact Price Sync (Point 1: ₹9 or actual final total)
-        const finalPayAmount = (checkoutData && typeof checkoutData.finalTotal !== "undefined" && checkoutData.finalTotal !== null)
+        // Exact Dynamic Amount Binding (Never Hardcoded!)
+        const realPayAmount = (typeof checkoutData.finalTotal === "number" && !isNaN(checkoutData.finalTotal))
             ? checkoutData.finalTotal
-            : 9;
+            : (checkoutData.subtotal || 0);
 
-        document.getElementById("payAmountDisplay").innerHTML = `&#8377;${finalPayAmount}`;
+        document.getElementById("payAmountDisplay").innerHTML = `&#8377;${realPayAmount}`;
         
-        // Point 4: COD Button Exact Label
+        // COD Button exact label sync
         const codBtnLabel = document.getElementById("codButtonLabel");
-        if (codBtnLabel) codBtnLabel.innerText = `Pay Amount (₹${finalPayAmount})`;
+        if (codBtnLabel) {
+            codBtnLabel.innerText = `Pay Amount (₹${realPayAmount})`;
+        }
 
-        // Point 3: Fresh Random QR Generation on every visit
-        const randomTxnId = "HM" + Date.now().toString().slice(-6) + Math.floor(100 + Math.random() * 900);
-        const upiUri = `upi://pay?pa=hungrymate.pay@upi&pn=HungrymateFood&am=${finalPayAmount}&tr=${randomTxnId}&tn=Order_${randomTxnId}&cu=INR`;
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=2&data=${encodeURIComponent(upiUri)}&rand=${Date.now()}`;
-        
-        document.getElementById("dynamicQrImage").src = qrUrl;
+        // Fresh Random QR Code Generator via QRCode.js (100% Client-Side Render)
+        const qrContainer = document.getElementById("qrcodeContainer");
+        qrContainer.innerHTML = ""; // Clear existing
+
+        const randomTxnSuffix = Date.now().toString().slice(-6) + Math.floor(100 + Math.random() * 900);
+        const upiUri = `upi://pay?pa=hungrymate.pay@upi&pn=HungrymateFood&am=${realPayAmount}&tr=HM${randomTxnSuffix}&tn=Food_Order_${randomTxnSuffix}&cu=INR`;
+
+        new QRCode(qrContainer, {
+            text: upiUri,
+            width: 190,
+            height: 190,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.M
+        });
     });
 
     function verifyUpiId() {
@@ -301,7 +330,10 @@
         document.getElementById("cardNumberInput").value = formatted;
     }
 
+    // Finalize Order and Route to Live Tracking
     function finalizePayment(paymentMode) {
+        if (!checkoutData) return alert("Session expired, please return to cart.");
+
         const randomDurationMins = Math.floor(Math.random() * (30 - 15 + 1)) + 15;
         const orderId = "HM-" + Math.floor(10000 + Math.random() * 90000);
         const randomHero = heroPool[Math.floor(Math.random() * heroPool.length)];
@@ -309,10 +341,10 @@
         const now = new Date();
         const placedAtStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ", " + now.toLocaleDateString("en-IN", { day: 'numeric', month: 'short' });
 
-        const customerName = (checkoutData && checkoutData.name) ? checkoutData.name : (defaultLoggedInUserName || "Customer");
-        const customerPhone = (checkoutData && checkoutData.phone) ? checkoutData.phone : "+91 98765 43210";
-        const customerAddress = (checkoutData && checkoutData.address) ? checkoutData.address : "Kolkata, West Bengal";
-        const finalPayAmount = (checkoutData && checkoutData.finalTotal) ? checkoutData.finalTotal : 9;
+        const customerName = checkoutData.name || defaultLoggedInUserName || "Customer";
+        const customerPhone = checkoutData.phone || "+91 98765 43210";
+        const customerAddress = checkoutData.address || "Kolkata, West Bengal";
+        const finalPayAmount = (typeof checkoutData.finalTotal === "number") ? checkoutData.finalTotal : (checkoutData.subtotal || 0);
 
         const finalizedOrder = {
             orderId: orderId,

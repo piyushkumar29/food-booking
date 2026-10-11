@@ -69,7 +69,7 @@
                 </div>
                 <div class="d-flex justify-content-between small text-muted mb-1">
                     <span>Platform Fee:</span>
-                    <strong id="platformFeeText">&#8377;9</strong>
+                    <strong id="platformFeeText">&#8377;0</strong>
                 </div>
                 <div class="d-flex justify-content-between small text-success mb-2">
                     <span>Delivery Charges:</span>
@@ -94,9 +94,11 @@
     const currentLoggedInUserId = "<%= currUser ? currUser._id : 'guest' %>";
     const defaultLoggedInUserName = "<%= currUser ? currUser.username : '' %>";
     const CART_STORAGE_KEY = "hungrymate_cart_" + currentLoggedInUserId;
+    
     let appliedCoupon = null;
     let discountAmount = 0;
     let computedFinalTotal = 0;
+    let computedSubtotal = 0;
 
     document.addEventListener("DOMContentLoaded", () => {
         renderCart();
@@ -173,6 +175,7 @@
                     <a href="/listings" class="btn btn-danger rounded-pill px-4 mt-2">Explore Menu</a>
                 </div>
             `;
+            computedSubtotal = 0;
             updateBillSummary(0);
             return;
         }
@@ -206,6 +209,7 @@
             `;
         });
 
+        computedSubtotal = subtotal;
         updateBillSummary(subtotal);
     }
 
@@ -262,6 +266,7 @@
         updateBillSummary(subtotal);
     }
 
+    // Dynamic Bill Calculation (Zero Hardcoding)
     function updateBillSummary(subtotal) {
         document.getElementById("subtotalText").innerHTML = `&#8377;${subtotal}`;
         document.getElementById("discountText").innerHTML = `-&#8377;${discountAmount}`;
@@ -269,6 +274,7 @@
         const platformFee = (subtotal > 0) ? 9 : 0;
         document.getElementById("platformFeeText").innerHTML = `&#8377;${platformFee}`;
         
+        // Exact Calculation: e.g. (130 - 0) + 9 = 139, ya (220 - 220) + 9 = 9
         computedFinalTotal = Math.max(subtotal - discountAmount + platformFee, platformFee);
         document.getElementById("grandTotalText").innerHTML = `&#8377;${computedFinalTotal}`;
     }
@@ -289,21 +295,19 @@
             return alert("Please enter your Delivery Address or click 'Use My Live Location'!");
         }
 
-        const subtotal = cart.reduce((acc, it) => acc + (it.price * it.quantity), 0);
-
+        // Store exact dynamic values (e.g. 139, 169, 9)
         const checkoutDraft = {
             userId: currentLoggedInUserId,
             name: name,
             phone: phone,
             address: address,
             cart: cart,
-            subtotal: subtotal,
+            subtotal: computedSubtotal,
             discount: discountAmount,
             couponApplied: appliedCoupon || "NONE",
             finalTotal: computedFinalTotal
         };
 
-        // Saved to both global and scoped localStorage
         localStorage.setItem("hungrymate_checkout_draft", JSON.stringify(checkoutDraft));
         localStorage.setItem("hungrymate_checkout_draft_" + currentLoggedInUserId, JSON.stringify(checkoutDraft));
         window.location.href = "/checkout/payment";
