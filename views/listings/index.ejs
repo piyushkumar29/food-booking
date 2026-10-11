@@ -195,7 +195,7 @@
                             <span class="food-new-price">&#8377;<%= currentPrice.toLocaleString("en-IN") %></span>
                         </div>
                         
-                        <!-- Point 1: Robust Direct Add To Cart Execution -->
+                        <!-- Point 4: Functional Add To Cart -->
                         <button class="btn btn-add-cart-pill shadow-sm" onclick="executeAddToCart('<%= listing._id %>', '<%= listing.title.replace(/'/g, '') %>', <%= listing.price %>, '<%= listing.image.url %>', <%= listing.preparationTime || 20 %>, '<%= (listing.restaurant || '').replace(/'/g, '') %>')">
                             + Add to Cart
                         </button>
@@ -224,7 +224,7 @@
     const currentUserId = "<%= currUser ? currUser._id : 'guest' %>";
     const USER_CART_KEY = "hungrymate_cart_" + currentUserId;
 
-    // Point 1: Robust Add To Cart Handler
+    // Point 4: Robust Add To Cart Handler
     function executeAddToCart(id, title, price, image, prepTime, restaurant) {
         let cart = JSON.parse(localStorage.getItem(USER_CART_KEY) || "[]");
         const existing = cart.find(item => item.id === id);
@@ -443,8 +443,8 @@
             foodCards.forEach(card => {
                 const title = card.getAttribute("data-title") || "";
                 const restaurant = card.getAttribute("data-restaurant") || "";
-                if (title.includes(val)) suggestions.add(title);
-                if (restaurant.includes(val)) suggestions.add(restaurant);
+                if (title.toLowerCase().includes(val)) suggestions.add(title);
+                if (restaurant.toLowerCase().includes(val)) suggestions.add(restaurant);
             });
 
             const arr = Array.from(suggestions).slice(0, 6);
