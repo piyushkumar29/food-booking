@@ -92,6 +92,7 @@
 
 <script>
     const currentLoggedInUserId = "<%= currUser ? currUser._id : 'guest' %>";
+    const defaultLoggedInUserName = "<%= currUser ? currUser.username : '' %>";
     const CART_STORAGE_KEY = "hungrymate_cart_" + currentLoggedInUserId;
     let appliedCoupon = null;
     let discountAmount = 0;
@@ -100,7 +101,11 @@
     document.addEventListener("DOMContentLoaded", () => {
         renderCart();
         const savedDraft = JSON.parse(localStorage.getItem("hungrymate_checkout_draft") || "{}");
-        if (savedDraft.name) document.getElementById("custName").value = savedDraft.name;
+        if (savedDraft.name && savedDraft.name.trim() !== "") {
+            document.getElementById("custName").value = savedDraft.name;
+        } else if (defaultLoggedInUserName) {
+            document.getElementById("custName").value = defaultLoggedInUserName;
+        }
         if (savedDraft.phone) document.getElementById("custPhone").value = savedDraft.phone;
         if (savedDraft.address) document.getElementById("custAddress").value = savedDraft.address;
     });
@@ -261,7 +266,6 @@
         document.getElementById("subtotalText").innerHTML = `&#8377;${subtotal}`;
         document.getElementById("discountText").innerHTML = `-&#8377;${discountAmount}`;
         
-        // Exact calculation: Platform Fee ₹9 always added if cart has items
         const platformFee = (subtotal > 0) ? 9 : 0;
         document.getElementById("platformFeeText").innerHTML = `&#8377;${platformFee}`;
         
@@ -273,17 +277,20 @@
         const cart = JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || "[]");
         if (cart.length === 0) return alert("Your cart is empty! Add items from menu first.");
 
-        const name = document.getElementById("custName").value.trim();
-        const phone = document.getElementById("custPhone").value.trim();
-        const address = document.getElementById("custAddress").value.trim();
+        let name = document.getElementById("custName").value.trim();
+        let phone = document.getElementById("custPhone").value.trim();
+        let address = document.getElementById("custAddress").value.trim();
 
-        if (!name || !phone || !address) {
-            return alert("Please fill Customer Name, Mobile Number, and Delivery Address before proceeding!");
+        if (!name) name = defaultLoggedInUserName || "Customer";
+        if (!phone) {
+            return alert("Please enter your Mobile Number before proceeding!");
+        }
+        if (!address) {
+            return alert("Please enter your Delivery Address or click 'Use My Live Location'!");
         }
 
         const subtotal = cart.reduce((acc, it) => acc + (it.price * it.quantity), 0);
 
-        // Store checkout draft in both global and scoped storage for 100% failproof read
         const checkoutDraft = {
             userId: currentLoggedInUserId,
             name: name,
@@ -296,6 +303,7 @@
             finalTotal: computedFinalTotal
         };
 
+        // Saved to both global and scoped localStorage
         localStorage.setItem("hungrymate_checkout_draft", JSON.stringify(checkoutDraft));
         localStorage.setItem("hungrymate_checkout_draft_" + currentLoggedInUserId, JSON.stringify(checkoutDraft));
         window.location.href = "/checkout/payment";
