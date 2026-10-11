@@ -43,7 +43,7 @@
                 </div>
             </div>
 
-            <!-- Coupon Code Section (Point 11: Removed Faltu Text Line) -->
+            <!-- Coupon Code Section -->
             <div class="border rounded-4 p-3 mb-4 bg-light">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <label class="form-label fw-bold small text-dark mb-0"><i class="fa-solid fa-tag text-warning me-1"></i>Apply Promo / Coupon Code</label>
@@ -99,13 +99,12 @@
 
     document.addEventListener("DOMContentLoaded", () => {
         renderCart();
-        const savedCheckout = JSON.parse(localStorage.getItem("hungrymate_checkout_draft_" + currentLoggedInUserId) || "{}");
+        const savedCheckout = JSON.parse(localStorage.getItem("hungrymate_checkout_draft") || "{}");
         if (savedCheckout.name) document.getElementById("custName").value = savedCheckout.name;
         if (savedCheckout.phone) document.getElementById("custPhone").value = savedCheckout.phone;
         if (savedCheckout.address) document.getElementById("custAddress").value = savedCheckout.address;
     });
 
-    // Real Live Location Extraction Function with Forced English Language (Points 7 & 9)
     function fetchLiveUserLocation() {
         const btn = document.getElementById("detectLocationBtn");
         const btnText = document.getElementById("locationBtnText");
@@ -128,7 +127,6 @@
                 statusHint.innerText = `GPS coordinates acquired. Fetching street address...`;
 
                 try {
-                    // Forced English accept-language so no regional Hindi/Bengali script appears
                     const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&accept-language=en`);
                     const data = await response.json();
 
@@ -266,6 +264,7 @@
         document.getElementById("grandTotalText").innerHTML = `&#8377;${finalTotal}`;
     }
 
+    // Point 2: Unified Draft Storage Guarantee
     function proceedToPaymentPage() {
         const cart = JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || "[]");
         if (cart.length === 0) return alert("Your cart is empty! Add items from menu first.");
@@ -282,6 +281,7 @@
         const finalTotal = Math.max(subtotal - discountAmount + 9, 0);
 
         const checkoutDraft = {
+            userId: currentLoggedInUserId,
             name: name,
             phone: phone,
             address: address,
@@ -292,6 +292,8 @@
             finalTotal: finalTotal
         };
 
+        // Saved both standard and scoped key to guarantee 100% session persistence
+        localStorage.setItem("hungrymate_checkout_draft", JSON.stringify(checkoutDraft));
         localStorage.setItem("hungrymate_checkout_draft_" + currentLoggedInUserId, JSON.stringify(checkoutDraft));
         window.location.href = "/checkout/payment";
     }

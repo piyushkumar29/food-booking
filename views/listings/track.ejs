@@ -64,7 +64,7 @@
     }
 </style>
 
-<!-- Point 5: Check if User is Logged In -->
+<!-- Login Required Guard -->
 <% if(!currUser) { %>
     <div class="row justify-content-center my-5">
         <div class="col-12 col-md-8 col-lg-6 text-center">
@@ -81,7 +81,18 @@
     </div>
 <% } else { %>
 
-<div class="track-card-box">
+<!-- Point 3: Clean Empty Order Box (Rendered when user has placed NO orders yet) -->
+<div id="noOrdersPlacedCard" class="track-card-box text-center py-5 d-none">
+    <i class="fa-solid fa-motorcycle fs-1 text-danger mb-3"></i>
+    <h4 class="fw-bold mb-2">No Orders Placed Yet!</h4>
+    <p class="text-muted small mb-4">You don't have any active deliveries or previous orders yet. Browse our menu to order delicious dishes.</p>
+    <a href="/listings" class="btn btn-danger rounded-pill px-4 py-2 fw-bold shadow-sm">
+        <i class="fa-solid fa-utensils me-1"></i> Explore Food Menu
+    </a>
+</div>
+
+<!-- Active Tracking Container (Rendered ONLY when user has active/past orders) -->
+<div class="track-card-box" id="mainTrackingCardContainer">
     
     <!-- Multi-Order Active Tabs Strip -->
     <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
@@ -119,7 +130,7 @@
     </div>
 
     <!-- Delivery Hero Partner Details -->
-    <div class="delivery-partner-badge">
+    <div class="delivery-partner-badge" id="heroBadgeWrapper">
         <div class="d-flex align-items-center gap-2">
             <div class="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center fw-bold fs-5" style="width: 44px; height: 44px;">
                 <i class="fa-solid fa-helmet-safety"></i>
@@ -137,7 +148,7 @@
     </div>
 
     <!-- Responsive Curve SVG Route -->
-    <div class="curved-track-container">
+    <div class="curved-track-container" id="curveWrapper">
         <svg viewBox="0 0 940 240" preserveAspectRatio="none" width="100%" height="100%">
             <path id="routeCurve" d="M 40,190 C 130,40 210,240 310,80 C 420,240 500,30 620,180 C 730,240 820,30 900,120" fill="none" stroke="#cbd5e1" stroke-width="12" stroke-linecap="round" stroke-dasharray="10,8" />
             <circle cx="40" cy="190" r="9" fill="#fe424d" />
@@ -167,7 +178,7 @@
         </div>
     </div>
 
-    <!-- Past Order Receipts Table -->
+    <!-- Past Order Receipts Table (Point 3: Real Rows with Delivery Hero, Phone, ETA, Star Rating Link) -->
     <div class="mt-4 pt-3 border-top">
         <div class="d-flex justify-content-between align-items-center mb-2">
             <h6 class="fw-bold mb-0"><i class="fa-solid fa-clock-rotate-left text-danger me-1"></i>Past Order Receipts & History</h6>
@@ -255,16 +266,23 @@
         }
     }
 
+    // Point 3: Clean Toggle Between "No Orders Yet" & "Active Tracking Container"
     function setupActiveOrderTabs() {
         let history = JSON.parse(localStorage.getItem(USER_HISTORY_KEY) || "[]");
+        const emptyCard = document.getElementById("noOrdersPlacedCard");
+        const mainCard = document.getElementById("mainTrackingCardContainer");
         const tabStrip = document.getElementById("multiOrdersTabStrip");
-        tabStrip.innerHTML = "";
 
         if (history.length === 0) {
-            loadOrderToTrack(null);
+            if (emptyCard) emptyCard.classList.remove("d-none");
+            if (mainCard) mainCard.classList.add("d-none");
             return;
+        } else {
+            if (emptyCard) emptyCard.classList.add("d-none");
+            if (mainCard) mainCard.classList.remove("d-none");
         }
 
+        tabStrip.innerHTML = "";
         history.forEach((ord, idx) => {
             const btn = document.createElement("button");
             const isDeliv = ord.isDelivered;
@@ -297,96 +315,89 @@
         const compBanner = document.getElementById("deliveryCompletedBanner");
         const refundBanner = document.getElementById("refundNoticeBanner");
 
-        if (order) {
-            document.getElementById("trackOrderId").innerText = order.orderId;
-            document.getElementById("trackDestAddress").innerText = order.address;
-            document.getElementById("trackOrderTime").innerText = order.placedAt;
+        if (!order) return;
 
-            const hero = order.deliveryHeroData || { name: "Rahul Verma", id: "HM-DEL-984", phone: "+91 98765 43210" };
-            document.getElementById("heroNameText").innerText = hero.name + ` (${hero.id})`;
-            document.getElementById("heroPhoneText").innerText = hero.phone;
-            document.getElementById("heroCallLink").href = `tel:${hero.phone.replace(/\s+/g, '')}`;
+        document.getElementById("trackOrderId").innerText = order.orderId;
+        document.getElementById("trackDestAddress").innerText = order.address;
+        document.getElementById("trackOrderTime").innerText = order.placedAt;
 
-            const city = (order.address || "").split(',')[0] || "Destination";
-            const rest = order.restaurantName || "Kitchen";
-            document.getElementById("stnKitchen").innerHTML = `<i class="fa-solid fa-kitchen-set me-1"></i> 1. ${rest}`;
-            document.getElementById("stnTransit1").innerHTML = `<i class="fa-solid fa-road me-1"></i> 2. ${city} Exp`;
-            document.getElementById("stnTransit2").innerHTML = `<i class="fa-solid fa-map-pin me-1"></i> 3. ${city} Sec`;
-            document.getElementById("stnDoorstep").innerHTML = `<i class="fa-solid fa-house-chimney me-1"></i> 4. Doorstep`;
+        const hero = order.deliveryHeroData || { name: "Rahul Verma", id: "HM-DEL-984", phone: "+91 98765 43210" };
+        document.getElementById("heroNameText").innerText = hero.name + ` (${hero.id})`;
+        document.getElementById("heroPhoneText").innerText = hero.phone;
+        document.getElementById("heroCallLink").href = `tel:${hero.phone.replace(/\s+/g, '')}`;
 
-            const durationTotalMs = (order.totalDurationMins || 25) * 60 * 1000;
-            const startTime = order.timestampStart || Date.now();
-            const elapsed = Date.now() - startTime;
-            const pathLength = path.getTotalLength();
+        const city = (order.address || "").split(',')[0] || "Destination";
+        const rest = order.restaurantName || "Kitchen";
+        document.getElementById("stnKitchen").innerHTML = `<i class="fa-solid fa-kitchen-set me-1"></i> 1. ${rest}`;
+        document.getElementById("stnTransit1").innerHTML = `<i class="fa-solid fa-road me-1"></i> 2. ${city} Exp`;
+        document.getElementById("stnTransit2").innerHTML = `<i class="fa-solid fa-map-pin me-1"></i> 3. ${city} Sec`;
+        document.getElementById("stnDoorstep").innerHTML = `<i class="fa-solid fa-house-chimney me-1"></i> 4. Doorstep`;
 
-            if (order.isCancelled) {
-                etaText.innerText = "Cancelled";
-                cancelBtn.classList.add("d-none");
-                bike.style.display = "none";
-                compBanner.classList.add("d-none");
-                refundBanner.classList.remove("d-none");
-                const isOnlinePay = (order.paymentMode || "").includes("UPI") || (order.paymentMode || "").includes("Card");
-                document.getElementById("refundMessageText").innerText = isOnlinePay 
-                    ? `Reason: ${order.cancelReason || 'Cancelled by user'}. A refund of ₹${order.totalPaid} has been initiated back to your ${order.paymentMode}.`
-                    : `Reason: ${order.cancelReason || 'Cancelled by user'}. (Cash on Delivery - No charge deducted).`;
-                return;
-            } else {
-                refundBanner.classList.add("d-none");
-            }
+        const durationTotalMs = (order.totalDurationMins || 25) * 60 * 1000;
+        const startTime = order.timestampStart || Date.now();
+        const elapsed = Date.now() - startTime;
+        const pathLength = path.getTotalLength();
 
-            if (order.isDelivered || elapsed >= durationTotalMs) {
-                const point = path.getPointAtLength(pathLength);
+        if (order.isCancelled) {
+            etaText.innerText = "Cancelled";
+            cancelBtn.classList.add("d-none");
+            bike.style.display = "none";
+            compBanner.classList.add("d-none");
+            refundBanner.classList.remove("d-none");
+            const isOnlinePay = (order.paymentMode || "").includes("UPI") || (order.paymentMode || "").includes("Card");
+            document.getElementById("refundMessageText").innerText = isOnlinePay 
+                ? `Reason: ${order.cancelReason || 'Cancelled by user'}. A refund of ₹${order.totalPaid} has been initiated back to your ${order.paymentMode}.`
+                : `Reason: ${order.cancelReason || 'Cancelled by user'}. (Cash on Delivery - No charge deducted).`;
+            return;
+        } else {
+            refundBanner.classList.add("d-none");
+        }
+
+        if (order.isDelivered || elapsed >= durationTotalMs) {
+            const point = path.getPointAtLength(pathLength);
+            bike.style.left = ((point.x / 940) * 100) + "%";
+            bike.style.top = ((point.y / 240) * 100) + "%";
+            bike.style.display = "block";
+            etaText.innerText = "Delivered!";
+            cancelBtn.classList.add("d-none");
+            compBanner.classList.remove("d-none");
+        } else {
+            bike.style.display = "block";
+            compBanner.classList.add("d-none");
+
+            currentAnimInterval = setInterval(() => {
+                const currentElapsed = Date.now() - startTime;
+                const progress = Math.min(currentElapsed / durationTotalMs, 1);
+                
+                const point = path.getPointAtLength(progress * pathLength);
                 bike.style.left = ((point.x / 940) * 100) + "%";
                 bike.style.top = ((point.y / 240) * 100) + "%";
-                bike.style.display = "block";
-                etaText.innerText = "Delivered!";
-                cancelBtn.classList.add("d-none");
-                compBanner.classList.remove("d-none");
-            } else {
-                bike.style.display = "block";
-                compBanner.classList.add("d-none");
 
-                currentAnimInterval = setInterval(() => {
-                    const currentElapsed = Date.now() - startTime;
-                    const progress = Math.min(currentElapsed / durationTotalMs, 1);
-                    
-                    const point = path.getPointAtLength(progress * pathLength);
-                    bike.style.left = ((point.x / 940) * 100) + "%";
-                    bike.style.top = ((point.y / 240) * 100) + "%";
+                if (progress >= 0.80) {
+                    cancelBtn.classList.add("d-none");
+                } else {
+                    cancelBtn.classList.remove("d-none");
+                }
 
-                    if (progress >= 0.80) {
-                        cancelBtn.classList.add("d-none");
-                    } else {
-                        cancelBtn.classList.remove("d-none");
-                    }
+                const remainingSecs = Math.max(Math.floor((durationTotalMs - currentElapsed) / 1000), 0);
+                const m = Math.floor(remainingSecs / 60);
+                const s = remainingSecs % 60;
+                etaText.innerText = `${m}:${s < 10 ? '0' : ''}${s} mins`;
 
-                    const remainingSecs = Math.max(Math.floor((durationTotalMs - currentElapsed) / 1000), 0);
-                    const m = Math.floor(remainingSecs / 60);
-                    const s = remainingSecs % 60;
-                    etaText.innerText = `${m}:${s < 10 ? '0' : ''}${s} mins`;
+                if (progress >= 1) {
+                    etaText.innerText = "Delivered!";
+                    clearInterval(currentAnimInterval);
 
-                    if (progress >= 1) {
-                        etaText.innerText = "Delivered!";
-                        clearInterval(currentAnimInterval);
+                    order.isDelivered = true;
+                    updateLocalOrderRecord(order);
 
-                        order.isDelivered = true;
-                        updateLocalOrderRecord(order);
-
-                        compBanner.classList.remove("d-none");
-                        cancelBtn.classList.add("d-none");
-                        setupActiveOrderTabs();
-                        renderHistoryTable();
-                        confetti({ particleCount: 160, spread: 85, origin: { y: 0.5 } });
-                    }
-                }, 500);
-            }
-        } else {
-            document.getElementById("trackDestAddress").innerText = "No active orders found!";
-            etaText.innerText = "Idle";
-            bike.style.display = "none";
-            cancelBtn.classList.add("d-none");
-            compBanner.classList.add("d-none");
-            refundBanner.classList.add("d-none");
+                    compBanner.classList.remove("d-none");
+                    cancelBtn.classList.add("d-none");
+                    setupActiveOrderTabs();
+                    renderHistoryTable();
+                    confetti({ particleCount: 160, spread: 85, origin: { y: 0.5 } });
+                }
+            }, 500);
         }
     }
 

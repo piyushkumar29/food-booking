@@ -117,15 +117,15 @@
         <button class="scroll-btn ms-1 d-none d-sm-flex" id="slideRight"><i class="fa-solid fa-chevron-right"></i></button>
     </div>
 
-    <!-- Veg & Dark/Light Mode Toggle Controls (Point 4: Real-time Label Text Fix) -->
+    <!-- Veg Toggle (Point 1: Robust & Click Synchronized) & Dark Mode Toggle -->
     <div class="controls-pills-bar">
         <div class="clickable-toggle-box" id="vegPill">
             <span class="toggle-label">&#x1F7E2; Veg</span>
-            <input class="form-check-input mt-0" type="checkbox" id="onlyVegToggle" role="switch">
+            <input class="form-check-input mt-0" type="checkbox" id="onlyVegToggle" role="switch" style="pointer-events: none;">
         </div>
         <div class="clickable-toggle-box" id="darkPill">
             <span class="toggle-label" id="darkLabel"><i class="fa-solid fa-moon"></i> Dark</span>
-            <input class="form-check-input mt-0" type="checkbox" id="darkModeToggle" role="switch">
+            <input class="form-check-input mt-0" type="checkbox" id="darkModeToggle" role="switch" style="pointer-events: none;">
         </div>
     </div>
 </div>
@@ -151,7 +151,7 @@
 
             let currentPrice = listing.price || 199;
             let originalCutPrice = Math.round(currentPrice * 2.5);
-            let isVegFood = (listing.isVeg === true || String(listing.isVeg) === 'true');
+            let isVegFood = (listing.isVeg === true || String(listing.isVeg).toLowerCase() === 'true');
         %>
         <div class="food-card-box"
              data-title="<%= (listing.title || '').toLowerCase() %>"
@@ -159,7 +159,7 @@
              data-location="<%= (listing.location || '').toLowerCase() %>"
              data-category="<%= (listing.category || '').toLowerCase() %>"
              data-description="<%= (listing.description || '').toLowerCase() %>"
-             data-isveg="<%= String(listing.isVeg) %>">
+             data-isveg="<%= isVegFood ? 'true' : 'false' %>">
             
             <div class="listing-card">
                 <div class="card-img-wrapper">
@@ -195,7 +195,6 @@
                             <span class="food-new-price">&#8377;<%= currentPrice.toLocaleString("en-IN") %></span>
                         </div>
                         
-                        <!-- Point 4: Functional Add To Cart -->
                         <button class="btn btn-add-cart-pill shadow-sm" onclick="executeAddToCart('<%= listing._id %>', '<%= listing.title.replace(/'/g, '') %>', <%= listing.price %>, '<%= listing.image.url %>', <%= listing.preparationTime || 20 %>, '<%= (listing.restaurant || '').replace(/'/g, '') %>')">
                             + Add to Cart
                         </button>
@@ -208,10 +207,10 @@
 
 <!-- Friendly No Match Box -->
 <div id="noMatchMessage" class="text-center py-5 d-none">
-    <div class="p-4 rounded-4 shadow-sm d-inline-block border" style="max-width: 480px;">
+    <div class="p-4 rounded-4 shadow-sm d-inline-block border bg-white" style="max-width: 480px;">
         <i class="fa-solid fa-bowl-food fs-1 text-danger mb-3"></i>
         <h5 class="fw-bold">No Food Items Found!</h5>
-        <p class="text-muted small mb-3">We couldn't find any dish matching your search keyword. Try searching for popular items like <strong>Biryani, Pizza, Burger, Tacos, Rolls, or Cakes</strong>.</p>
+        <p class="text-muted small mb-3">We couldn't find any dish matching your selection. Try selecting another category or clearing filters.</p>
         <button class="btn btn-danger rounded-pill px-4 btn-sm fw-bold shadow-sm" onclick="resetAllSearchAndFilters()">
             Explore All Food Items
         </button>
@@ -224,7 +223,6 @@
     const currentUserId = "<%= currUser ? currUser._id : 'guest' %>";
     const USER_CART_KEY = "hungrymate_cart_" + currentUserId;
 
-    // Point 4: Robust Add To Cart Handler
     function executeAddToCart(id, title, price, image, prepTime, restaurant) {
         let cart = JSON.parse(localStorage.getItem(USER_CART_KEY) || "[]");
         const existing = cart.find(item => item.id === id);
@@ -271,6 +269,7 @@
         if (mobileSearchInput) mobileSearchInput.value = "";
         activeCat = "all";
         activeRestaurantFilter = "";
+        onlyVegToggle.checked = false;
         document.getElementById("activeRestaurantAlert").classList.add("d-none");
         categoryFilters.forEach(item => item.classList.remove("active-filter"));
         const allCatBtn = document.querySelector('.filter[data-category="all"]');
@@ -284,6 +283,7 @@
     if (slBtn) slBtn.addEventListener("click", () => filterBox.scrollBy({ left: -240, behavior: "smooth" }));
     if (srBtn) srBtn.addEventListener("click", () => filterBox.scrollBy({ left: 240, behavior: "smooth" }));
 
+    // Point 1: 100% Reliable Veg Filter Click & Event Trigger
     const vegPill = document.getElementById("vegPill");
     const onlyVegToggle = document.getElementById("onlyVegToggle");
     vegPill.addEventListener("click", () => {
@@ -295,7 +295,6 @@
     const darkModeToggle = document.getElementById("darkModeToggle");
     const darkLabel = document.getElementById("darkLabel");
 
-    // Point 4: Exact Dark / Light Switch Label Synchronization
     function updateDarkMode(isDark) {
         if (isDark) {
             document.body.classList.add("dark-mode");
@@ -326,7 +325,6 @@
     const categoryFilters = document.querySelectorAll(".filter");
     const noMatchMsg = document.getElementById("noMatchMessage");
 
-    // Exact Category Match Function
     function checkCategoryMatch(activeCat, title, category, description, isVeg) {
         if (activeCat === "all" || activeCat === "trending") return true;
         if (activeCat === "veg") return isVeg;
@@ -376,7 +374,7 @@
         return fullContent.includes(activeCat);
     }
 
-    // Universal Real-Time Filter & Search Execution
+    // Point 1: Universal Filter Execution with strict Veg Checking
     function applyAllFilters() {
         const query = ((searchInput ? searchInput.value : "") || (mobileSearchInput ? mobileSearchInput.value : "")).trim().toLowerCase();
         const vegOnly = onlyVegToggle.checked;
@@ -388,7 +386,7 @@
             const location = (card.getAttribute("data-location") || "").toLowerCase();
             const category = (card.getAttribute("data-category") || "").toLowerCase();
             const description = (card.getAttribute("data-description") || "").toLowerCase();
-            const isVeg = card.getAttribute("data-isveg") === "true";
+            const isVeg = (card.getAttribute("data-isveg") === "true");
 
             const fullContent = `${title} ${restaurant} ${location} ${category} ${description}`;
             
@@ -398,7 +396,8 @@
                 matchSearch = words.every(w => fullContent.includes(w));
             }
 
-            const matchVeg = !vegOnly || isVeg;
+            // Only Veg filter: If vegOnly is true, isVeg must be true
+            const matchVeg = !vegOnly || (isVeg === true);
             
             let matchRestaurant = true;
             if (activeRestaurantFilter) {

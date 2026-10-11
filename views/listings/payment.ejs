@@ -24,7 +24,7 @@
                 <small id="summaryCustomerAddress" class="text-secondary d-block text-truncate">--</small>
             </div>
 
-            <!-- Payment Options Tabs/Accordion -->
+            <!-- Payment Options Accordion -->
             <div class="accordion" id="paymentOptionsAccordion">
                 
                 <!-- 1. DYNAMIC QR CODE -->
@@ -72,7 +72,7 @@
                     </div>
                 </div>
 
-                <!-- 3. CREDIT & DEBIT CARD WITH INSTANT HOLDER NAME -->
+                <!-- 3. CREDIT & DEBIT CARD -->
                 <div class="accordion-item border rounded-3 mb-3 overflow-hidden">
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed fw-bold text-dark shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCard">
@@ -133,9 +133,9 @@
 </div>
 
 <script>
+    const currentSessionUserId = "<%= currUser ? currUser._id : 'guest' %>";
     let checkoutData = null;
 
-    // Delivery Partner Pool
     const heroPool = [
         { name: "Rahul Verma", id: "HM-DEL-984", phone: "+91 98765 43210" },
         { name: "Amitabh Sen", id: "HM-DEL-412", phone: "+91 98301 22415" },
@@ -145,7 +145,13 @@
     ];
 
     document.addEventListener("DOMContentLoaded", () => {
-        checkoutData = JSON.parse(localStorage.getItem("hungrymate_checkout_draft") || "null");
+        // Point 2: Dual Key Recovery to permanently eliminate session error
+        checkoutData = JSON.parse(
+            localStorage.getItem("hungrymate_checkout_draft") ||
+            localStorage.getItem("hungrymate_checkout_draft_" + currentSessionUserId) ||
+            "null"
+        );
+
         if (!checkoutData || !checkoutData.cart || checkoutData.cart.length === 0) {
             alert("No checkout session found! Please start from cart.");
             window.location.href = "/cart";
@@ -157,14 +163,12 @@
         document.getElementById("summaryCustomerPhone").innerText = checkoutData.phone;
         document.getElementById("summaryCustomerAddress").innerText = checkoutData.address;
 
-        // Dynamic QR code API generator
         const qrAmount = checkoutData.finalTotal;
         const randomRef = "HM" + Math.floor(1000 + Math.random() * 9000);
         const upiString = encodeURIComponent(`upi://pay?pa=hungrymate.pay@upi&pn=HungrymateFood&am=${qrAmount}&tr=${randomRef}&cu=INR`);
         document.getElementById("dynamicQrImage").src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${upiString}`;
     });
 
-    // Real-like UPI ID verification with holder name display
     function verifyUpiId() {
         const val = document.getElementById("upiIdInput").value.trim();
         if (!val || !val.includes("@")) {
@@ -185,12 +189,10 @@
     }
 
     function detectCardBrand(val) {
-        // Formatter space every 4 digits
         const formatted = val.replace(/\D/g, "").replace(/(.{4})/g, "$1 ").trim();
         document.getElementById("cardNumberInput").value = formatted;
     }
 
-    // Finalize order and create history record
     function finalizePayment(paymentMode) {
         const randomDurationMins = Math.floor(Math.random() * (30 - 15 + 1)) + 15;
         const orderId = "HM-" + Math.floor(10000 + Math.random() * 90000);
@@ -201,6 +203,7 @@
 
         const finalizedOrder = {
             orderId: orderId,
+            userId: currentSessionUserId,
             customerName: checkoutData.name,
             customerPhone: checkoutData.phone,
             address: checkoutData.address,
@@ -220,13 +223,15 @@
             isCancelled: false
         };
 
-        let history = JSON.parse(localStorage.getItem("hungrymate_order_history") || "[]");
+        const USER_HISTORY_KEY = "hungrymate_order_history_" + currentSessionUserId;
+        let history = JSON.parse(localStorage.getItem(USER_HISTORY_KEY) || "[]");
         history.unshift(finalizedOrder);
-        localStorage.setItem("hungrymate_order_history", JSON.stringify(history));
+        localStorage.setItem(USER_HISTORY_KEY, JSON.stringify(history));
 
-        // Clear cart & temporary draft
-        localStorage.removeItem("hungrymate_cart");
+        // Clear user-specific cart & drafts
+        localStorage.removeItem("hungrymate_cart_" + currentSessionUserId);
         localStorage.removeItem("hungrymate_checkout_draft");
+        localStorage.removeItem("hungrymate_checkout_draft_" + currentSessionUserId);
         if (typeof refreshNavCartBadge === "function") refreshNavCartBadge();
 
         alert(`Order #${orderId} Placed Successfully using ${paymentMode}!`);
