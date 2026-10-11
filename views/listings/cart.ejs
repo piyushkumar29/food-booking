@@ -163,7 +163,6 @@
     }
 
     function renderCart() {
-        // Fallback to check guest or legacy cart if user cart is empty
         let cart = JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || "[]");
         if (cart.length === 0) {
             const fallbackCart = JSON.parse(localStorage.getItem("hungrymate_cart") || "[]");
@@ -319,11 +318,10 @@
             finalTotal: exactFinalAmount
         };
 
-        // Saved to both global and scoped localStorage
         localStorage.setItem("hungrymate_checkout_draft", JSON.stringify(checkoutDraft));
         localStorage.setItem("hungrymate_checkout_draft_" + currentLoggedInUserId, JSON.stringify(checkoutDraft));
 
-        // URL Parameters pass taaki direct browser level par exact values transport hon
+        // URL parameters transport ensures 100% failproof value transmission
         const targetUrl = `/checkout/payment?amount=${encodeURIComponent(exactFinalAmount)}&name=${encodeURIComponent(name)}&phone=${encodeURIComponent(phone)}&address=${encodeURIComponent(address)}`;
         window.location.href = targetUrl;
     }

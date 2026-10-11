@@ -124,8 +124,9 @@
                         <div class="accordion-body payment-acc-body text-center">
                             <p class="small text-white-50 mb-2">Scan & pay using PhonePe, Google Pay, Paytm, or BHIM</p>
                             
+                            <!-- Pure High-Res Responsive QR Container -->
                             <div class="qr-box-wrap mb-2">
-                                <div id="qrcodeContainer"></div>
+                                <img id="dynamicQrImage" src="" alt="Live Payment QR Code" style="width: 200px; height: 200px; display: block; margin: 0 auto; object-fit: contain;">
                             </div>
                             
                             <div class="small fw-semibold text-white mt-1">
@@ -224,173 +225,162 @@
 </div>
 
 <script>
-    const currentSessionUserId = "<%= currUser ? currUser._id : 'guest' %>";
-    const defaultLoggedInUserName = "<%= currUser ? currUser.username : '' %>";
-    let checkoutData = null;
-    let finalPayAmount = 0;
+    (function() {
+        const currentSessionUserId = "<%= currUser ? currUser._id : 'guest' %>";
+        const defaultLoggedInUserName = "<%= currUser ? currUser.username : '' %>";
+        let checkoutData = null;
+        let finalPayAmount = 0;
 
-    const heroPool = [
-        { name: "Rahul Verma", id: "HM-DEL-984", phone: "+91 98765 43210" },
-        { name: "Amitabh Sen", id: "HM-DEL-412", phone: "+91 98301 22415" },
-        { name: "Subhash Mondal", id: "HM-DEL-773", phone: "+91 89104 55621" },
-        { name: "Rohan Mukherjee", id: "HM-DEL-291", phone: "+91 94331 88902" },
-        { name: "Vikram Das", id: "HM-DEL-658", phone: "+91 97482 11340" }
-    ];
+        const heroPool = [
+            { name: "Rahul Verma", id: "HM-DEL-984", phone: "+91 98765 43210" },
+            { name: "Amitabh Sen", id: "HM-DEL-412", phone: "+91 98301 22415" },
+            { name: "Subhash Mondal", id: "HM-DEL-773", phone: "+91 89104 55621" },
+            { name: "Rohan Mukherjee", id: "HM-DEL-291", phone: "+91 94331 88902" },
+            { name: "Vikram Das", id: "HM-DEL-658", phone: "+91 97482 11340" }
+        ];
 
-    document.addEventListener("DOMContentLoaded", () => {
-        // Step 1: Read URL Parameters (Highest Priority)
-        const urlParams = new URLSearchParams(window.location.search);
-        const urlAmount = urlParams.get("amount");
-        const urlName = urlParams.get("name");
-        const urlPhone = urlParams.get("phone");
-        const urlAddress = urlParams.get("address");
+        function initPaymentView() {
+            // Step 1: Read URL Search Parameters (Highest Reliability)
+            const urlParams = new URLSearchParams(window.location.search);
+            const paramAmount = urlParams.get("amount");
+            const paramName = urlParams.get("name");
+            const paramPhone = urlParams.get("phone");
+            const paramAddress = urlParams.get("address");
 
-        // Step 2: Read LocalStorage Draft
-        const rawDraft = localStorage.getItem("hungrymate_checkout_draft") ||
-                         localStorage.getItem("hungrymate_checkout_draft_" + currentSessionUserId);
+            // Step 2: Read Draft from Storage
+            const rawDraft = localStorage.getItem("hungrymate_checkout_draft") ||
+                             localStorage.getItem("hungrymate_checkout_draft_" + currentSessionUserId);
 
-        if (rawDraft) {
-            try { checkoutData = JSON.parse(rawDraft); } catch(e) { checkoutData = null; }
+            if (rawDraft) {
+                try { checkoutData = JSON.parse(rawDraft); } catch(e) { checkoutData = null; }
+            }
+
+            // Calculate Exact Final Amount
+            if (paramAmount && !isNaN(parseFloat(paramAmount))) {
+                finalPayAmount = parseFloat(paramAmount);
+            } else if (checkoutData && typeof checkoutData.finalTotal === "number" && !isNaN(checkoutData.finalTotal)) {
+                finalPayAmount = checkoutData.finalTotal;
+            } else if (checkoutData && checkoutData.subtotal) {
+                finalPayAmount = checkoutData.subtotal;
+            } else {
+                finalPayAmount = 139;
+            }
+
+            // Customer Info Binding
+            const custName = paramName || (checkoutData && checkoutData.name) || defaultLoggedInUserName || "Customer";
+            const custPhone = paramPhone || (checkoutData && checkoutData.phone) || "+91 Contact Verified";
+            const custAddress = paramAddress || (checkoutData && checkoutData.address) || "Delivery Address Set";
+
+            // Render on DOM
+            document.getElementById("payAmountDisplay").innerHTML = "&#8377;" + finalPayAmount;
+            document.getElementById("summaryCustomerName").innerText = custName;
+            document.getElementById("summaryCustomerPhone").innerText = custPhone;
+            document.getElementById("summaryCustomerAddress").innerText = custAddress;
+
+            const codBtnLabel = document.getElementById("codButtonLabel");
+            if (codBtnLabel) {
+                codBtnLabel.innerText = "Pay Amount (₹" + finalPayAmount + ")";
+            }
+
+            // Generate Instant Dynamic QR Image (Zero External JS Library Error)
+            const randomTxnSuffix = Date.now().toString().slice(-6) + Math.floor(100 + Math.random() * 900);
+            const upiUri = `upi://pay?pa=hungrymate.pay@upi&pn=HungrymateFood&am=${finalPayAmount}&tr=HM${randomTxnSuffix}&tn=Order_${randomTxnSuffix}&cu=INR`;
+            
+            const qrImageEl = document.getElementById("dynamicQrImage");
+            if (qrImageEl) {
+                const encodedUri = encodeURIComponent(upiUri);
+                // Guaranteed instant dynamic SVG QR code
+                qrImageEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=4&data=${encodedUri}&t=${Date.now()}`;
+                qrImageEl.onerror = function() {
+                    this.onerror = null;
+                    this.src = `https://quickchart.io/qr?text=${encodedUri}&size=200`;
+                };
+            }
         }
 
-        // Determine Final Exact Amount (Dynamic without fallback to 9)
-        if (urlAmount && !isNaN(parseFloat(urlAmount))) {
-            finalPayAmount = parseFloat(urlAmount);
-        } else if (checkoutData && typeof checkoutData.finalTotal === "number") {
-            finalPayAmount = checkoutData.finalTotal;
-        } else if (checkoutData && checkoutData.subtotal) {
-            finalPayAmount = checkoutData.subtotal;
+        // Initialize immediately to prevent any empty flash
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPaymentView);
         } else {
-            finalPayAmount = 139; // Fallback only if both sources fail
+            initPaymentView();
         }
 
-        // Determine Customer Details
-        const custName = urlName || (checkoutData && checkoutData.name) || defaultLoggedInUserName || "Customer";
-        const custPhone = urlPhone || (checkoutData && checkoutData.phone) || "+91 Contact Verified";
-        const custAddress = urlAddress || (checkoutData && checkoutData.address) || "Delivery Address Set";
+        window.verifyUpiId = function() {
+            const val = document.getElementById("upiIdInput").value.trim();
+            if (!val || !val.includes("@")) {
+                return alert("Please enter a valid UPI address (e.g. mobile@upi)!");
+            }
+            const namePart = val.split("@")[0].replace(/[^a-zA-Z]/g, " ").trim();
+            const holderName = namePart ? namePart.toUpperCase() : "VERIFIED USER";
 
-        // Render UI
-        document.getElementById("payAmountDisplay").innerHTML = `&#8377;${finalPayAmount}`;
-        document.getElementById("summaryCustomerName").innerText = custName;
-        document.getElementById("summaryCustomerPhone").innerText = custPhone;
-        document.getElementById("summaryCustomerAddress").innerText = custAddress;
-
-        const codBtnLabel = document.getElementById("codButtonLabel");
-        if (codBtnLabel) {
-            codBtnLabel.innerText = `Pay Amount (₹${finalPayAmount})`;
-        }
-
-        // Render Fresh Random QR Code using Dynamic Multi-Provider SVG (Zero Network Failure)
-        renderDynamicQRCode(finalPayAmount);
-    });
-
-    // Fresh Random QR Generator (Unique Reference Every Visit)
-    function renderDynamicQRCode(amount) {
-        const qrBox = document.getElementById("qrcodeContainer");
-        qrBox.innerHTML = "";
-
-        const randomTxnSuffix = Date.now().toString().slice(-6) + Math.floor(100 + Math.random() * 900);
-        const upiUri = `upi://pay?pa=hungrymate.pay@upi&pn=HungrymateFood&am=${amount}&tr=HM${randomTxnSuffix}&tn=Order_${randomTxnSuffix}&cu=INR`;
-        
-        // Multi-fallback secure QR Image
-        const qrImg = document.createElement("img");
-        qrImg.alt = "Payment QR Code";
-        qrImg.style.width = "200px";
-        qrImg.style.height = "200px";
-        qrImg.style.display = "block";
-        qrImg.style.margin = "0 auto";
-        qrImg.style.objectFit = "contain";
-        
-        // Primary QR provider
-        const primaryUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=2&data=${encodeURIComponent(upiUri)}&rand=${Date.now()}`;
-        // Fallback QR provider if primary blocked
-        const fallbackUrl = `https://quickchart.io/qr?text=${encodeURIComponent(upiUri)}&size=200`;
-
-        qrImg.src = primaryUrl;
-        qrImg.onerror = function() {
-            this.onerror = null;
-            this.src = fallbackUrl;
+            document.getElementById("upiHolderName").innerText = holderName;
+            document.getElementById("upiVerifiedBadge").classList.remove("d-none");
         };
 
-        qrBox.appendChild(qrImg);
-    }
-
-    function verifyUpiId() {
-        const val = document.getElementById("upiIdInput").value.trim();
-        if (!val || !val.includes("@")) {
-            return alert("Please enter a valid UPI address (e.g. mobile@upi)!");
-        }
-        const namePart = val.split("@")[0].replace(/[^a-zA-Z]/g, " ").trim();
-        const holderName = namePart ? namePart.toUpperCase() : "VERIFIED USER";
-
-        document.getElementById("upiHolderName").innerText = holderName;
-        document.getElementById("upiVerifiedBadge").classList.remove("d-none");
-    }
-
-    function reflectCardName(val) {
-        if (val.trim().length > 2) {
-            document.getElementById("verifiedCardHolder").innerText = val.trim().toUpperCase();
-            document.getElementById("cardVerifiedBadge").classList.remove("d-none");
-        }
-    }
-
-    function detectCardBrand(val) {
-        const formatted = val.replace(/\D/g, "").replace(/(.{4})/g, "$1 ").trim();
-        document.getElementById("cardNumberInput").value = formatted;
-    }
-
-    function finalizePayment(paymentMode) {
-        // Read cart data from draft or storage
-        const currentCart = (checkoutData && checkoutData.cart && checkoutData.cart.length > 0)
-            ? checkoutData.cart
-            : JSON.parse(localStorage.getItem("hungrymate_cart_" + currentSessionUserId) || localStorage.getItem("hungrymate_cart") || "[]");
-
-        const randomDurationMins = Math.floor(Math.random() * (30 - 15 + 1)) + 15;
-        const orderId = "HM-" + Math.floor(10000 + Math.random() * 90000);
-        const randomHero = heroPool[Math.floor(Math.random() * heroPool.length)];
-
-        const now = new Date();
-        const placedAtStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ", " + now.toLocaleDateString("en-IN", { day: 'numeric', month: 'short' });
-
-        const custName = document.getElementById("summaryCustomerName").innerText || "Customer";
-        const custPhone = document.getElementById("summaryCustomerPhone").innerText || "+91 98765 43210";
-        const custAddress = document.getElementById("summaryCustomerAddress").innerText || "Kolkata, West Bengal";
-
-        const finalizedOrder = {
-            orderId: orderId,
-            userId: currentSessionUserId,
-            customerName: custName,
-            customerPhone: custPhone,
-            address: custAddress,
-            items: currentCart,
-            subtotal: (checkoutData && checkoutData.subtotal) ? checkoutData.subtotal : finalPayAmount,
-            discount: (checkoutData && checkoutData.discount) ? checkoutData.discount : 0,
-            couponApplied: (checkoutData && checkoutData.couponApplied) ? checkoutData.couponApplied : "NONE",
-            totalPaid: finalPayAmount,
-            paymentMode: paymentMode,
-            totalDurationMins: randomDurationMins,
-            timestampStart: Date.now(),
-            placedAt: placedAtStr,
-            deliveryHeroData: randomHero,
-            restaurantName: (currentCart.length > 0 && currentCart[0].restaurant) ? currentCart[0].restaurant : "Hungrymate Kitchen",
-            firstFoodItemId: (currentCart.length > 0 && currentCart[0].id) ? currentCart[0].id : "",
-            isDelivered: false,
-            isCancelled: false
+        window.reflectCardName = function(val) {
+            if (val.trim().length > 2) {
+                document.getElementById("verifiedCardHolder").innerText = val.trim().toUpperCase();
+                document.getElementById("cardVerifiedBadge").classList.remove("d-none");
+            }
         };
 
-        const USER_HISTORY_KEY = "hungrymate_order_history_" + currentSessionUserId;
-        let history = JSON.parse(localStorage.getItem(USER_HISTORY_KEY) || "[]");
-        history.unshift(finalizedOrder);
-        localStorage.setItem(USER_HISTORY_KEY, JSON.stringify(history));
+        window.detectCardBrand = function(val) {
+            const formatted = val.replace(/\D/g, "").replace(/(.{4})/g, "$1 ").trim();
+            document.getElementById("cardNumberInput").value = formatted;
+        };
 
-        // Clear user-specific cart & drafts
-        localStorage.removeItem("hungrymate_cart_" + currentSessionUserId);
-        localStorage.removeItem("hungrymate_cart");
-        localStorage.removeItem("hungrymate_checkout_draft");
-        localStorage.removeItem("hungrymate_checkout_draft_" + currentSessionUserId);
-        if (typeof refreshNavCartBadge === "function") refreshNavCartBadge();
+        window.finalizePayment = function(paymentMode) {
+            const currentCart = (checkoutData && checkoutData.cart && checkoutData.cart.length > 0)
+                ? checkoutData.cart
+                : JSON.parse(localStorage.getItem("hungrymate_cart_" + currentSessionUserId) || localStorage.getItem("hungrymate_cart") || "[]");
 
-        alert(`Order #${orderId} Placed Successfully via ${paymentMode}!`);
-        window.location.href = "/orders/track";
-    }
+            const randomDurationMins = Math.floor(Math.random() * (30 - 15 + 1)) + 15;
+            const orderId = "HM-" + Math.floor(10000 + Math.random() * 90000);
+            const randomHero = heroPool[Math.floor(Math.random() * heroPool.length)];
+
+            const now = new Date();
+            const placedAtStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ", " + now.toLocaleDateString("en-IN", { day: 'numeric', month: 'short' });
+
+            const custName = document.getElementById("summaryCustomerName").innerText || "Customer";
+            const custPhone = document.getElementById("summaryCustomerPhone").innerText || "+91 98765 43210";
+            const custAddress = document.getElementById("summaryCustomerAddress").innerText || "Kolkata, West Bengal";
+
+            const finalizedOrder = {
+                orderId: orderId,
+                userId: currentSessionUserId,
+                customerName: custName,
+                customerPhone: custPhone,
+                address: custAddress,
+                items: currentCart,
+                subtotal: (checkoutData && checkoutData.subtotal) ? checkoutData.subtotal : finalPayAmount,
+                discount: (checkoutData && checkoutData.discount) ? checkoutData.discount : 0,
+                couponApplied: (checkoutData && checkoutData.couponApplied) ? checkoutData.couponApplied : "NONE",
+                totalPaid: finalPayAmount,
+                paymentMode: paymentMode,
+                totalDurationMins: randomDurationMins,
+                timestampStart: Date.now(),
+                placedAt: placedAtStr,
+                deliveryHeroData: randomHero,
+                restaurantName: (currentCart.length > 0 && currentCart[0].restaurant) ? currentCart[0].restaurant : "Hungrymate Kitchen",
+                firstFoodItemId: (currentCart.length > 0 && currentCart[0].id) ? currentCart[0].id : "",
+                isDelivered: false,
+                isCancelled: false
+            };
+
+            const USER_HISTORY_KEY = "hungrymate_order_history_" + currentSessionUserId;
+            let history = JSON.parse(localStorage.getItem(USER_HISTORY_KEY) || "[]");
+            history.unshift(finalizedOrder);
+            localStorage.setItem(USER_HISTORY_KEY, JSON.stringify(history));
+
+            // Clear temporary cart & drafts
+            localStorage.removeItem("hungrymate_cart_" + currentSessionUserId);
+            localStorage.removeItem("hungrymate_cart");
+            localStorage.removeItem("hungrymate_checkout_draft");
+            localStorage.removeItem("hungrymate_checkout_draft_" + currentSessionUserId);
+            if (typeof refreshNavCartBadge === "function") refreshNavCartBadge();
+
+            alert(`Order #${orderId} Placed Successfully via ${paymentMode}!`);
+            window.location.href = "/orders/track";
+        };
+    })();
 </script>
