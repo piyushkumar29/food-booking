@@ -90,7 +90,7 @@
     .toggle-label { font-size: 0.72rem; font-weight: 700; margin: 0; white-space: nowrap; }
 </style>
 
-<!-- Categories & Controls (Points 3 & 4) -->
+<!-- Categories & Controls -->
 <div class="top-action-bar">
     <div class="filter-wrapper">
         <button class="scroll-btn me-1 d-none d-sm-flex" id="slideLeft"><i class="fa-solid fa-chevron-left"></i></button>
@@ -117,7 +117,7 @@
         <button class="scroll-btn ms-1 d-none d-sm-flex" id="slideRight"><i class="fa-solid fa-chevron-right"></i></button>
     </div>
 
-    <!-- Veg & Dark Mode Toggle Controls -->
+    <!-- Veg & Dark/Light Mode Toggle Controls (Point 4: Real-time Label Text Fix) -->
     <div class="controls-pills-bar">
         <div class="clickable-toggle-box" id="vegPill">
             <span class="toggle-label">&#x1F7E2; Veg</span>
@@ -195,7 +195,8 @@
                             <span class="food-new-price">&#8377;<%= currentPrice.toLocaleString("en-IN") %></span>
                         </div>
                         
-                        <button class="btn btn-add-cart-pill shadow-sm" onclick="addToCart('<%= listing._id %>', '<%= listing.title.replace(/'/g, '') %>', <%= listing.price %>, '<%= listing.image.url %>', <%= listing.preparationTime || 20 %>, '<%= (listing.restaurant || '').replace(/'/g, '') %>')">
+                        <!-- Point 1: Robust Direct Add To Cart Execution -->
+                        <button class="btn btn-add-cart-pill shadow-sm" onclick="executeAddToCart('<%= listing._id %>', '<%= listing.title.replace(/'/g, '') %>', <%= listing.price %>, '<%= listing.image.url %>', <%= listing.preparationTime || 20 %>, '<%= (listing.restaurant || '').replace(/'/g, '') %>')">
                             + Add to Cart
                         </button>
                     </div>
@@ -220,6 +221,22 @@
 <script>
     let activeRestaurantFilter = "";
     let activeCat = "all";
+    const currentUserId = "<%= currUser ? currUser._id : 'guest' %>";
+    const USER_CART_KEY = "hungrymate_cart_" + currentUserId;
+
+    // Point 1: Robust Add To Cart Handler
+    function executeAddToCart(id, title, price, image, prepTime, restaurant) {
+        let cart = JSON.parse(localStorage.getItem(USER_CART_KEY) || "[]");
+        const existing = cart.find(item => item.id === id);
+        if (existing) {
+            existing.quantity += 1;
+        } else {
+            cart.push({ id, title, price, image, prepTime: prepTime || 20, restaurant: restaurant || "Chef Kitchen", quantity: 1 });
+        }
+        localStorage.setItem(USER_CART_KEY, JSON.stringify(cart));
+        if (typeof refreshNavCartBadge === "function") refreshNavCartBadge();
+        alert(`${title} added to your cart!`);
+    }
 
     function saveActiveRestaurant(restaurant) {
         if (restaurant && restaurant.trim() !== "") {
@@ -227,7 +244,6 @@
         }
     }
 
-    // Point 5: Real Restaurant Extraction
     function filterSpecificRestaurant(restName) {
         if (!restName) return;
         localStorage.setItem("hungrymate_last_viewed_restaurant", restName);
@@ -262,19 +278,6 @@
         applyAllFilters();
     }
 
-    function addToCart(id, title, price, image, prepTime, restaurant) {
-        let cart = JSON.parse(localStorage.getItem("hungrymate_cart") || "[]");
-        const existing = cart.find(item => item.id === id);
-        if (existing) {
-            existing.quantity += 1;
-        } else {
-            cart.push({ id, title, price, image, prepTime: prepTime || 20, restaurant: restaurant || "Chef Kitchen", quantity: 1 });
-        }
-        localStorage.setItem("hungrymate_cart", JSON.stringify(cart));
-        if (typeof refreshNavCartBadge === "function") refreshNavCartBadge();
-        alert(`${title} added to your cart!`);
-    }
-
     const filterBox = document.getElementById("filters");
     const slBtn = document.getElementById("slideLeft");
     const srBtn = document.getElementById("slideRight");
@@ -292,6 +295,7 @@
     const darkModeToggle = document.getElementById("darkModeToggle");
     const darkLabel = document.getElementById("darkLabel");
 
+    // Point 4: Exact Dark / Light Switch Label Synchronization
     function updateDarkMode(isDark) {
         if (isDark) {
             document.body.classList.add("dark-mode");
@@ -305,8 +309,16 @@
             localStorage.setItem("hungrymate_dark_theme", "inactive");
         }
     }
-    if (localStorage.getItem("hungrymate_dark_theme") === "active") updateDarkMode(true);
-    if (darkPill) darkPill.addEventListener("click", () => updateDarkMode(!darkModeToggle.checked));
+    if (localStorage.getItem("hungrymate_dark_theme") === "active") {
+        updateDarkMode(true);
+    } else {
+        updateDarkMode(false);
+    }
+
+    if (darkPill) darkPill.addEventListener("click", () => {
+        const currentlyDark = document.body.classList.contains("dark-mode");
+        updateDarkMode(!currentlyDark);
+    });
 
     const foodCards = document.querySelectorAll(".food-card-box");
     const searchInput = document.getElementById("foodSearchInput");
@@ -314,7 +326,7 @@
     const categoryFilters = document.querySelectorAll(".filter");
     const noMatchMsg = document.getElementById("noMatchMessage");
 
-    // Exact Category Match Function (Point 3)
+    // Exact Category Match Function
     function checkCategoryMatch(activeCat, title, category, description, isVeg) {
         if (activeCat === "all" || activeCat === "trending") return true;
         if (activeCat === "veg") return isVeg;
@@ -364,7 +376,7 @@
         return fullContent.includes(activeCat);
     }
 
-    // Points 3, 4 & 5: Universal Real-Time Filter & Search Execution
+    // Universal Real-Time Filter & Search Execution
     function applyAllFilters() {
         const query = ((searchInput ? searchInput.value : "") || (mobileSearchInput ? mobileSearchInput.value : "")).trim().toLowerCase();
         const vegOnly = onlyVegToggle.checked;
@@ -413,7 +425,6 @@
         applyAllFilters();
     };
 
-    // Point 4: Live Alphabet-by-Alphabet Autocomplete Dropdown
     function buildLiveRecommendations(inputEl) {
         if (!inputEl) return;
         const box = document.getElementById("searchHistoryBox");
@@ -432,8 +443,8 @@
             foodCards.forEach(card => {
                 const title = card.getAttribute("data-title") || "";
                 const restaurant = card.getAttribute("data-restaurant") || "";
-                if (title.toLowerCase().includes(val)) suggestions.add(title);
-                if (restaurant.toLowerCase().includes(val)) suggestions.add(restaurant);
+                if (title.includes(val)) suggestions.add(title);
+                if (restaurant.includes(val)) suggestions.add(restaurant);
             });
 
             const arr = Array.from(suggestions).slice(0, 6);
@@ -480,31 +491,7 @@
         });
     });
 
-    // Point 5: Auto-extract all unique restaurants from DOM
     document.addEventListener("DOMContentLoaded", () => {
-        const container = document.getElementById("restaurantChipsContainer");
-        if (container) {
-            let uniqueRests = new Set();
-            foodCards.forEach(c => {
-                const r = c.getAttribute("data-restaurant");
-                if (r && r.trim()) uniqueRests.add(r.trim());
-            });
-
-            if (uniqueRests.size > 0) {
-                container.innerHTML = "";
-                Array.from(uniqueRests).sort().forEach(r => {
-                    const btn = document.createElement("button");
-                    btn.type = "button";
-                    btn.className = "btn btn-sm btn-outline-secondary rounded-pill rest-chip-btn";
-                    btn.innerHTML = `<i class="fa-solid fa-store me-1 text-danger"></i> ${r}`;
-                    btn.onclick = () => {
-                        if (typeof selectRestaurantFilter === "function") selectRestaurantFilter(r);
-                    };
-                    container.appendChild(btn);
-                });
-            }
-        }
-
         const urlParams = new URLSearchParams(window.location.search);
         const restParam = urlParams.get("restaurant");
         if (restParam) {

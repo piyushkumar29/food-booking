@@ -23,6 +23,7 @@ const passport = require("passport");
 const LocalStrategy = require("passport-local");
 
 const User = require("./models/user.js");
+const Listing = require("./models/listing.js");
 const { connectDB } = require("./db.js");
 
 // OAuth Strategies
@@ -67,10 +68,10 @@ app.use(async (req, res, next) => {
     } catch (error) {
         console.error("Database connection failed:", error.message);
         if (req.path.startsWith("/api/") || req.path.includes("/orders/api/")) {
-            return res.status(503).json({ ok: false, error: "Database temporarily unavailable." });
+            return res.status(503).json({ ok: false, error: "Service temporarily unavailable." });
         }
         return res.status(503).render("error.ejs", {
-            message: "Hungrymate database is temporarily unavailable. Please try again in a moment.",
+            message: "Hungrymate is temporarily unavailable. Please refresh in a moment.",
         });
     }
 });
@@ -219,6 +220,7 @@ passport.deserializeUser(async (id, done) => {
     }
 });
 
+// Middleware for Globals & Dynamic Cloud Database Restaurant Extractor (Point 2)
 app.use(async (req, res, next) => {
     try {
         if (req.user && checkIsOwner(req.user.email, req.user.username) && !req.user.isOwner) {
@@ -228,19 +230,23 @@ app.use(async (req, res, next) => {
         res.locals.success = req.flash("success");
         res.locals.error = req.flash("error");
         res.locals.currUser = req.user;
+
+        // Extract all existing unique restaurant names from listings database
+        const distinctRestaurants = await Listing.distinct("restaurant");
+        res.locals.allRestaurants = distinctRestaurants.filter(r => r && r.trim() !== "");
         next();
     } catch (error) {
         next(error);
     }
 });
 
-// Root & Static Page Routes
+// Root & Page Routes
 app.get("/", (req, res) => res.redirect("/listings"));
 app.get("/cart", (req, res) => res.render("listings/cart.ejs"));
 app.get("/offers", (req, res) => res.render("listings/offers.ejs"));
 app.get("/orders/track", (req, res) => res.render("listings/track.ejs"));
 
-// Dedicated Checkout Payment Page Route (Point 3)
+// Dedicated Checkout Payment Page Route
 app.get("/checkout/payment", (req, res) => {
     res.render("listings/payment.ejs");
 });

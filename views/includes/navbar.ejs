@@ -1,10 +1,12 @@
 <nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top shadow-sm hm-main-navbar py-2 px-2 px-md-3">
   <div class="container-fluid d-flex align-items-center justify-content-between p-0 flex-nowrap">
     
-    <!-- Left Logo & Navigation Items -->
+    <!-- Left Logo & Instagram Style Cursive Text on Phone Only (Point 3) -->
     <div class="d-flex align-items-center flex-shrink-0 gap-2 gap-lg-3">
-      <a class="navbar-brand m-0 p-0 d-flex align-items-center" href="/listings">
+      <a class="navbar-brand m-0 p-0 d-flex align-items-center text-decoration-none" href="/listings">
         <img src="/myimg.png" alt="Hungrymate Logo" class="brand-navbar-logo" />
+        <!-- Instagram Style Cursive Gradient Text (Phone Only: <768px) -->
+        <span class="brand-insta-text d-inline d-md-none ms-2">Hungrymate</span>
       </a>
 
       <!-- Desktop Navigation Links -->
@@ -61,7 +63,7 @@
       </div>
     </div>
 
-    <!-- Right Controls: Cart & Sign up / Log in (Points 10, 12, 13) -->
+    <!-- Right Controls: Cart & Sign up / Log in -->
     <div class="d-flex align-items-center gap-2 flex-shrink-0">
       <a href="/cart" class="btn btn-light border position-relative rounded-pill px-3 py-1 d-flex align-items-center gap-1 text-decoration-none d-none d-md-inline-flex" title="View Cart">
         <i class="fa-solid fa-cart-shopping text-danger"></i>
@@ -69,7 +71,6 @@
         <span id="navCartCountBadge" class="badge rounded-pill bg-danger" style="font-size: 0.7rem;">0</span>
       </a>
 
-      <!-- Point 10: Sign up & Log in with dedicated visible dark-mode classes -->
       <% if(!currUser) { %>
         <div class="d-flex gap-1">
           <a class="btn nav-auth-signup-btn rounded-pill px-3 py-1 fw-bold btn-sm shadow-sm" href="/signup">Sign up</a>
@@ -239,7 +240,7 @@
 </div>
 <% } %>
 
-<!-- Modal: Same Restaurant Search & Quick Picker (Point 5) -->
+<!-- Modal: Same Restaurant Search & Quick Picker (Point 2: Real Database Restaurants Populated) -->
 <div class="modal fade" id="sameRestaurantModal" tabindex="-1" aria-labelledby="sameRestaurantModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content rounded-4 border-0 shadow">
@@ -257,7 +258,17 @@
         </div>
 
         <h6 class="small fw-bold text-muted mb-2">ALL RESTAURANTS IN DATABASE:</h6>
-        <div id="restaurantChipsContainer" class="d-flex flex-wrap gap-2"></div>
+        <div id="restaurantChipsContainer" class="d-flex flex-wrap gap-2">
+          <% if (typeof allRestaurants !== "undefined" && allRestaurants && allRestaurants.length > 0) { %>
+            <% for(let rName of allRestaurants) { %>
+              <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill rest-chip-btn" onclick="selectRestaurantFilter('<%= rName %>')">
+                <i class="fa-solid fa-store me-1 text-danger"></i> <%= rName %>
+              </button>
+            <% } %>
+          <% } else { %>
+            <span class="text-muted small">Loading restaurants...</span>
+          <% } %>
+        </div>
       </div>
     </div>
   </div>
@@ -270,10 +281,27 @@
   <input type="hidden" name="avatarData" id="avatarDataInput" />
 </form>
 
+<style>
+/* Point 3: Instagram Script Style Gradient Branding for Phone View */
+@import url('https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap');
+
+.brand-insta-text {
+  font-family: 'Grand Hotel', cursive, sans-serif !important;
+  font-size: 1.85rem !important;
+  line-height: 1 !important;
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.5px;
+  vertical-align: middle;
+}
+</style>
+
 <script>
-// Scoped user cart key
-const currentLoggedInUserId = "<%= currUser ? currUser._id : 'guest' %>";
-const CART_STORAGE_KEY = "hungrymate_cart_" + currentLoggedInUserId;
+// Universal cart engine key
+const currentSessionUserId = "<%= currUser ? currUser._id : 'guest' %>";
+const ACTIVE_CART_KEY = "hungrymate_cart_" + currentSessionUserId;
 
 function promptEditName(currentName) {
     const updated = prompt("Enter your new profile name:", currentName);
@@ -297,7 +325,7 @@ function uploadPermanentAvatar(event) {
 }
 
 function refreshNavCartBadge() {
-    const cart = JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || "[]");
+    const cart = JSON.parse(localStorage.getItem(ACTIVE_CART_KEY) || "[]");
     const totalCount = cart.reduce((acc, item) => acc + (item.quantity || 1), 0);
     const badge = document.getElementById("navCartCountBadge");
     const mobileBadge = document.getElementById("mobileCartBadge");
@@ -324,13 +352,13 @@ function selectRestaurantFilter(restName) {
     const modal = bootstrap.Modal.getInstance(modalEl);
     if (modal) modal.hide();
 
-    if (!window.location.pathname.includes("/listings") || window.location.pathname.length > 10) {
+    // If currently on listings, filter live; otherwise redirect to listings
+    if (window.location.pathname === "/listings" || window.location.pathname === "/") {
+        if (typeof filterSpecificRestaurant === "function") {
+            filterSpecificRestaurant(restName);
+        }
+    } else {
         window.location.href = `/listings?restaurant=${encodeURIComponent(restName)}`;
-        return;
-    }
-
-    if (typeof filterSpecificRestaurant === "function") {
-        filterSpecificRestaurant(restName);
     }
 }
 
