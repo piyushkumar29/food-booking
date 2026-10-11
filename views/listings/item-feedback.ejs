@@ -1,6 +1,7 @@
 <% layout("/layouts/boilerplate") %>
 
 <style>
+    /* Pure Interactive Star Rating with Dynamic Hover */
     .interactive-star-group {
         display: inline-flex;
         align-items: center;
@@ -12,16 +13,19 @@
 
     .interactive-star-group i {
         font-size: 2.3rem;
-        color: #475569;
-        transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease, filter 0.2s ease;
+        color: #cbd5e1;
+        transition: transform 0.15s ease, color 0.15s ease, filter 0.15s ease;
         cursor: pointer;
     }
 
-    .interactive-star-group i.active-star,
-    .interactive-star-group i.hover-star {
+    body.dark-mode .interactive-star-group i {
+        color: #475569 !important;
+    }
+
+    .interactive-star-group i.star-highlight {
         color: #facc15 !important;
-        filter: drop-shadow(0 0 7px rgba(250, 204, 21, 0.65)) !important;
-        transform: scale(1.2);
+        filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.75)) !important;
+        transform: scale(1.18);
     }
 </style>
 
@@ -44,11 +48,11 @@
                 <div class="mb-4 text-center">
                     <label class="form-label fw-bold small text-dark d-block mb-1">Tap Stars to Rate:</label>
                     <div class="interactive-star-group" id="starRatingContainer">
-                        <i class="fa-solid fa-star active-star" data-rating="1"></i>
-                        <i class="fa-solid fa-star active-star" data-rating="2"></i>
-                        <i class="fa-solid fa-star active-star" data-rating="3"></i>
-                        <i class="fa-solid fa-star active-star" data-rating="4"></i>
-                        <i class="fa-solid fa-star active-star" data-rating="5"></i>
+                        <i class="fa-solid fa-star" data-index="1"></i>
+                        <i class="fa-solid fa-star" data-index="2"></i>
+                        <i class="fa-solid fa-star" data-index="3"></i>
+                        <i class="fa-solid fa-star" data-index="4"></i>
+                        <i class="fa-solid fa-star" data-index="5"></i>
                     </div>
                     <input type="hidden" name="review[rating]" id="selectedRatingInput" value="5" required>
                 </div>
@@ -86,43 +90,36 @@
         const starContainer = document.getElementById("starRatingContainer");
         const stars = starContainer.querySelectorAll("i");
         const ratingInput = document.getElementById("selectedRatingInput");
-        let currentRating = 5;
+        let selectedScore = 5;
+
+        function paintStars(limit) {
+            stars.forEach(star => {
+                const idx = parseInt(star.getAttribute("data-index"));
+                if (idx <= limit) {
+                    star.classList.add("star-highlight");
+                } else {
+                    star.classList.remove("star-highlight");
+                }
+            });
+        }
+
+        paintStars(selectedScore);
 
         stars.forEach(star => {
             star.addEventListener("mouseenter", function() {
-                const hoverVal = parseInt(this.getAttribute("data-rating"));
-                stars.forEach(s => {
-                    const val = parseInt(s.getAttribute("data-rating"));
-                    if (val <= hoverVal) {
-                        s.classList.add("hover-star");
-                    } else {
-                        s.classList.remove("hover-star");
-                        s.classList.remove("active-star");
-                    }
-                });
+                const hoverIndex = parseInt(this.getAttribute("data-index"));
+                paintStars(hoverIndex);
             });
 
             star.addEventListener("click", function() {
-                currentRating = parseInt(this.getAttribute("data-rating"));
-                ratingInput.value = currentRating;
-                updateStarDisplay(currentRating);
+                selectedScore = parseInt(this.getAttribute("data-index"));
+                ratingInput.value = selectedScore;
+                paintStars(selectedScore);
             });
         });
 
         starContainer.addEventListener("mouseleave", function() {
-            stars.forEach(s => s.classList.remove("hover-star"));
-            updateStarDisplay(currentRating);
+            paintStars(selectedScore);
         });
-
-        function updateStarDisplay(val) {
-            stars.forEach(s => {
-                const starVal = parseInt(s.getAttribute("data-rating"));
-                if (starVal <= val) {
-                    s.classList.add("active-star");
-                } else {
-                    s.classList.remove("active-star");
-                }
-            });
-        }
     });
 </script>
