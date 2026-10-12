@@ -117,15 +117,15 @@
         <button class="scroll-btn ms-1 d-none d-sm-flex" id="slideRight"><i class="fa-solid fa-chevron-right"></i></button>
     </div>
 
-    <!-- Veg Toggle (Point 1: Robust & Click Synchronized) & Dark Mode Toggle -->
+    <!-- Veg & Dark Mode Toggle Controls (Point 3 Fix) -->
     <div class="controls-pills-bar">
         <div class="clickable-toggle-box" id="vegPill">
             <span class="toggle-label">&#x1F7E2; Veg</span>
-            <input class="form-check-input mt-0" type="checkbox" id="onlyVegToggle" role="switch" style="pointer-events: none;">
+            <input class="form-check-input mt-0 ms-1" type="checkbox" id="onlyVegToggle" role="switch">
         </div>
         <div class="clickable-toggle-box" id="darkPill">
             <span class="toggle-label" id="darkLabel"><i class="fa-solid fa-moon"></i> Dark</span>
-            <input class="form-check-input mt-0" type="checkbox" id="darkModeToggle" role="switch" style="pointer-events: none;">
+            <input class="form-check-input mt-0 ms-1" type="checkbox" id="darkModeToggle" role="switch">
         </div>
     </div>
 </div>
@@ -232,6 +232,7 @@
             cart.push({ id, title, price, image, prepTime: prepTime || 20, restaurant: restaurant || "Chef Kitchen", quantity: 1 });
         }
         localStorage.setItem(USER_CART_KEY, JSON.stringify(cart));
+        localStorage.setItem("hungrymate_cart", JSON.stringify(cart));
         if (typeof refreshNavCartBadge === "function") refreshNavCartBadge();
         alert(`${title} added to your cart!`);
     }
@@ -269,7 +270,7 @@
         if (mobileSearchInput) mobileSearchInput.value = "";
         activeCat = "all";
         activeRestaurantFilter = "";
-        onlyVegToggle.checked = false;
+        if (onlyVegToggle) onlyVegToggle.checked = false;
         document.getElementById("activeRestaurantAlert").classList.add("d-none");
         categoryFilters.forEach(item => item.classList.remove("active-filter"));
         const allCatBtn = document.querySelector('.filter[data-category="all"]');
@@ -283,13 +284,22 @@
     if (slBtn) slBtn.addEventListener("click", () => filterBox.scrollBy({ left: -240, behavior: "smooth" }));
     if (srBtn) srBtn.addEventListener("click", () => filterBox.scrollBy({ left: 240, behavior: "smooth" }));
 
-    // Point 1: 100% Reliable Veg Filter Click & Event Trigger
+    // Point 3 Fix: Robust Veg Toggle Click Handler
     const vegPill = document.getElementById("vegPill");
     const onlyVegToggle = document.getElementById("onlyVegToggle");
-    vegPill.addEventListener("click", () => {
-        onlyVegToggle.checked = !onlyVegToggle.checked;
-        applyAllFilters();
-    });
+
+    if (vegPill && onlyVegToggle) {
+        vegPill.addEventListener("click", (e) => {
+            if (e.target !== onlyVegToggle) {
+                onlyVegToggle.checked = !onlyVegToggle.checked;
+            }
+            applyAllFilters();
+        });
+
+        onlyVegToggle.addEventListener("change", () => {
+            applyAllFilters();
+        });
+    }
 
     const darkPill = document.getElementById("darkPill");
     const darkModeToggle = document.getElementById("darkModeToggle");
@@ -314,10 +324,12 @@
         updateDarkMode(false);
     }
 
-    if (darkPill) darkPill.addEventListener("click", () => {
-        const currentlyDark = document.body.classList.contains("dark-mode");
-        updateDarkMode(!currentlyDark);
-    });
+    if (darkPill && darkModeToggle) {
+        darkPill.addEventListener("click", (e) => {
+            const currentlyDark = document.body.classList.contains("dark-mode");
+            updateDarkMode(!currentlyDark);
+        });
+    }
 
     const foodCards = document.querySelectorAll(".food-card-box");
     const searchInput = document.getElementById("foodSearchInput");
@@ -374,10 +386,10 @@
         return fullContent.includes(activeCat);
     }
 
-    // Point 1: Universal Filter Execution with strict Veg Checking
+    // Point 3: Master Filter Function with Accurate Veg Filter Check
     function applyAllFilters() {
         const query = ((searchInput ? searchInput.value : "") || (mobileSearchInput ? mobileSearchInput.value : "")).trim().toLowerCase();
-        const vegOnly = onlyVegToggle.checked;
+        const vegOnly = onlyVegToggle ? onlyVegToggle.checked : false;
         let visibleCount = 0;
 
         foodCards.forEach(card => {
@@ -396,8 +408,8 @@
                 matchSearch = words.every(w => fullContent.includes(w));
             }
 
-            // Only Veg filter: If vegOnly is true, isVeg must be true
-            const matchVeg = !vegOnly || (isVeg === true);
+            // If veg toggle checked -> show ONLY veg dishes; if unchecked -> show both veg & non-veg
+            const matchVeg = !vegOnly || isVeg;
             
             let matchRestaurant = true;
             if (activeRestaurantFilter) {

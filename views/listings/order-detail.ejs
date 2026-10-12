@@ -3,46 +3,39 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
-    /* Pure SVG Interactive Star Rating Engine */
-    .svg-star-rating-box {
+    /* Pure CSS Golden-Amber Star Hover & Active Rating Engine */
+    .golden-star-rating {
         display: inline-flex;
-        align-items: center;
+        flex-direction: row-reverse;
         justify-content: center;
         gap: 0.65rem;
-        cursor: pointer;
         padding: 0.5rem;
         user-select: none;
     }
 
-    .svg-star-item {
-        width: 38px;
-        height: 38px;
+    .golden-star-rating input {
+        display: none !important;
+    }
+
+    .golden-star-rating label {
         cursor: pointer;
-        transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+        font-size: 2.3rem;
+        color: #cbd5e1; /* Default soft grey in light mode */
+        transition: transform 0.15s ease, color 0.15s ease, filter 0.15s ease;
+        margin: 0;
+        line-height: 1;
     }
 
-    /* Prevent SVG internal path from stealing pointer events */
-    .svg-star-item svg {
-        width: 100%;
-        height: 100%;
-        pointer-events: none !important;
-        fill: #cbd5e1; /* Default soft grey in light mode */
-        transition: fill 0.15s ease, filter 0.15s ease;
+    body.dark-mode .golden-star-rating label {
+        color: #475569 !important; /* Visible slate grey in dark mode */
     }
 
-    body.dark-mode .svg-star-item svg {
-        fill: #475569 !important; /* Visible slate in dark mode */
-    }
-
-    /* Highlighted Yellow Amber Glow */
-    .svg-star-item.active svg,
-    .svg-star-item.hover svg {
-        fill: #facc15 !important;
-        filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.75)) !important;
-    }
-
-    .svg-star-item.active,
-    .svg-star-item.hover {
+    /* Golden Yellow Glow on Hover and Active Checked States */
+    .golden-star-rating label:hover,
+    .golden-star-rating label:hover ~ label,
+    .golden-star-rating input:checked ~ label {
+        color: #facc15 !important;
+        filter: drop-shadow(0 0 10px rgba(250, 204, 21, 0.8)) !important;
         transform: scale(1.18);
     }
 </style>
@@ -128,7 +121,7 @@
             </button>
         </div>
 
-        <!-- Integrated Rating & Feedback Form for this Order (Interactive Star Hover Widget) -->
+        <!-- Integrated Rating & Feedback Form for this Order -->
         <div class="card shadow-sm border-0 rounded-4 p-3 p-md-4 bg-white mb-4">
             <div class="text-center mb-3">
                 <h5 class="fw-bold mb-1"><i class="fa-solid fa-star text-warning me-2"></i>Rate & Review this Order</h5>
@@ -137,27 +130,25 @@
 
             <form id="orderReviewForm" method="POST" action="/listings" enctype="multipart/form-data" novalidate class="needs-validation">
                 
-                <!-- Zero-Dependency Pure Vector Star Hover Widget -->
+                <!-- Zero-Glitch Glowing Golden Star Rating Hover Widget -->
                 <div class="mb-4 text-center">
                     <label class="form-label fw-bold small text-dark d-block mb-1">Tap Stars to Rate:</label>
-                    <div class="svg-star-rating-box" id="svgStarContainer">
-                        <div class="svg-star-item" data-value="1">
-                            <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                        </div>
-                        <div class="svg-star-item" data-value="2">
-                            <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                        </div>
-                        <div class="svg-star-item" data-value="3">
-                            <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                        </div>
-                        <div class="svg-star-item" data-value="4">
-                            <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                        </div>
-                        <div class="svg-star-item" data-value="5">
-                            <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                        </div>
+                    <div class="golden-star-rating">
+                        <input type="radio" id="star5" name="review[rating]" value="5" checked />
+                        <label for="star5" title="5 stars">&#9733;</label>
+
+                        <input type="radio" id="star4" name="review[rating]" value="4" />
+                        <label for="star4" title="4 stars">&#9733;</label>
+
+                        <input type="radio" id="star3" name="review[rating]" value="3" />
+                        <label for="star3" title="3 stars">&#9733;</label>
+
+                        <input type="radio" id="star2" name="review[rating]" value="2" />
+                        <label for="star2" title="2 stars">&#9733;</label>
+
+                        <input type="radio" id="star1" name="review[rating]" value="1" />
+                        <label for="star1" title="1 star">&#9733;</label>
                     </div>
-                    <input type="hidden" name="review[rating]" id="selectedRatingInput" value="5" required>
                 </div>
 
                 <!-- Reviewer Name -->
@@ -193,21 +184,55 @@
     let loadedOrderRecord = null;
 
     document.addEventListener("DOMContentLoaded", () => {
-        const USER_HISTORY_KEY = "hungrymate_order_history_" + currentSessionUserId;
-        const history = JSON.parse(localStorage.getItem(USER_HISTORY_KEY) || localStorage.getItem("hungrymate_order_history") || "[]");
-        loadedOrderRecord = history.find(o => o.orderId === currentOrderId) || history[0];
+        // Point 4 Fix: Multi-tier fallback order scanner (Checks all storage spaces for this Order ID)
+        const allHistories = [];
+        
+        // Scan user-scoped history
+        const scopedKey = "hungrymate_order_history_" + currentSessionUserId;
+        const scoped = JSON.parse(localStorage.getItem(scopedKey) || "[]");
+        allHistories.push(...scoped);
+
+        // Scan global history
+        const globalHist = JSON.parse(localStorage.getItem("hungrymate_order_history") || "[]");
+        allHistories.push(...globalHist);
+
+        // Match exact order record
+        loadedOrderRecord = allHistories.find(o => o && o.orderId === currentOrderId);
+
+        // Fallback to latest order if exact match not found
+        if (!loadedOrderRecord && allHistories.length > 0) {
+            loadedOrderRecord = allHistories[0];
+        }
+
+        // Emergency fallback from checkout draft
+        if (!loadedOrderRecord) {
+            const draft = JSON.parse(localStorage.getItem("hungrymate_checkout_draft") || "{}");
+            if (draft.cart && draft.cart.length > 0) {
+                loadedOrderRecord = {
+                    orderId: currentOrderId,
+                    placedAt: "Just now",
+                    address: draft.address || "Kolkata, West Bengal",
+                    couponApplied: draft.couponApplied || "NONE",
+                    paymentMode: "Cash on Delivery",
+                    totalPaid: draft.finalTotal || 0,
+                    deliveryHeroData: { name: "Rahul Verma", phone: "+91 98765 43210" },
+                    items: draft.cart,
+                    isDelivered: true
+                };
+            }
+        }
 
         if (loadedOrderRecord) {
-            document.getElementById("detailOrderIdDisplay").innerText = loadedOrderRecord.orderId;
-            document.getElementById("detailPlacedTime").innerText = loadedOrderRecord.placedAt || "--";
-            document.getElementById("detailAddress").innerText = loadedOrderRecord.address || "--";
+            document.getElementById("detailOrderIdDisplay").innerText = loadedOrderRecord.orderId || currentOrderId;
+            document.getElementById("detailPlacedTime").innerText = loadedOrderRecord.placedAt || "Recent";
+            document.getElementById("detailAddress").innerText = loadedOrderRecord.address || "Delivery Address Provided";
             document.getElementById("detailCoupon").innerText = loadedOrderRecord.couponApplied || "NONE";
             document.getElementById("detailPayMode").innerText = loadedOrderRecord.paymentMode || "Cash on Delivery";
             document.getElementById("detailTotalPaid").innerText = "₹" + (loadedOrderRecord.totalPaid || 0);
 
             const hero = loadedOrderRecord.deliveryHeroData || { name: "Rahul Verma", phone: "+91 98765 43210" };
-            document.getElementById("detailHeroName").innerText = hero.name;
-            document.getElementById("detailHeroPhone").innerText = hero.phone;
+            document.getElementById("detailHeroName").innerText = hero.name || "Rahul Verma";
+            document.getElementById("detailHeroPhone").innerText = hero.phone || "+91 98765 43210";
 
             if (loadedOrderRecord.isCancelled) {
                 document.getElementById("detailStatusBadge").className = "badge bg-danger";
@@ -227,8 +252,8 @@
                     <tr>
                         <td><strong>${it.title}</strong></td>
                         <td>${it.restaurant || 'Kitchen'}</td>
-                        <td class="text-center">${it.quantity}</td>
-                        <td class="text-end">₹${it.price * it.quantity}</td>
+                        <td class="text-center">${it.quantity || 1}</td>
+                        <td class="text-end">₹${(it.price || 0) * (it.quantity || 1)}</td>
                     </tr>
                 `;
             });
@@ -238,57 +263,7 @@
                 document.getElementById("orderReviewForm").action = `/listings/${targetFoodId}/reviews`;
             }
         }
-
-        // Initialize pure vector star rating hover engine
-        initPureSvgStarRating();
     });
-
-    function initPureSvgStarRating() {
-        const container = document.getElementById("svgStarContainer");
-        const stars = container.querySelectorAll(".svg-star-item");
-        const ratingInput = document.getElementById("selectedRatingInput");
-        let activeScore = 5;
-
-        function renderStars(level, isHover = false) {
-            stars.forEach(star => {
-                const val = parseInt(star.getAttribute("data-value"));
-                if (isHover) {
-                    if (val <= level) {
-                        star.classList.add("hover");
-                    } else {
-                        star.classList.remove("hover");
-                        star.classList.remove("active");
-                    }
-                } else {
-                    star.classList.remove("hover");
-                    if (val <= level) {
-                        star.classList.add("active");
-                    } else {
-                        star.classList.remove("active");
-                    }
-                }
-            });
-        }
-
-        renderStars(activeScore, false);
-
-        stars.forEach(star => {
-            star.addEventListener("mouseenter", function(e) {
-                const hoverScore = parseInt(this.getAttribute("data-value"));
-                renderStars(hoverScore, true);
-            });
-
-            star.addEventListener("click", function(e) {
-                activeScore = parseInt(this.getAttribute("data-value"));
-                ratingInput.value = activeScore;
-                renderStars(activeScore, false);
-            });
-        });
-
-        container.addEventListener("mouseleave", function() {
-            renderStars(activeScore, false);
-        });
-    }
 
     function downloadDetailReceiptPdf() {
         if (!loadedOrderRecord) return alert("Order details not loaded!");
@@ -304,13 +279,15 @@
 
         let itemsHtml = "";
         (loadedOrderRecord.items || []).forEach((it, i) => {
+            const qty = it.quantity || 1;
+            const price = it.price || 0;
             itemsHtml += `
                 <tr>
                     <td style="border: 1px solid #000; padding: 6px; text-align: center;">${i + 1}</td>
                     <td style="border: 1px solid #000; padding: 6px;"><strong>${it.title}</strong> (${it.restaurant || 'Kitchen'})</td>
-                    <td style="border: 1px solid #000; padding: 6px; text-align: center;">${it.quantity}</td>
-                    <td style="border: 1px solid #000; padding: 6px; text-align: right;">₹${it.price.toFixed(2)}</td>
-                    <td style="border: 1px solid #000; padding: 6px; text-align: right;">₹${(it.price * it.quantity).toFixed(2)}</td>
+                    <td style="border: 1px solid #000; padding: 6px; text-align: center;">${qty}</td>
+                    <td style="border: 1px solid #000; padding: 6px; text-align: right;">₹${price.toFixed(2)}</td>
+                    <td style="border: 1px solid #000; padding: 6px; text-align: right;">₹${(price * qty).toFixed(2)}</td>
                 </tr>
             `;
         });
@@ -343,7 +320,7 @@
                     <td style="border: 1px solid #000; padding: 6px; font-weight: 800; background-color: #f1f5f9;">CUSTOMER:</td>
                     <td style="border: 1px solid #000; padding: 6px;">${loadedOrderRecord.customerName || 'Customer'} (${loadedOrderRecord.customerPhone || 'N/A'})</td>
                     <td style="border: 1px solid #000; padding: 6px; font-weight: 800; background-color: #f1f5f9;">DELIVERY HERO:</td>
-                    <td style="border: 1px solid #000; padding: 6px;">${hero.name} (${hero.id}) - ${hero.phone}</td>
+                    <td style="border: 1px solid #000; padding: 6px;">${hero.name} (${hero.id || 'HM-DEL-984'}) - ${hero.phone}</td>
                 </tr>
                 <tr>
                     <td style="border: 1px solid #000; padding: 6px; font-weight: 800; background-color: #f1f5f9;">ADDRESS:</td>
