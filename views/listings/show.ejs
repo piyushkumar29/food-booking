@@ -26,6 +26,11 @@
     let isVegFood = (listing.isVeg === true || String(listing.isVeg) === 'true');
     let currentPrice = listing.price || 199;
     let originalCutPrice = Math.round(currentPrice * 2.5);
+
+    // Dynamic Google Maps Search Query for this specific restaurant & location
+    const restaurantQuery = encodeURIComponent(`${listing.restaurant || ''} ${listing.location || ''} ${listing.country || 'India'}`.trim());
+    const gmapsUrl = `https://www.google.com/maps/search/?api=1&query=${restaurantQuery}`;
+    const osmEmbedUrl = `https://www.openstreetmap.org/export/embed.html?bbox=88.25%2C22.45%2C88.50%2C22.75&layer=mapnik&marker=22.5726%2C88.3639`;
 %>
 
 <style>
@@ -60,6 +65,29 @@
         height: 100%;
         background: #0284c7;
         border-radius: 20px;
+    }
+
+    /* Restaurant Map Section */
+    .restaurant-map-card {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 1.25rem;
+        border: 1.5px solid #e2e8f0;
+        margin-bottom: 1.5rem;
+    }
+    body.dark-mode .restaurant-map-card {
+        background: #111827 !important;
+        border-color: #1f2937 !important;
+        color: #f8fafc !important;
+    }
+    .restaurant-map-iframe {
+        width: 100%;
+        height: 260px;
+        border-radius: 16px;
+        border: 1px solid #cbd5e1;
+    }
+    body.dark-mode .restaurant-map-iframe {
+        border-color: #334155;
     }
 </style>
 
@@ -139,6 +167,28 @@
                 </div>
 
             </div>
+        </div>
+
+        <!-- Point 2: Restaurant Location Map & Open with Google Maps Button -->
+        <div class="restaurant-map-card shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <div>
+                    <h5 class="fw-bold mb-0"><i class="fa-solid fa-map-location-dot text-danger me-2"></i>Restaurant Kitchen Location</h5>
+                    <small class="text-muted"><%= listing.restaurant || 'Kitchen Hub' %> &bull; <%= listing.location %>, <%= listing.country %></small>
+                </div>
+                
+                <!-- Open with Google Maps button -->
+                <a href="<%= gmapsUrl %>" target="_blank" rel="noopener noreferrer" class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1 fw-bold d-flex align-items-center gap-1 shadow-sm">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Open with Google Maps
+                </a>
+            </div>
+
+            <iframe 
+                class="restaurant-map-iframe" 
+                src="https://maps.google.com/maps?q=<%= restaurantQuery %>&t=&z=14&ie=UTF8&iwloc=&output=embed" 
+                loading="lazy" 
+                allowfullscreen>
+            </iframe>
         </div>
 
         <!-- RATINGS & FEEDBACK SECTION -->
@@ -252,6 +302,7 @@ function addToCart(id, title, price, image, prepTime, restaurant) {
         cart.push({ id, title, price, image, prepTime: prepTime || 20, restaurant: restaurant || "Chef Kitchen", quantity: 1 });
     }
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+    localStorage.setItem("hungrymate_cart", JSON.stringify(cart));
     if (typeof refreshNavCartBadge === "function") refreshNavCartBadge();
     alert(`${title} added to your cart!`);
 }

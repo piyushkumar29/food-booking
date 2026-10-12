@@ -3,33 +3,45 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
-    /* Pure Interactive Star Rating with Dynamic Hover */
-    .interactive-star-group {
+    /* Standalone Interactive Pure SVG Star Engine */
+    .svg-star-rating-box {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 0.6rem;
+        gap: 0.65rem;
         cursor: pointer;
         padding: 0.5rem;
+        user-select: none;
     }
 
-    /* Unselected Default Star: Visible Soft Grey in Light & Dark mode */
-    .interactive-star-group i {
-        font-size: 2.2rem;
-        color: #cbd5e1;
-        transition: transform 0.15s ease, color 0.15s ease, filter 0.15s ease;
+    .svg-star-item {
+        width: 38px;
+        height: 38px;
         cursor: pointer;
+        transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    body.dark-mode .interactive-star-group i {
-        color: #475569 !important;
+    .svg-star-item svg {
+        width: 100%;
+        height: 100%;
+        fill: #cbd5e1; /* Default soft grey in light mode */
+        transition: fill 0.15s ease, filter 0.15s ease;
     }
 
-    /* Hover & Selected Glowing Golden-Yellow */
-    .interactive-star-group i.star-highlight {
-        color: #facc15 !important;
+    body.dark-mode .svg-star-item svg {
+        fill: #475569 !important; /* Visible slate in dark mode */
+    }
+
+    /* Active & Hover Glowing Amber-Yellow */
+    .svg-star-item.active svg,
+    .svg-star-item.hover svg {
+        fill: #facc15 !important;
         filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.75)) !important;
-        transform: scale(1.15);
+    }
+
+    .svg-star-item.active,
+    .svg-star-item.hover {
+        transform: scale(1.18);
     }
 </style>
 
@@ -123,17 +135,26 @@
 
             <form id="orderReviewForm" method="POST" action="/listings" enctype="multipart/form-data" novalidate class="needs-validation">
                 
-                <!-- Dynamic Hover & Click Star Rating Widget -->
+                <!-- Zero-Dependency Pure Vector Star Hover Widget -->
                 <div class="mb-4 text-center">
                     <label class="form-label fw-bold small text-dark d-block mb-1">Tap Stars to Rate:</label>
-                    <div class="interactive-star-group" id="starRatingContainer">
-                        <i class="fa-solid fa-star" data-index="1"></i>
-                        <i class="fa-solid fa-star" data-index="2"></i>
-                        <i class="fa-solid fa-star" data-index="3"></i>
-                        <i class="fa-solid fa-star" data-index="4"></i>
-                        <i class="fa-solid fa-star" data-index="5"></i>
+                    <div class="svg-star-rating-box" id="svgStarContainer">
+                        <div class="svg-star-item" data-value="1">
+                            <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                        </div>
+                        <div class="svg-star-item" data-value="2">
+                            <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                        </div>
+                        <div class="svg-star-item" data-value="3">
+                            <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                        </div>
+                        <div class="svg-star-item" data-value="4">
+                            <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                        </div>
+                        <div class="svg-star-item" data-value="5">
+                            <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                        </div>
                     </div>
-                    <!-- Hidden input carries rating value (1 to 5) -->
                     <input type="hidden" name="review[rating]" id="selectedRatingInput" value="5" required>
                 </div>
 
@@ -216,48 +237,54 @@
             }
         }
 
-        // Initialize Dynamic Star Hover Engine
-        initLiveStarHoverEngine();
+        // Initialize pure vector star rating hover engine
+        initPureSvgStarRating();
     });
 
-    // Dynamic Live Hover Engine: Follows Cursor in Realtime
-    function initLiveStarHoverEngine() {
-        const starContainer = document.getElementById("starRatingContainer");
-        const stars = starContainer.querySelectorAll("i");
+    function initPureSvgStarRating() {
+        const container = document.getElementById("svgStarContainer");
+        const stars = container.querySelectorAll(".svg-star-item");
         const ratingInput = document.getElementById("selectedRatingInput");
-        let selectedScore = 5; // Initial selected score
+        let activeScore = 5;
 
-        function paintStars(limit) {
+        function renderStars(level, isHover = false) {
             stars.forEach(star => {
-                const idx = parseInt(star.getAttribute("data-index"));
-                if (idx <= limit) {
-                    star.classList.add("star-highlight");
+                const val = parseInt(star.getAttribute("data-value"));
+                if (isHover) {
+                    if (val <= level) {
+                        star.classList.add("hover");
+                    } else {
+                        star.classList.remove("hover");
+                        star.classList.remove("active");
+                    }
                 } else {
-                    star.classList.remove("star-highlight");
+                    star.classList.remove("hover");
+                    if (val <= level) {
+                        star.classList.add("active");
+                    } else {
+                        star.classList.remove("active");
+                    }
                 }
             });
         }
 
-        // Initial Paint (Default 5 Stars)
-        paintStars(selectedScore);
+        renderStars(activeScore, false);
 
-        // Hover Effect
         stars.forEach(star => {
             star.addEventListener("mouseenter", function() {
-                const hoverIndex = parseInt(this.getAttribute("data-index"));
-                paintStars(hoverIndex); // Paint up to cursor position
+                const hoverScore = parseInt(this.getAttribute("data-value"));
+                renderStars(hoverScore, true);
             });
 
             star.addEventListener("click", function() {
-                selectedScore = parseInt(this.getAttribute("data-index"));
-                ratingInput.value = selectedScore;
-                paintStars(selectedScore);
+                activeScore = parseInt(this.getAttribute("data-value"));
+                ratingInput.value = activeScore;
+                renderStars(activeScore, false);
             });
         });
 
-        // Reset to selected state on mouse leave
-        starContainer.addEventListener("mouseleave", function() {
-            paintStars(selectedScore);
+        container.addEventListener("mouseleave", function() {
+            renderStars(activeScore, false);
         });
     }
 
