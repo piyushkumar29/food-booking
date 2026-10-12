@@ -117,7 +117,7 @@
         <button class="scroll-btn ms-1 d-none d-sm-flex" id="slideRight"><i class="fa-solid fa-chevron-right"></i></button>
     </div>
 
-    <!-- Veg & Dark Mode Toggle Controls (Point 3 Fix) -->
+    <!-- Veg & Dark Mode Toggle Controls (Point 2: Clean Non-Glitch Event Handling) -->
     <div class="controls-pills-bar">
         <div class="clickable-toggle-box" id="vegPill">
             <span class="toggle-label">&#x1F7E2; Veg</span>
@@ -284,19 +284,19 @@
     if (slBtn) slBtn.addEventListener("click", () => filterBox.scrollBy({ left: -240, behavior: "smooth" }));
     if (srBtn) srBtn.addEventListener("click", () => filterBox.scrollBy({ left: 240, behavior: "smooth" }));
 
-    // Point 3 Fix: Robust Veg Toggle Click Handler
+    // Point 2: Reliable Veg Filter Toggle Logic
     const vegPill = document.getElementById("vegPill");
     const onlyVegToggle = document.getElementById("onlyVegToggle");
 
     if (vegPill && onlyVegToggle) {
-        vegPill.addEventListener("click", (e) => {
+        vegPill.addEventListener("click", function(e) {
             if (e.target !== onlyVegToggle) {
                 onlyVegToggle.checked = !onlyVegToggle.checked;
             }
             applyAllFilters();
         });
 
-        onlyVegToggle.addEventListener("change", () => {
+        onlyVegToggle.addEventListener("change", function() {
             applyAllFilters();
         });
     }
@@ -325,7 +325,7 @@
     }
 
     if (darkPill && darkModeToggle) {
-        darkPill.addEventListener("click", (e) => {
+        darkPill.addEventListener("click", () => {
             const currentlyDark = document.body.classList.contains("dark-mode");
             updateDarkMode(!currentlyDark);
         });
@@ -386,7 +386,7 @@
         return fullContent.includes(activeCat);
     }
 
-    // Point 3: Master Filter Function with Accurate Veg Filter Check
+    // Accurate Veg Filter Check
     function applyAllFilters() {
         const query = ((searchInput ? searchInput.value : "") || (mobileSearchInput ? mobileSearchInput.value : "")).trim().toLowerCase();
         const vegOnly = onlyVegToggle ? onlyVegToggle.checked : false;
@@ -408,7 +408,7 @@
                 matchSearch = words.every(w => fullContent.includes(w));
             }
 
-            // If veg toggle checked -> show ONLY veg dishes; if unchecked -> show both veg & non-veg
+            // Strict Pure Veg Checking
             const matchVeg = !vegOnly || isVeg;
             
             let matchRestaurant = true;

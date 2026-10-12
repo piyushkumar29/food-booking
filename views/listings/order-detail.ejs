@@ -3,8 +3,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
-    /* Pure CSS Golden-Amber Star Hover & Active Rating Engine */
-    .golden-star-rating {
+    /* Pure CSS Zero-Failure Star Hover & Glow Rating Engine */
+    .hm-star-rating-wrap {
         display: inline-flex;
         flex-direction: row-reverse;
         justify-content: center;
@@ -13,29 +13,29 @@
         user-select: none;
     }
 
-    .golden-star-rating input {
+    .hm-star-rating-wrap input {
         display: none !important;
     }
 
-    .golden-star-rating label {
+    .hm-star-rating-wrap label {
         cursor: pointer;
-        font-size: 2.3rem;
-        color: #cbd5e1; /* Default soft grey in light mode */
+        font-size: 2.5rem;
+        color: #cbd5e1; /* Soft grey in light mode */
         transition: transform 0.15s ease, color 0.15s ease, filter 0.15s ease;
         margin: 0;
         line-height: 1;
     }
 
-    body.dark-mode .golden-star-rating label {
+    body.dark-mode .hm-star-rating-wrap label {
         color: #475569 !important; /* Visible slate grey in dark mode */
     }
 
     /* Golden Yellow Glow on Hover and Active Checked States */
-    .golden-star-rating label:hover,
-    .golden-star-rating label:hover ~ label,
-    .golden-star-rating input:checked ~ label {
+    .hm-star-rating-wrap label:hover,
+    .hm-star-rating-wrap label:hover ~ label,
+    .hm-star-rating-wrap input:checked ~ label {
         color: #facc15 !important;
-        filter: drop-shadow(0 0 10px rgba(250, 204, 21, 0.8)) !important;
+        filter: drop-shadow(0 0 10px rgba(250, 204, 21, 0.85)) !important;
         transform: scale(1.18);
     }
 </style>
@@ -133,7 +133,7 @@
                 <!-- Zero-Glitch Glowing Golden Star Rating Hover Widget -->
                 <div class="mb-4 text-center">
                     <label class="form-label fw-bold small text-dark d-block mb-1">Tap Stars to Rate:</label>
-                    <div class="golden-star-rating">
+                    <div class="hm-star-rating-wrap">
                         <input type="radio" id="star5" name="review[rating]" value="5" checked />
                         <label for="star5" title="5 stars">&#9733;</label>
 
@@ -180,55 +180,56 @@
 
 <script>
     const currentOrderId = "<%= orderId %>";
-    const currentSessionUserId = "<%= currUser ? currUser._id : 'guest' %>";
     let loadedOrderRecord = null;
 
     document.addEventListener("DOMContentLoaded", () => {
-        // Point 4 Fix: Multi-tier fallback order scanner (Checks all storage spaces for this Order ID)
-        const allHistories = [];
-        
-        // Scan user-scoped history
-        const scopedKey = "hungrymate_order_history_" + currentSessionUserId;
-        const scoped = JSON.parse(localStorage.getItem(scopedKey) || "[]");
-        allHistories.push(...scoped);
-
-        // Scan global history
-        const globalHist = JSON.parse(localStorage.getItem("hungrymate_order_history") || "[]");
-        allHistories.push(...globalHist);
-
-        // Match exact order record
-        loadedOrderRecord = allHistories.find(o => o && o.orderId === currentOrderId);
-
-        // Fallback to latest order if exact match not found
-        if (!loadedOrderRecord && allHistories.length > 0) {
-            loadedOrderRecord = allHistories[0];
+        // Universal Deep Scanner: Scans ALL keys in LocalStorage for this exact order ID
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.includes("hungrymate")) {
+                try {
+                    const parsed = JSON.parse(localStorage.getItem(key));
+                    if (Array.isArray(parsed)) {
+                        const found = parsed.find(o => o && (o.orderId === currentOrderId || ("#" + o.orderId) === currentOrderId));
+                        if (found) {
+                            loadedOrderRecord = found;
+                            break;
+                        }
+                    } else if (parsed && (parsed.orderId === currentOrderId || ("#" + parsed.orderId) === currentOrderId)) {
+                        loadedOrderRecord = parsed;
+                        break;
+                    }
+                } catch(e) {}
+            }
         }
 
-        // Emergency fallback from checkout draft
+        // Fallback to active checkout draft if still not found
         if (!loadedOrderRecord) {
-            const draft = JSON.parse(localStorage.getItem("hungrymate_checkout_draft") || "{}");
-            if (draft.cart && draft.cart.length > 0) {
-                loadedOrderRecord = {
-                    orderId: currentOrderId,
-                    placedAt: "Just now",
-                    address: draft.address || "Kolkata, West Bengal",
-                    couponApplied: draft.couponApplied || "NONE",
-                    paymentMode: "Cash on Delivery",
-                    totalPaid: draft.finalTotal || 0,
-                    deliveryHeroData: { name: "Rahul Verma", phone: "+91 98765 43210" },
-                    items: draft.cart,
-                    isDelivered: true
-                };
-            }
+            try {
+                const draft = JSON.parse(localStorage.getItem("hungrymate_checkout_draft") || "{}");
+                if (draft && draft.cart && draft.cart.length > 0) {
+                    loadedOrderRecord = {
+                        orderId: currentOrderId,
+                        placedAt: "Recently Placed",
+                        address: draft.address || "Kolkata, West Bengal",
+                        couponApplied: draft.couponApplied || "NONE",
+                        paymentMode: "Cash on Delivery",
+                        totalPaid: draft.finalTotal || draft.subtotal || 139,
+                        deliveryHeroData: { name: "Rahul Verma", phone: "+91 98765 43210" },
+                        items: draft.cart,
+                        isDelivered: true
+                    };
+                }
+            } catch(e) {}
         }
 
         if (loadedOrderRecord) {
             document.getElementById("detailOrderIdDisplay").innerText = loadedOrderRecord.orderId || currentOrderId;
-            document.getElementById("detailPlacedTime").innerText = loadedOrderRecord.placedAt || "Recent";
+            document.getElementById("detailPlacedTime").innerText = loadedOrderRecord.placedAt || "Recently Placed";
             document.getElementById("detailAddress").innerText = loadedOrderRecord.address || "Delivery Address Provided";
             document.getElementById("detailCoupon").innerText = loadedOrderRecord.couponApplied || "NONE";
             document.getElementById("detailPayMode").innerText = loadedOrderRecord.paymentMode || "Cash on Delivery";
-            document.getElementById("detailTotalPaid").innerText = "₹" + (loadedOrderRecord.totalPaid || 0);
+            document.getElementById("detailTotalPaid").innerText = "₹" + (loadedOrderRecord.totalPaid || loadedOrderRecord.subtotal || 0);
 
             const hero = loadedOrderRecord.deliveryHeroData || { name: "Rahul Verma", phone: "+91 98765 43210" };
             document.getElementById("detailHeroName").innerText = hero.name || "Rahul Verma";
@@ -248,12 +249,14 @@
             const tbody = document.getElementById("detailItemsTableBody");
             tbody.innerHTML = "";
             (loadedOrderRecord.items || []).forEach(it => {
+                const qty = it.quantity || 1;
+                const pr = it.price || 0;
                 tbody.innerHTML += `
                     <tr>
-                        <td><strong>${it.title}</strong></td>
+                        <td><strong>${it.title || 'Food Item'}</strong></td>
                         <td>${it.restaurant || 'Kitchen'}</td>
-                        <td class="text-center">${it.quantity || 1}</td>
-                        <td class="text-end">₹${(it.price || 0) * (it.quantity || 1)}</td>
+                        <td class="text-center">${qty}</td>
+                        <td class="text-end">₹${pr * qty}</td>
                     </tr>
                 `;
             });
