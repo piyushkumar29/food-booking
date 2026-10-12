@@ -3,7 +3,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
-    /* Standalone Interactive Pure SVG Star Engine */
+    /* Pure SVG Interactive Star Rating Engine */
     .svg-star-rating-box {
         display: inline-flex;
         align-items: center;
@@ -21,9 +21,11 @@
         transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
+    /* Prevent SVG internal path from stealing pointer events */
     .svg-star-item svg {
         width: 100%;
         height: 100%;
+        pointer-events: none !important;
         fill: #cbd5e1; /* Default soft grey in light mode */
         transition: fill 0.15s ease, filter 0.15s ease;
     }
@@ -32,7 +34,7 @@
         fill: #475569 !important; /* Visible slate in dark mode */
     }
 
-    /* Active & Hover Glowing Amber-Yellow */
+    /* Highlighted Yellow Amber Glow */
     .svg-star-item.active svg,
     .svg-star-item.hover svg {
         fill: #facc15 !important;
@@ -126,7 +128,7 @@
             </button>
         </div>
 
-        <!-- Integrated Rating & Feedback Form for this Order -->
+        <!-- Integrated Rating & Feedback Form for this Order (Interactive Star Hover Widget) -->
         <div class="card shadow-sm border-0 rounded-4 p-3 p-md-4 bg-white mb-4">
             <div class="text-center mb-3">
                 <h5 class="fw-bold mb-1"><i class="fa-solid fa-star text-warning me-2"></i>Rate & Review this Order</h5>
@@ -271,12 +273,12 @@
         renderStars(activeScore, false);
 
         stars.forEach(star => {
-            star.addEventListener("mouseenter", function() {
+            star.addEventListener("mouseenter", function(e) {
                 const hoverScore = parseInt(this.getAttribute("data-value"));
                 renderStars(hoverScore, true);
             });
 
-            star.addEventListener("click", function() {
+            star.addEventListener("click", function(e) {
                 activeScore = parseInt(this.getAttribute("data-value"));
                 ratingInput.value = activeScore;
                 renderStars(activeScore, false);
