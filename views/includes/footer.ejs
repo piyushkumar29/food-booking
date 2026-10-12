@@ -1,18 +1,424 @@
-<footer class="f-info py-4 text-center">
-    <div class="f-info-socials mb-2">
-        <a href="https://www.linkedin.com/in/piyush-kumar-8547b03b6/" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-linkedin"></i></a>
-        <a href="https://github.com/piyushkumar29" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-github"></i></a>
-        <a href="https://www.youtube.com/@piyushkumarGURUDEVofficial" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-youtube"></i></a>
-        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-instagram"></i></a>
-    </div>
-    <div class="f-info-brand mb-1">
-        <span>&copy; 2026 HUNGRYMATE Private Limited</span>
-    </div>
-    <div class="small text-muted mb-2">
-        Engineered & Managed by <strong class="text-danger">Piyush Kumar</strong>, Founder of Hungrymate
-    </div>
-    <div class="f-info-links">
-        <a href="/privacy">Privacy</a> &bull;
-        <a href="/terms">Terms</a>
-    </div>
+<footer class="f-info">
+  <div class="f-info-socials mb-2">
+    <a href="https://www.linkedin.com/in/piyush-kumar-8547b03b6/" target="_blank" rel="noopener"><i class="fa-brands fa-linkedin"></i></a>
+    <a href="https://github.com/piyushkumar29" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i></a>
+    <a href="https://youtube.com" target="_blank" rel="noopener"><i class="fa-brands fa-youtube"></i></a>
+    <a href="https://www.youtube.com/@piyushkumarGURUDEVofficial" target="_blank" rel="noopener"><i class="fa-brands fa-instagram"></i></a>
+  </div>
+
+  <div class="f-info-brand mb-1">
+    <span>&copy; 2026 HUNGRYMATE Private Limited</span>
+  </div>
+
+  <div class="small mb-2" style="font-size: 0.8rem;">
+    Engineered & Managed by <strong class="text-danger" style="color: #fe424d;">Piyush Kumar</strong>, Founder of Hungrymate
+  </div>
+
+  <div class="f-info-links">
+    <a href="/privacy">Privacy</a> &bull;
+    <a href="/terms">Terms</a>
+  </div>
 </footer>
+
+<!-- =========================================================
+     FLOATING AI CUSTOMER CARE WIDGET (DESKTOP & MOBILE COMPATIBLE)
+     ========================================================= -->
+<style>
+  /* Floating Trigger Button */
+  .ai-support-fab {
+    position: fixed;
+    bottom: 26px;
+    right: 24px;
+    z-index: 1090;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #fe424d 0%, #f59e0b 100%);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(254, 66, 77, 0.45);
+    cursor: pointer;
+    border: 2px solid #ffffff;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+    user-select: none;
+  }
+  .ai-support-fab:hover {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 12px 28px rgba(254, 66, 77, 0.6);
+  }
+  .ai-support-fab i {
+    font-size: 1.55rem;
+  }
+  .ai-fab-badge {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    background: #10b981;
+    color: #ffffff;
+    font-size: 0.6rem;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 12px;
+    border: 1.5px solid #ffffff;
+    animation: pulseBadge 2s infinite;
+  }
+  @keyframes pulseBadge {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+  }
+
+  /* Position above Flipkart bottom bar on Mobile screens */
+  @media (max-width: 991px) {
+    .ai-support-fab {
+      bottom: 82px !important;
+      right: 16px !important;
+      width: 52px !important;
+      height: 52px !important;
+    }
+    .ai-support-fab i {
+      font-size: 1.35rem !important;
+    }
+  }
+
+  /* Chat Window Box */
+  .ai-chat-window {
+    position: fixed;
+    bottom: 92px;
+    right: 24px;
+    width: 370px;
+    max-width: calc(100vw - 32px);
+    height: 520px;
+    max-height: calc(100vh - 120px);
+    background: #ffffff;
+    border-radius: 22px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25);
+    border: 1.5px solid #e2e8f0;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 1095;
+    animation: popUpChat 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @media (max-width: 991px) {
+    .ai-chat-window {
+      bottom: 142px !important;
+      right: 16px !important;
+      height: 480px !important;
+    }
+  }
+  @keyframes popUpChat {
+    0% { opacity: 0; transform: translateY(20px) scale(0.95); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* Chat Header */
+  .ai-chat-header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: #ffffff;
+    padding: 0.9rem 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid #fe424d;
+  }
+  .ai-bot-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #fe424d 0%, #f59e0b 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  /* Chat Messages Stream */
+  .ai-chat-messages {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+    background: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    font-size: 0.85rem;
+  }
+  .ai-msg {
+    max-width: 82%;
+    padding: 0.65rem 0.9rem;
+    border-radius: 16px;
+    line-height: 1.45;
+    word-wrap: break-word;
+  }
+  .ai-msg.bot {
+    background: #ffffff;
+    color: #0f172a;
+    border: 1px solid #e2e8f0;
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  }
+  .ai-msg.user {
+    background: #fe424d;
+    color: #ffffff;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+    box-shadow: 0 2px 8px rgba(254,66,77,0.3);
+  }
+
+  /* Quick Suggestion Chips */
+  .ai-chips-wrapper {
+    display: flex;
+    gap: 0.35rem;
+    overflow-x: auto;
+    padding: 0.5rem 0.8rem;
+    background: #f1f5f9;
+    border-top: 1px solid #e2e8f0;
+    scrollbar-width: none;
+  }
+  .ai-chips-wrapper::-webkit-scrollbar { display: none; }
+  .ai-chip-btn {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 20px;
+    padding: 0.25rem 0.65rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #334155;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .ai-chip-btn:hover {
+    background: #fe424d;
+    border-color: #fe424d;
+    color: #ffffff;
+  }
+
+  /* Chat Input Form */
+  .ai-chat-input-bar {
+    padding: 0.65rem 0.85rem;
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    gap: 0.45rem;
+    align-items: center;
+  }
+  .ai-chat-input {
+    flex: 1;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 25px;
+    padding: 0.45rem 0.85rem;
+    font-size: 0.84rem;
+    outline: none;
+  }
+  .ai-chat-input:focus {
+    border-color: #fe424d;
+  }
+  .ai-chat-send-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #fe424d;
+    color: #ffffff;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+  }
+  .ai-chat-send-btn:hover {
+    transform: scale(1.08);
+  }
+
+  /* Dark Mode Enhancements for Chat */
+  body.dark-mode .ai-chat-window {
+    background: #111827 !important;
+    border-color: #334155 !important;
+    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.7) !important;
+  }
+  body.dark-mode .ai-chat-messages {
+    background: #0f172a !important;
+  }
+  body.dark-mode .ai-msg.bot {
+    background: #1e293b !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+  }
+  body.dark-mode .ai-chips-wrapper {
+    background: #182235 !important;
+    border-top-color: #334155 !important;
+  }
+  body.dark-mode .ai-chip-btn {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    color: #cbd5e1 !important;
+  }
+  body.dark-mode .ai-chip-btn:hover {
+    background: #facc15 !important;
+    border-color: #facc15 !important;
+    color: #000000 !important;
+  }
+  body.dark-mode .ai-chat-input-bar {
+    background: #111827 !important;
+    border-top-color: #334155 !important;
+  }
+  body.dark-mode .ai-chat-input {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    color: #ffffff !important;
+  }
+  body.dark-mode .ai-chat-input::placeholder {
+    color: #94a3b8 !important;
+  }
+</style>
+
+<!-- Floating Circular Icon Button -->
+<div class="ai-support-fab shadow-lg" id="aiSupportFabBtn" onclick="toggleHungrymateAiChat()">
+  <i class="fa-solid fa-headset"></i>
+  <span class="ai-fab-badge">AI Live</span>
+</div>
+
+<!-- Floating Chat Pop-up Box -->
+<div class="ai-chat-window" id="aiChatWindow">
+  <!-- Header -->
+  <div class="ai-chat-header">
+    <div class="d-flex align-items-center gap-2">
+      <div class="ai-bot-avatar">
+        <i class="fa-solid fa-robot"></i>
+      </div>
+      <div>
+        <h6 class="mb-0 fw-bold" style="font-size: 0.92rem;">Hungrymate AI Support</h6>
+        <small class="text-white-50" style="font-size: 0.7rem;"><i class="fa-solid fa-circle text-success" style="font-size: 0.5rem;"></i> Online &bull; Instant Assistance</small>
+      </div>
+    </div>
+    <button type="button" class="btn text-white p-0 border-0 fs-5" onclick="toggleHungrymateAiChat()">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+
+  <!-- Messages Container -->
+  <div class="ai-chat-messages" id="aiChatMessages">
+    <div class="ai-msg bot">
+      Hello! 👋 Welcome to <strong>Hungrymate Customer Care</strong>. I am your 24/7 AI Order Support. How can I assist you with your orders, refunds, or delivery today?
+    </div>
+  </div>
+
+  <!-- Quick Action Chips -->
+  <div class="ai-chips-wrapper">
+    <button class="ai-chip-btn" onclick="sendAiQuickMessage('Track my latest order')">📍 Track Order</button>
+    <button class="ai-chip-btn" onclick="sendAiQuickMessage('Refund & Cancellation Policy')">💸 Refund Status</button>
+    <button class="ai-chip-btn" onclick="sendAiQuickMessage('Contact Delivery Partner')">🛵 Delivery Hero</button>
+    <button class="ai-chip-btn" onclick="sendAiQuickMessage('How to apply coupons?')">🏷️ Coupons</button>
+  </div>
+
+  <!-- Input Field Bar -->
+  <form class="ai-chat-input-bar" onsubmit="event.preventDefault(); submitAiChatInput();">
+    <input type="text" id="aiChatTextInput" class="ai-chat-input shadow-none" placeholder="Type your order query here..." autocomplete="off" />
+    <button type="submit" class="ai-chat-send-btn shadow-sm">
+      <i class="fa-solid fa-paper-plane" style="font-size: 0.85rem;"></i>
+    </button>
+  </form>
+</div>
+
+<script>
+  let isAiChatOpen = false;
+
+  function toggleHungrymateAiChat() {
+    const chatWin = document.getElementById("aiChatWindow");
+    if (!chatWin) return;
+    isAiChatOpen = !isAiChatOpen;
+    chatWin.style.display = isAiChatOpen ? "flex" : "none";
+    if (isAiChatOpen) {
+      setTimeout(() => {
+        const inp = document.getElementById("aiChatTextInput");
+        if (inp) inp.focus();
+        scrollAiMessagesToBottom();
+      }, 100);
+    }
+  }
+
+  function scrollAiMessagesToBottom() {
+    const container = document.getElementById("aiChatMessages");
+    if (container) container.scrollTop = container.scrollHeight;
+  }
+
+  function submitAiChatInput() {
+    const inputEl = document.getElementById("aiChatTextInput");
+    if (!inputEl) return;
+    const msg = inputEl.value.trim();
+    if (!msg) return;
+    inputEl.value = "";
+    processAiMessage(msg);
+  }
+
+  function sendAiQuickMessage(text) {
+    processAiMessage(text);
+  }
+
+  function processAiMessage(userText) {
+    const container = document.getElementById("aiChatMessages");
+    if (!container) return;
+
+    // Append User Message
+    const userDiv = document.createElement("div");
+    userDiv.className = "ai-msg user";
+    userDiv.innerText = userText;
+    container.appendChild(userDiv);
+    scrollAiMessagesToBottom();
+
+    // Fetch User's Latest Order from LocalStorage
+    let latestOrder = null;
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.includes("hungrymate_order_history")) {
+        try {
+          const parsed = JSON.parse(localStorage.getItem(k));
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            latestOrder = parsed[0];
+            break;
+          }
+        } catch(e) {}
+      }
+    }
+
+    // Typing delay simulator
+    setTimeout(() => {
+      const botDiv = document.createElement("div");
+      botDiv.className = "ai-msg bot";
+
+      const query = userText.toLowerCase();
+
+      if (query.includes("track") || query.includes("where") || query.includes("status")) {
+        if (latestOrder) {
+          const hero = latestOrder.deliveryHeroData || { name: "Rahul Verma", phone: "+91 98765 43210" };
+          const status = latestOrder.isCancelled ? "Cancelled ❌" : (latestOrder.isDelivered ? "Delivered 🎉" : "In-Transit 🛵");
+          botDiv.innerHTML = `Your latest Order <strong>#${latestOrder.orderId}</strong> is currently <strong>${status}</strong>.<br><br>Delivery Hero: <strong>${hero.name}</strong> (${hero.phone}).<br>Delivering to: <em>${latestOrder.address || 'Address registered'}</em>.<br><br>You can watch the live route on our <a href="/orders/track" class="text-danger fw-bold">Tracking Page</a>!`;
+        } else {
+          botDiv.innerHTML = `You don't have any active orders right now! Browse our delicious menu and add items to your cart to place an order.`;
+        }
+      } else if (query.includes("refund") || query.includes("cancel")) {
+        botDiv.innerHTML = `<strong>Hungrymate Cancellation & Refund Policy:</strong><br>• For online orders (UPI/Card), refunds are credited back to your original source account within 1–2 business days.<br>• For Cash on Delivery (COD) orders with prepaid platform fees, you can provide your UPI ID in the cancellation window for direct payout.<br>• You can cancel your order directly from the <a href="/orders/track" class="text-danger fw-bold">Live Tracking Page</a> anytime before final dispatch.`;
+      } else if (query.includes("hero") || query.includes("partner") || query.includes("delivery boy") || query.includes("contact")) {
+        if (latestOrder && latestOrder.deliveryHeroData) {
+          const hero = latestOrder.deliveryHeroData;
+          botDiv.innerHTML = `Your assigned delivery hero is <strong>${hero.name}</strong> (ID: ${hero.id}). You can reach them directly at <a href="tel:${hero.phone.replace(/\s+/g,'')}" class="text-success fw-bold">${hero.phone}</a>.`;
+        } else {
+          botDiv.innerHTML = `Our delivery heroes are 100% vaccinated and trained for hygiene. Once you place an order, you will receive their real-time name, contact number, and live motorcycle animation.`;
+        }
+      } else if (query.includes("coupon") || query.includes("offer") || query.includes("discount")) {
+        botDiv.innerHTML = `You can use promo code <strong>1STUSERFREE</strong> for 100% discount on your first order! Or try <strong>FLAT60%</strong> and <strong>HUNGRY20</strong> on our <a href="/offers" class="text-danger fw-bold">Offers Page</a>.`;
+      } else {
+        botDiv.innerHTML = `Thank you for contacting Hungrymate! For inquiries regarding active food deliveries, please visit our <a href="/orders/track" class="text-danger fw-bold">Track Page</a>, or call our 24/7 support desk at <strong>1800-HUNGRY-MATE</strong>.`;
+      }
+
+      container.appendChild(botDiv);
+      scrollAiMessagesToBottom();
+    }, 450);
+  }
+</script>
